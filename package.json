@@ -1,0 +1,25 @@
+{
+  "name": "tiny-entity",
+  "version": "1.0.0",
+  "description": "一款简单容用的ORM框架，支持NEDB IndexedDB 以及Sqlite等常用的数据库",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joinlee/tiny-entity.git"
+  },
+  "keywords": [
+    "tiny",
+    "nedb",
+    "sqlite",
+    "indexedDB"
+  ],
+  "author": "likecheng",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joinlee/tiny-entity/issues"
+  },
+  "homepage": "https://github.com/joinlee/tiny-entity#readme"
+}
