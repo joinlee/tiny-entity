@@ -61,7 +61,7 @@ class DataContext {
                     if (err)
                         reject(err);
                     else {
-                        db.persistence.compactDatafile();
+                        //db.persistence.compactDatafile();
                         resolve(r);
                     }
                 });
@@ -110,7 +110,7 @@ class DataContext {
                         reject(err);
                     }
                     else {
-                        db.persistence.compactDatafile();
+                        // db.persistence.compactDatafile();
                         resolve(obj);
                     }
                 });
@@ -169,7 +169,7 @@ class DataContext {
                     if (err)
                         reject(err);
                     else {
-                        db.persistence.compactDatafile();
+                        // db.persistence.compactDatafile();
                         resolve(true);
                     }
                 });
@@ -270,6 +270,18 @@ class DataContext {
         // else {
         //     return this.nedb;
         // }
+        let openDBTask = (cb) => {
+            clearInterval(timer);
+            let dbc = new Datastore(this.config.FilePath + tbName + ".db");
+            dbc.loadDatabase((err) => {
+                if (err)
+                    timer = setInterval(openDBTask, 200);
+                else {
+                    console.log("数据库打开成功！ ====================>", tbName);
+                    cb(dbc);
+                }
+            });
+        };
         return new Promise((resolve, reject) => {
             let db = new Datastore({
                 filename: this.config.FilePath + tbName + ".db",
@@ -277,11 +289,12 @@ class DataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        console.log("数据库打开失败：" + tbName, err);
-                        reject(err);
+                        // console.log("onload ==================> 数据库打开失败：" + tbName, err);
+                        // reject(err);
+                        console.log("==================> 数据库打开失败：启动open task" + tbName);
+                        timer = setInterval(openDBTask, 200, resolve);
                     }
                     else {
-                        // console.log("打开成功：" + tbName);
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
                             if (err)
                                 console.log("添加索引失败：", err);
@@ -332,6 +345,7 @@ class DataContext {
     }
 }
 exports.DataContext = DataContext;
+let timer;
 (function (QueryMode) {
     QueryMode[QueryMode["Normal"] = 0] = "Normal";
     QueryMode[QueryMode["First"] = 1] = "First";
