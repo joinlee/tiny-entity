@@ -1,6 +1,6 @@
 import sqlite = require("sqlite-sync");
 
-class DataContext implements IDataContext {
+export class DataContext implements IDataContext {
     private dbName: string = "js/Test.db3";
     private transactionOn: boolean = false;
     private querySentence: string[] = [];
@@ -9,8 +9,8 @@ class DataContext implements IDataContext {
         this.dbName = dbName;
         var r = sqlite.connect(this.dbName);
 
-        //let x = this.Query("select * from sqlite_master where type='table';");
-        //console.log(x);
+        // let x = this.Query("select * from sqlite_master where type='table';");
+        // console.log(x);
     }
     /**
      * @param  {IEntityObject} obj
@@ -152,5 +152,21 @@ interface PropertyFormatResult {
     PropertyValueList: any[];
 }
 
-export { DataContext };
+export function Transaction(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
+    let method = descriptor.value;
+    // descriptor.value = async function () {
+    //     console.log("BeginTranscation propertyName:", propertyName);
+    //     this.ctx.BeginTranscation();
+    //     let result;
+    //     try {
+    //         result = await method.apply(this, arguments);
+    //         this.ctx.Commit();
+    //         return result;
+    //     } catch (error) {
+    //         console.log("RollBack propertyName:", propertyName);
+    //         await this.ctx.RollBack();
+    //         throw error;
+    //     }
+    // }
+}
 

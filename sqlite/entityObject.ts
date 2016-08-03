@@ -15,7 +15,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
         this.ctx = ctx;
     }
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
-        var sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+        let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
         this.sqlTemp.push(sql);
         return this;
     }
@@ -117,6 +117,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
         qFnS = qFnS.replace(/\(/g, "");
         qFnS = qFnS.replace(/\)/g, "");
         qFnS = qFnS.replace(/\;/g, "");
+        qFnS = qFnS.replace(/=>/g, "");
         qFnS = qFnS.trim();
         let p: string = qFnS[0];
 

@@ -39,8 +39,9 @@ class TestDemoDataContext extends DataContext {
 
 function query() {
     let ctx = new TestDemoDataContext();
-    // let r = ctx.Employee.Where(x=>x.employeeNumber == "001").ToList();
-    // console.log("employee =====>",r[0].account);
+    let nn = "001"
+    let r = ctx.Employee.Where(x => x.employeeNumber == nn, ["nn"], [nn]).ToList();
+    console.log("employee =====>", r[0].account);
     // //ctx.Employee.Count();
 
     // let count = ctx.Employee.Count(x=>x.employeeNumber == "001");
@@ -71,8 +72,8 @@ function query() {
 
     //ctx.Update()
 
-    let ac = "lkc";
-    var r = ctx.Employee.Where(x => x.account == "lkc").Select(x => x.account).ToList();
+    // let ac = "lkc";
+    // var r = ctx.Employee.Where(x => x.account == "lkc").Select(x => x.account).ToList();
 
     console.log(r);
 }
