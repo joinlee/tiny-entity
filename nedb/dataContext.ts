@@ -15,10 +15,10 @@ export class DataContext implements IDataContext {
     }
 
 
-    async Create(obj: IEntityObject, checkPrimariyKey: boolean = true): Promise<Object> {
+    async Create(obj: IEntityObject, stillOpen: boolean = true): Promise<Object> {
         delete (obj as any).ctx;
         let promise = new Promise((resolve, reject) => {
-            this.create_inner(obj).then((r) => {
+            this.createInner(obj, stillOpen).then((r) => {
                 //添加事务的记录
                 this.pushQuery("create", obj);
                 resolve(r);
@@ -33,42 +33,28 @@ export class DataContext implements IDataContext {
 
         return promise;
     }
-    private async checkPrimaryKey(obj: IEntityObject) {
-        let db = await this.Open(obj.toString());
-        return new Promise((resolve, reject) => {
-            db.findOne({ id: obj.id }, (err, r) => {
-                if (r) {
-                    resolve(false);
-                }
-                else {
-                    resolve(true);
-                }
-            })
-        })
-    }
-    private async create_inner(obj: IEntityObject) {
-        let db = await this.Open(obj.toString());
+    private async createInner(obj: IEntityObject, stillOpen) {
+        let db = await this.Open(obj.toString(), stillOpen);
         return new Promise((resolve, reject) => {
             db.insert(obj, (err, r) => {
                 if (err) reject(err);
                 else {
-                    //db.persistence.compactDatafile();
                     resolve(r);
                 }
             });
         });
     }
 
-    async Update(obj: IEntityObject) {
+    async Update(obj: IEntityObject, stillOpen: boolean = true) {
         delete (obj as any).ctx;
         let entity;
         if (this.transOn) {
-            entity = await this.getEntity(obj.toString(), obj.id);
+            entity = await this.getEntity(obj.toString(), obj.id, stillOpen);
             entity.toString = obj.toString;
         }
 
         return new Promise((resolve, reject) => {
-            this.update_inner(obj).then(r => {
+            this.UpdateInner(obj, stillOpen).then(r => {
                 this.pushQuery("update", entity);
                 resolve(r);
             }).catch(err => {
@@ -76,24 +62,9 @@ export class DataContext implements IDataContext {
             })
         });
     }
-    private async update_inner(obj: IEntityObject) {
+    private async UpdateInner(obj: IEntityObject, stillOpen) {
         delete (<any>obj)._id;
-        let db = await this.Open(obj.toString());
-        // let r = await (() => {
-        //     return new Promise((resolve, reject) => {
-        //         db.update({ id: obj.id }, obj, { upsert: false }, (err, numReplaced: number, upsert) => {
-        //             if (err) {
-        //                 reject(err);
-        //             }
-        //             else {
-        //                 resolve(obj);
-        //             }
-        //         });
-        //     })
-        // })();
-
-        // let count = await this.checkCount(obj);
-        // return r;
+        let db = await this.Open(obj.toString(), stillOpen);
 
         return new Promise((resolve, reject) => {
             db.update({ id: obj.id }, obj, { upsert: false }, (err, numReplaced: number, upsert) => {
@@ -101,24 +72,14 @@ export class DataContext implements IDataContext {
                     reject(err);
                 }
                 else {
-                    // db.persistence.compactDatafile();
                     resolve(obj);
                 }
             });
         })
     }
 
-    private async checkCount(obj: IEntityObject) {
-        let db = await this.Open(obj.toString());
-        return new Promise((resolve, reject) => {
-            db.count({ id: obj.id }, (err, r) => {
-                if (err) reject(err);
-                else resolve(r);
-            });
-        });
-    }
-    private async getEntity(name, id) {
-        let db = await this.Open(name);
+    private async getEntity(name, id, stillOpen) {
+        let db = await this.Open(name, stillOpen);
         return new Promise((resolve, reject) => {
             db.findOne({ id: id }, (err, r) => {
                 if (err) reject(err);
@@ -127,15 +88,15 @@ export class DataContext implements IDataContext {
         });
     }
 
-    async Delete(obj: IEntityObject): Promise<boolean> {
+    async Delete(obj: IEntityObject, stillOpen: boolean = true): Promise<boolean> {
         let entity;
         if (this.transOn) {
-            entity = await this.getEntity(obj.toString(), obj.id);
+            entity = await this.getEntity(obj.toString(), obj.id, stillOpen);
             entity.toString = obj.toString;
         }
 
         let promise = new Promise<boolean>((resolve, reject) => {
-            this.delete_inner(obj).then(() => {
+            this.deleteInner(obj, stillOpen).then(() => {
                 this.pushQuery("delete", entity);
                 resolve(true);
             }).catch(err => {
@@ -145,13 +106,12 @@ export class DataContext implements IDataContext {
 
         return promise;
     }
-    private async delete_inner(obj: IEntityObject) {
-        let db = await this.Open(obj.toString());
+    private async deleteInner(obj: IEntityObject, stillOpen) {
+        let db = await this.Open(obj.toString(), stillOpen);
         let promise = new Promise<boolean>((resolve, reject) => {
             db.remove({ id: obj.id }, {}, (err, numRemoved) => {
                 if (err) reject(err);
                 else {
-                    // db.persistence.compactDatafile();
                     resolve(true);
                 }
             });
@@ -231,7 +191,7 @@ export class DataContext implements IDataContext {
 
     private dbLinks = [];
 
-    private Open(tbName: string): Promise<Datastore> {
+    private Open(tbName: string, stillOpen): Promise<Datastore> {
         // if (this.config.IsMulitTabel) {
         //     // let _db = this.dbLinks.find(x => x.key == tbName);
         //     // if (_db) return _db.db;
@@ -257,6 +217,7 @@ export class DataContext implements IDataContext {
                 if (err) timer = setInterval(openDBTask, 200);
                 else {
                     console.log("数据库打开成功！ ====================>", tbName);
+                    clearInterval(timer);
                     cb(dbc);
                 }
             });
@@ -269,10 +230,13 @@ export class DataContext implements IDataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        // console.log("onload ==================> 数据库打开失败：" + tbName, err);
-                        // reject(err);
-                        console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        timer = setInterval(openDBTask, 200, resolve);
+                        if (stillOpen) {
+                            reject(err);
+                        }
+                        else {
+                            console.log("==================> 数据库打开失败：启动open task" + tbName);
+                            timer = setInterval(openDBTask, 200, resolve);
+                        }
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
@@ -296,13 +260,13 @@ export class DataContext implements IDataContext {
 
                     switch (item.key) {
                         case "create":
-                            await this.delete_inner(item.entity);
+                            await this.deleteInner(item.entity);
                             break;
                         case "update":
-                            await this.update_inner(item.entity);
+                            await this.UpdateInner(item.entity);
                             break;
                         case "delete":
-                            await this.create_inner(item.entity);
+                            await this.createInner(item.entity);
                             break;
                     }
                 }
@@ -325,9 +289,6 @@ export class DataContext implements IDataContext {
 }
 
 let timer;
-
-
-
 
 export enum QueryMode {
     Normal,

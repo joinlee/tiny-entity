@@ -18,11 +18,11 @@ class DataContext {
             this.nedb.loadDatabase();
         }
     }
-    Create(obj, checkPrimariyKey = true) {
+    Create(obj, stillOpen = true) {
         return __awaiter(this, void 0, Promise, function* () {
             delete obj.ctx;
             let promise = new Promise((resolve, reject) => {
-                this.create_inner(obj).then((r) => {
+                this.createInner(obj, stillOpen).then((r) => {
                     //添加事务的记录
                     this.pushQuery("create", obj);
                     resolve(r);
@@ -38,46 +38,30 @@ class DataContext {
             return promise;
         });
     }
-    checkPrimaryKey(obj) {
+    createInner(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(obj.toString());
-            return new Promise((resolve, reject) => {
-                db.findOne({ id: obj.id }, (err, r) => {
-                    if (r) {
-                        resolve(false);
-                    }
-                    else {
-                        resolve(true);
-                    }
-                });
-            });
-        });
-    }
-    create_inner(obj) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(obj.toString());
+            let db = yield this.Open(obj.toString(), stillOpen);
             return new Promise((resolve, reject) => {
                 db.insert(obj, (err, r) => {
                     if (err)
                         reject(err);
                     else {
-                        //db.persistence.compactDatafile();
                         resolve(r);
                     }
                 });
             });
         });
     }
-    Update(obj) {
+    Update(obj, stillOpen = true) {
         return __awaiter(this, void 0, void 0, function* () {
             delete obj.ctx;
             let entity;
             if (this.transOn) {
-                entity = yield this.getEntity(obj.toString(), obj.id);
+                entity = yield this.getEntity(obj.toString(), obj.id, stillOpen);
                 entity.toString = obj.toString;
             }
             return new Promise((resolve, reject) => {
-                this.update_inner(obj).then(r => {
+                this.UpdateInner(obj, stillOpen).then(r => {
                     this.pushQuery("update", entity);
                     resolve(r);
                 }).catch(err => {
@@ -86,53 +70,25 @@ class DataContext {
             });
         });
     }
-    update_inner(obj) {
+    UpdateInner(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
             delete obj._id;
-            let db = yield this.Open(obj.toString());
-            // let r = await (() => {
-            //     return new Promise((resolve, reject) => {
-            //         db.update({ id: obj.id }, obj, { upsert: false }, (err, numReplaced: number, upsert) => {
-            //             if (err) {
-            //                 reject(err);
-            //             }
-            //             else {
-            //                 resolve(obj);
-            //             }
-            //         });
-            //     })
-            // })();
-            // let count = await this.checkCount(obj);
-            // return r;
+            let db = yield this.Open(obj.toString(), stillOpen);
             return new Promise((resolve, reject) => {
                 db.update({ id: obj.id }, obj, { upsert: false }, (err, numReplaced, upsert) => {
                     if (err) {
                         reject(err);
                     }
                     else {
-                        // db.persistence.compactDatafile();
                         resolve(obj);
                     }
                 });
             });
         });
     }
-    checkCount(obj) {
+    getEntity(name, id, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(obj.toString());
-            return new Promise((resolve, reject) => {
-                db.count({ id: obj.id }, (err, r) => {
-                    if (err)
-                        reject(err);
-                    else
-                        resolve(r);
-                });
-            });
-        });
-    }
-    getEntity(name, id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(name);
+            let db = yield this.Open(name, stillOpen);
             return new Promise((resolve, reject) => {
                 db.findOne({ id: id }, (err, r) => {
                     if (err)
@@ -143,15 +99,15 @@ class DataContext {
             });
         });
     }
-    Delete(obj) {
+    Delete(obj, stillOpen = true) {
         return __awaiter(this, void 0, Promise, function* () {
             let entity;
             if (this.transOn) {
-                entity = yield this.getEntity(obj.toString(), obj.id);
+                entity = yield this.getEntity(obj.toString(), obj.id, stillOpen);
                 entity.toString = obj.toString;
             }
             let promise = new Promise((resolve, reject) => {
-                this.delete_inner(obj).then(() => {
+                this.deleteInner(obj, stillOpen).then(() => {
                     this.pushQuery("delete", entity);
                     resolve(true);
                 }).catch(err => {
@@ -161,15 +117,14 @@ class DataContext {
             return promise;
         });
     }
-    delete_inner(obj) {
+    deleteInner(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(obj.toString());
+            let db = yield this.Open(obj.toString(), stillOpen);
             let promise = new Promise((resolve, reject) => {
                 db.remove({ id: obj.id }, {}, (err, numRemoved) => {
                     if (err)
                         reject(err);
                     else {
-                        // db.persistence.compactDatafile();
                         resolve(true);
                     }
                 });
@@ -254,7 +209,7 @@ class DataContext {
             return promise;
         });
     }
-    Open(tbName) {
+    Open(tbName, stillOpen) {
         // if (this.config.IsMulitTabel) {
         //     // let _db = this.dbLinks.find(x => x.key == tbName);
         //     // if (_db) return _db.db;
@@ -278,6 +233,7 @@ class DataContext {
                     timer = setInterval(openDBTask, 200);
                 else {
                     console.log("数据库打开成功！ ====================>", tbName);
+                    clearInterval(timer);
                     cb(dbc);
                 }
             });
@@ -289,10 +245,13 @@ class DataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        // console.log("onload ==================> 数据库打开失败：" + tbName, err);
-                        // reject(err);
-                        console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        timer = setInterval(openDBTask, 200, resolve);
+                        if (stillOpen) {
+                            reject(err);
+                        }
+                        else {
+                            console.log("==================> 数据库打开失败：启动open task" + tbName);
+                            timer = setInterval(openDBTask, 200, resolve);
+                        }
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
@@ -315,13 +274,13 @@ class DataContext {
                         console.log(item);
                         switch (item.key) {
                             case "create":
-                                yield this.delete_inner(item.entity);
+                                yield this.deleteInner(item.entity);
                                 break;
                             case "update":
-                                yield this.update_inner(item.entity);
+                                yield this.UpdateInner(item.entity);
                                 break;
                             case "delete":
-                                yield this.create_inner(item.entity);
+                                yield this.createInner(item.entity);
                                 break;
                         }
                     }
