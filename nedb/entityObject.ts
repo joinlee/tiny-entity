@@ -114,7 +114,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
 
 
     clone(source: any, destination: T, isDeep: boolean = false): T {
-        // if (!source) return null;
+        if (!source) return null;
         // for (var key in source) {
         //     if (typeof (key) != "function") {
         //         if (isDeep) { }

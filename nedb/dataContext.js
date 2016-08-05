@@ -245,13 +245,15 @@ class DataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        if (stillOpen) {
-                            reject(err);
-                        }
-                        else {
-                            console.log("==================> 数据库打开失败：启动open task" + tbName);
-                            timer = setInterval(openDBTask, 200, resolve);
-                        }
+                        // if (stillOpen) {
+                        //     reject(err);
+                        // }
+                        // else {
+                        //     console.log("==================> 数据库打开失败：启动open task" + tbName);
+                        //     timer = setInterval(openDBTask, 200, resolve);
+                        // }
+                        console.log("==================> 数据库打开失败：启动open task" + tbName);
+                        timer = setInterval(openDBTask, 200, resolve);
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {

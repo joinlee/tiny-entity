@@ -33,7 +33,7 @@ export class DataContext implements IDataContext {
 
         return promise;
     }
-    private async createInner(obj: IEntityObject, stillOpen) {
+    private async createInner(obj: IEntityObject, stillOpen?) {
         let db = await this.Open(obj.toString(), stillOpen);
         return new Promise((resolve, reject) => {
             db.insert(obj, (err, r) => {
@@ -62,7 +62,7 @@ export class DataContext implements IDataContext {
             })
         });
     }
-    private async UpdateInner(obj: IEntityObject, stillOpen) {
+    private async UpdateInner(obj: IEntityObject, stillOpen?) {
         delete (<any>obj)._id;
         let db = await this.Open(obj.toString(), stillOpen);
 
@@ -106,7 +106,7 @@ export class DataContext implements IDataContext {
 
         return promise;
     }
-    private async deleteInner(obj: IEntityObject, stillOpen) {
+    private async deleteInner(obj: IEntityObject, stillOpen?) {
         let db = await this.Open(obj.toString(), stillOpen);
         let promise = new Promise<boolean>((resolve, reject) => {
             db.remove({ id: obj.id }, {}, (err, numRemoved) => {
@@ -191,7 +191,7 @@ export class DataContext implements IDataContext {
 
     private dbLinks = [];
 
-    private Open(tbName: string, stillOpen): Promise<Datastore> {
+    private Open(tbName: string, stillOpen?): Promise<Datastore> {
         // if (this.config.IsMulitTabel) {
         //     // let _db = this.dbLinks.find(x => x.key == tbName);
         //     // if (_db) return _db.db;
@@ -230,13 +230,15 @@ export class DataContext implements IDataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        if (stillOpen) {
-                            reject(err);
-                        }
-                        else {
-                            console.log("==================> 数据库打开失败：启动open task" + tbName);
-                            timer = setInterval(openDBTask, 200, resolve);
-                        }
+                        // if (stillOpen) {
+                        //     reject(err);
+                        // }
+                        // else {
+                        //     console.log("==================> 数据库打开失败：启动open task" + tbName);
+                        //     timer = setInterval(openDBTask, 200, resolve);
+                        // }
+                        console.log("==================> 数据库打开失败：启动open task" + tbName);
+                        timer = setInterval(openDBTask, 200, resolve);
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
