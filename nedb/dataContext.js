@@ -52,6 +52,27 @@ class DataContext {
             });
         });
     }
+    UpdateRange(list, stillOpen = true) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let entityList = [];
+            return new Promise((resolve, reject) => {
+                try {
+                    for (var index = 0, l = list.length; index < l; index++) {
+                        var element = list[index];
+                        this.Update(element).then(v => {
+                            entityList.push(v);
+                            if (entityList.length == l) {
+                                resolve(entityList);
+                            }
+                        }).catch(err => { new Error(err); });
+                    }
+                }
+                catch (error) {
+                    reject(error);
+                }
+            });
+        });
+    }
     Update(obj, stillOpen = true) {
         return __awaiter(this, void 0, void 0, function* () {
             delete obj.ctx;
