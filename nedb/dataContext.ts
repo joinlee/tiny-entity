@@ -25,7 +25,7 @@ export class DataContext implements IDataContext {
             })
                 .catch(err => {
                     if (err.errorType == "uniqueViolated") {
-                        reject("插入失败：重复的主键id");
+                        reject({ code: -101, message: "插入失败：重复的主键id" });
                     } else
                         reject(err);
                 })
@@ -41,28 +41,28 @@ export class DataContext implements IDataContext {
                 else {
                     resolve(r);
                 }
-            }); 
+            });
         });
     }
 
-    async UpdateRange(list:[IEntityObject], stillOpen: boolean = true){
+    async UpdateRange(list: [IEntityObject], stillOpen: boolean = true) {
         let entityList = [];
         return new Promise((resolve, reject) => {
             try {
                 for (var index = 0, l = list.length; index < l; index++) {
                     var element = list[index];
-                    this.Update(element).then(v=>{
+                    this.Update(element).then(v => {
                         entityList.push(v);
-                        if(entityList.length==l){
+                        if (entityList.length == l) {
                             resolve(entityList)
-                        }     
-                    }).catch(err=>{new Error(err);});
+                        }
+                    }).catch(err => { new Error(err); });
                 }
-               
+
             } catch (error) {
                 reject(error);
             }
-           
+
         });
     }
 
@@ -239,7 +239,7 @@ export class DataContext implements IDataContext {
                 else {
                     console.log("数据库打开成功！ ====================>", tbName);
                     clearInterval(timer);
-                    cb(dbc);
+                    cb && cb(dbc);
                 }
             });
         }

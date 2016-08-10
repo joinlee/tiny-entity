@@ -29,7 +29,7 @@ class DataContext {
                 })
                     .catch(err => {
                     if (err.errorType == "uniqueViolated") {
-                        reject("插入失败：重复的主键id");
+                        reject({ code: -101, message: "插入失败：重复的主键id" });
                     }
                     else
                         reject(err);
@@ -255,7 +255,7 @@ class DataContext {
                 else {
                     console.log("数据库打开成功！ ====================>", tbName);
                     clearInterval(timer);
-                    cb(dbc);
+                    cb && cb(dbc);
                 }
             });
         };
