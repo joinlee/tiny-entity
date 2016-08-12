@@ -118,14 +118,14 @@ function openDBTest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let ctx = new TestDemoDataContext();
-            let u = new User();
-            u.mobile = "15908101316";
-            u.email = "lp@qq.com";
-            u.name = "牛魔王1";
-            u.password = "202cb962ac59075b964b07152d234b70";
-            u.id = "3d07e702-d750-46c6-8791-60bc6f76fcc4";
-            let r = yield ctx.Create(u);
-            console.log(r);
+            // let u = new User();
+            // u.mobile = "15908101316";
+            // u.email = "lp@qq.com";
+            // u.name = "牛魔王1";
+            // u.password = "202cb962ac59075b964b07152d234b70";
+            // u.id = "3d07e702-d750-46c6-8791-60bc6f76fcc4";
+            // let r = await ctx.Create(u);
+            // console.log(r);
             let uu = yield ctx.User.First(x => x.email == "lp@qq.com");
             console.log(uu);
         }

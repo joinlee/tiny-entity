@@ -18,8 +18,12 @@ export class EntityObject<T> implements IEntityObject, IQueryObject<T> {
         return this;
     }
     Any(qFn: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: boolean) => void) {
-        this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.SelectAny, qFn);
-        this.ctx.OnSubmit(queryCallback);
+        return new Promise<boolean>((resolve, reject) => {
+            this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.SelectAny, qFn);
+            this.ctx.OnSubmit(r => {
+                resolve(r);
+            });
+        });
     }
     Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void) {
 
@@ -33,9 +37,11 @@ export class EntityObject<T> implements IEntityObject, IQueryObject<T> {
         paramsKey?: string[],
         paramsValue?: any[],
         queryCallback?: (result: T) => void) {
-        this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.SelectFirst, qFn);
-        this.ctx.OnSubmit(x => {
-            queryCallback(this.clone(x, <any>this));
+        return new Promise<T>((resolve, reject) => {
+            this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.SelectFirst, qFn);
+            this.ctx.OnSubmit(x => {
+                resolve(this.clone(x, <any>this));
+            });
         });
     }
     ToList(queryCallback?: (result: T[]) => void): Promise<T[]> {
@@ -48,16 +54,21 @@ export class EntityObject<T> implements IEntityObject, IQueryObject<T> {
 
     clone(source: any, destination: T, isDeep: boolean = false): T {
         if (!source) return null;
-        for (var key in source) {
-            if (typeof (key) != "function") {
-                if (isDeep) { }
-                else {
-                    if (typeof (key) != "object") {
-                        destination[key] = source[key];
-                    }
-                }
-            }
-        }
+        // for (var key in source) {
+        //     if (typeof (key) != "function") {
+        //         if (isDeep) { 
+
+        //         }
+        //         else {
+        //             if (typeof (key) != "object") {
+        //                 destination[key] = source[key];
+        //             }
+        //         }
+        //     }
+        // }
+
+        destination = JSON.parse(JSON.stringify(source));
+
         delete (destination as any).sqlTemp;
         delete (destination as any).queryParam;
         delete (destination as any)._id;

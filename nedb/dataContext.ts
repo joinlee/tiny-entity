@@ -1,5 +1,6 @@
 
 import Datastore = require("nedb");
+import { DBOpenWorker, OpenWorkerManager } from "./dbOpenWorker";
 
 export class DataContext implements IDataContext {
     private nedb: Datastore;
@@ -230,20 +231,6 @@ export class DataContext implements IDataContext {
         //     return this.nedb;
         // }
 
-
-        let openDBTask = (cb) => {
-            clearInterval(timer);
-            let dbc = new Datastore(this.config.FilePath + tbName + ".db");
-            dbc.loadDatabase((err) => {
-                if (err) timer = setInterval(openDBTask, 200);
-                else {
-                    console.log("数据库打开成功！ ====================>", tbName);
-                    clearInterval(timer);
-                    cb && cb(dbc);
-                }
-            });
-        }
-
         return new Promise((resolve, reject) => {
             let db = new Datastore({
                 filename: this.config.FilePath + tbName + ".db",
@@ -259,7 +246,10 @@ export class DataContext implements IDataContext {
                         //     timer = setInterval(openDBTask, 200, resolve);
                         // }
                         console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        timer = setInterval(openDBTask, 200, resolve);
+                        // timer = setInterval(openDBTask, 200, resolve);
+                        OpenWorkerManager.Current.Task(new DBOpenWorker(
+                            { path: this.config.FilePath + tbName + ".db" }, resolve
+                        ));
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {

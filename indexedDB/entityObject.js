@@ -14,8 +14,12 @@ class EntityObject {
         return this;
     }
     Any(qFn, paramsKey, paramsValue, queryCallback) {
-        this.ctx.AddQueryScratchpad(this.toString(), dataContext_1.QueryActionType.SelectAny, qFn);
-        this.ctx.OnSubmit(queryCallback);
+        return new Promise((resolve, reject) => {
+            this.ctx.AddQueryScratchpad(this.toString(), dataContext_1.QueryActionType.SelectAny, qFn);
+            this.ctx.OnSubmit(r => {
+                resolve(r);
+            });
+        });
     }
     Count(qFn, paramsKey, paramsValue, queryCallback) {
     }
@@ -25,9 +29,11 @@ class EntityObject {
     Take(count) { return this; }
     Skip(count) { return this; }
     First(qFn, paramsKey, paramsValue, queryCallback) {
-        this.ctx.AddQueryScratchpad(this.toString(), dataContext_1.QueryActionType.SelectFirst, qFn);
-        this.ctx.OnSubmit(x => {
-            queryCallback(this.clone(x, this));
+        return new Promise((resolve, reject) => {
+            this.ctx.AddQueryScratchpad(this.toString(), dataContext_1.QueryActionType.SelectFirst, qFn);
+            this.ctx.OnSubmit(x => {
+                resolve(this.clone(x, this));
+            });
         });
     }
     ToList(queryCallback) {
@@ -40,16 +46,18 @@ class EntityObject {
     clone(source, destination, isDeep = false) {
         if (!source)
             return null;
-        for (var key in source) {
-            if (typeof (key) != "function") {
-                if (isDeep) { }
-                else {
-                    if (typeof (key) != "object") {
-                        destination[key] = source[key];
-                    }
-                }
-            }
-        }
+        // for (var key in source) {
+        //     if (typeof (key) != "function") {
+        //         if (isDeep) { 
+        //         }
+        //         else {
+        //             if (typeof (key) != "object") {
+        //                 destination[key] = source[key];
+        //             }
+        //         }
+        //     }
+        // }
+        destination = JSON.parse(JSON.stringify(source));
         delete destination.sqlTemp;
         delete destination.queryParam;
         delete destination._id;

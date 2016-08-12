@@ -100,7 +100,7 @@ class DataContext {
                     let o = JSON.parse(JSON.stringify(ii.EntityObject));
                     dbRequest = store.add(o);
                     dbRequest.onsuccess = (evt) => {
-                        //插入数据后返回的自动Id
+                        //插入数据后返回的自动id
                         let rId = evt.target.result;
                         ii.ResultCallback && ii.ResultCallback(rId);
                     };
@@ -108,10 +108,11 @@ class DataContext {
                 else if (ii.QueryAction == QueryActionType.Update) {
                     this.db.GetIndexCursor(store.index("id"), (cursor) => {
                         if (cursor) {
-                            if (cursor.value.Id == ii.EntityObject.id) {
+                            if (cursor.value.id == ii.EntityObject.id) {
                                 let p = ii.EntityObject;
                                 delete p.ctx;
-                                cursor.update(p);
+                                let o = this.copy(cursor.value, p);
+                                cursor.update(o);
                             }
                             else
                                 cursor.continue();
@@ -165,7 +166,7 @@ class DataContext {
                     });
                 }
                 else if (ii.QueryAction == QueryActionType.SelectAny) {
-                    this.db.GetIndexCursor(store.index("Id"), (cursor) => {
+                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
                         if (cursor) {
                             if (ii.QueryFunction(cursor.value)) {
                                 queryCallback && queryCallback(true);
@@ -182,7 +183,7 @@ class DataContext {
                     store.count();
                 }
                 else if (ii.QueryAction == QueryActionType.SelectFirst) {
-                    this.db.GetIndexCursor(store.index("Id"), (cursor) => {
+                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
                         if (cursor) {
                             let r = cursor.value;
                             if (ii.QueryFunction(r))
@@ -206,6 +207,17 @@ class DataContext {
                 console.error("trans.onerror", evt);
             };
         }
+    }
+    copy(s, d) {
+        for (let key in d) {
+            if (typeof (d[key]) == "object") {
+                s[key] = this.copy({}, d[key]);
+            }
+            else {
+                s[key] = d[key];
+            }
+        }
+        return s;
     }
     /**
      * 查询当前表最大的计数器索引
@@ -241,7 +253,8 @@ class DataContext {
             return null;
         for (var key in source) {
             if (typeof (key) != "function") {
-                if (isDeep) { }
+                if (isDeep) {
+                }
                 else {
                     if (typeof (key) != "object") {
                         destination[key] = source[key];
