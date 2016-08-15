@@ -44,7 +44,7 @@ class OpenWorkerManager {
             this.taskList.splice(index, 1);
         };
         this.taskList.push(task);
-        process.nextTick(task.BeginTask);
+        process.nextTick(task.BeginTask.bind(task));
     }
 }
 OpenWorkerManager.Current = new OpenWorkerManager();

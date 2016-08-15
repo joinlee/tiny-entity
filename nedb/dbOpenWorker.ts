@@ -1,5 +1,4 @@
 import Datastore = require("nedb");
-import tagg = require('tagg2');
 
 export class DBOpenWorker {
     private timer: number;
@@ -52,6 +51,6 @@ export class OpenWorkerManager {
             this.taskList.splice(index, 1);
         }
         this.taskList.push(task);
-        process.nextTick(task.BeginTask);
+        process.nextTick(task.BeginTask.bind(task));
     }
 }
