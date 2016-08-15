@@ -21,6 +21,7 @@ export class DataContext implements IDataContext {
 
         sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
 
+        console.log(sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -108,7 +109,6 @@ export class DataContext implements IDataContext {
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key])) {
                 propertyNameList.push(key);
-                console.log(obj[key]);
                 if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
                 }

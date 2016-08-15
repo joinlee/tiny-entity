@@ -35,15 +35,17 @@ class DBOpenWorker {
 exports.DBOpenWorker = DBOpenWorker;
 class OpenWorkerManager {
     constructor() {
-        this.taskList = [];
+        this.taskList = new WeakMap();
     }
     Task(task) {
         task.OnDestory = () => {
-            let index = this.taskList.findIndex(x => x.WorkId == task.WorkId);
-            task.Destory();
-            this.taskList.splice(index, 1);
+            if (this.taskList.has(task.WorkId)) {
+                task.Destory();
+                this.taskList.delete(task.WorkId);
+                console.log("移除OpenDBWork，WorkId：" + task.WorkId);
+            }
         };
-        this.taskList.push(task);
+        this.taskList.set(task.WorkId, task);
         process.nextTick(task.BeginTask.bind(task));
     }
 }

@@ -15,7 +15,7 @@ export class DBOpenWorker {
 
     BeginTask(interval?: number) {
         if (interval) this.interval = interval;
-        this.timer = setInterval(this.OpenDBTask.bind(this), this.interval);   
+        this.timer = setInterval(this.OpenDBTask.bind(this), this.interval);
     }
 
     Destory() {
@@ -40,17 +40,19 @@ export class DBOpenWorker {
 
 export class OpenWorkerManager {
     static Current: OpenWorkerManager = new OpenWorkerManager();
-    private taskList: DBOpenWorker[] = [];
-    constructor(){
+    private taskList: WeakMap<number, DBOpenWorker> = new WeakMap();
+    constructor() {
     }
 
     Task(task: DBOpenWorker) {
         task.OnDestory = () => {
-            let index = this.taskList.findIndex(x => x.WorkId == task.WorkId);
-            task.Destory();
-            this.taskList.splice(index, 1);
+            if (this.taskList.has(task.WorkId)) {
+                task.Destory();
+                this.taskList.delete(task.WorkId);
+                console.log("移除OpenDBWork，WorkId：" + task.WorkId);
+            }
         }
-        this.taskList.push(task);
+        this.taskList.set(task.WorkId, task);
         process.nextTick(task.BeginTask.bind(task));
     }
 }

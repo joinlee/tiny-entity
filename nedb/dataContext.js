@@ -9,11 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const Datastore = require("nedb");
 const dbOpenWorker_1 = require("./dbOpenWorker");
+var dbconfig;
 class DataContext {
     constructor(config) {
         this.transList = [];
         this.dbLinks = [];
         this.config = config;
+        dbconfig = config;
         if (!config.IsMulitTabel) {
             this.nedb = new Datastore(config.FilePath + config.DBName);
             this.nedb.loadDatabase();
@@ -254,16 +256,8 @@ class DataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        // if (stillOpen) {
-                        //     reject(err);
-                        // }
-                        // else {
-                        //     console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        //     timer = setInterval(openDBTask, 200, resolve);
-                        // }
                         console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        // timer = setInterval(openDBTask, 200, resolve);
-                        dbOpenWorker_1.OpenWorkerManager.Current.Task(new dbOpenWorker_1.DBOpenWorker({ path: this.config.FilePath + tbName + ".db" }, resolve));
+                        dbOpenWorker_1.OpenWorkerManager.Current.Task(new dbOpenWorker_1.DBOpenWorker({ path: dbconfig.FilePath + tbName + ".db" }, resolve));
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {

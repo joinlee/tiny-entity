@@ -1,6 +1,7 @@
 
 import Datastore = require("nedb");
 import { DBOpenWorker, OpenWorkerManager } from "./dbOpenWorker";
+var dbconfig;
 
 export class DataContext implements IDataContext {
     private nedb: Datastore;
@@ -9,6 +10,7 @@ export class DataContext implements IDataContext {
     private transList: TransQuery[] = [];
     constructor(config: ContextConfig) {
         this.config = config;
+        dbconfig = config;
         if (!config.IsMulitTabel) {
             this.nedb = new Datastore(config.FilePath + config.DBName);
             this.nedb.loadDatabase();
@@ -238,17 +240,10 @@ export class DataContext implements IDataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        // if (stillOpen) {
-                        //     reject(err);
-                        // }
-                        // else {
-                        //     console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        //     timer = setInterval(openDBTask, 200, resolve);
-                        // }
+
                         console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        // timer = setInterval(openDBTask, 200, resolve);
                         OpenWorkerManager.Current.Task(new DBOpenWorker(
-                            { path: this.config.FilePath + tbName + ".db" }, resolve
+                            { path: dbconfig.FilePath + tbName + ".db" }, resolve
                         ));
                     }
                     else {
