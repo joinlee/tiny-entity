@@ -256,8 +256,12 @@ class DataContext {
                 autoload: true,
                 onload: (err) => {
                     if (err) {
-                        console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        dbOpenWorker_1.OpenWorkerManager.Current.Task(new dbOpenWorker_1.DBOpenWorker({ path: dbconfig.FilePath + tbName + ".db" }, resolve));
+                        if (err.errorType == "uniqueViolated")
+                            reject(err);
+                        else {
+                            console.log("启动open task:" + tbName);
+                            dbOpenWorker_1.OpenWorkerManager.Current.Task(new dbOpenWorker_1.DBOpenWorker({ path: dbconfig.FilePath + tbName + ".db" }, resolve));
+                        }
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {

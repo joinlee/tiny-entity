@@ -238,13 +238,16 @@ export class DataContext implements IDataContext {
                 filename: this.config.FilePath + tbName + ".db",
                 inMemoryOnly: false,
                 autoload: true,
-                onload: (err) => {
+                onload: (err: any) => {
                     if (err) {
+                        if (err.errorType == "uniqueViolated") reject(err);
+                        else {
+                            console.log("启动open task:" + tbName);
+                            OpenWorkerManager.Current.Task(new DBOpenWorker(
+                                { path: dbconfig.FilePath + tbName + ".db" }, resolve
+                            ));
+                        }
 
-                        console.log("==================> 数据库打开失败：启动open task" + tbName);
-                        OpenWorkerManager.Current.Task(new DBOpenWorker(
-                            { path: dbconfig.FilePath + tbName + ".db" }, resolve
-                        ));
                     }
                     else {
                         db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
