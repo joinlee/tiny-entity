@@ -5,12 +5,10 @@ export class DBOpenWorker {
     private option: { path: string };
     private interval: number = 200;
     private callback;
-    private workId: number;
-    get WorkId() { return this.workId; }
+    WorkId: any
     constructor(option: { path: string }, callback: (db: Datastore) => void) {
         this.option = option;
         this.callback = callback;
-        this.workId = new Date().getTime();
     }
 
     BeginTask(interval?: number) {
@@ -40,7 +38,7 @@ export class DBOpenWorker {
 
 export class OpenWorkerManager {
     static Current: OpenWorkerManager = new OpenWorkerManager();
-    private taskList: WeakMap<number, DBOpenWorker> = new WeakMap();
+    private taskList: WeakMap<any, DBOpenWorker> = new WeakMap();
     constructor() {
     }
 
@@ -52,6 +50,7 @@ export class OpenWorkerManager {
                 console.log("移除OpenDBWork，WorkId：" + task.WorkId);
             }
         }
+        task.WorkId = { key: new Date().getTime() }
         this.taskList.set(task.WorkId, task);
         process.nextTick(task.BeginTask.bind(task));
     }

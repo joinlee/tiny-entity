@@ -5,9 +5,7 @@ class DBOpenWorker {
         this.interval = 200;
         this.option = option;
         this.callback = callback;
-        this.workId = new Date().getTime();
     }
-    get WorkId() { return this.workId; }
     BeginTask(interval) {
         if (interval)
             this.interval = interval;
@@ -45,6 +43,7 @@ class OpenWorkerManager {
                 console.log("移除OpenDBWork，WorkId：" + task.WorkId);
             }
         };
+        task.WorkId = { key: new Date().getTime() };
         this.taskList.set(task.WorkId, task);
         process.nextTick(task.BeginTask.bind(task));
     }
