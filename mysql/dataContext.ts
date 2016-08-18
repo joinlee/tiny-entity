@@ -59,7 +59,8 @@ export class DataContext implements IDataContext {
      * @param  {IEntityObject} obj
      */
     Delete(obj: IEntityObject) {
-        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id=" + obj.id + ";";
+        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
+        console.log("DELETE:",sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -80,42 +81,51 @@ export class DataContext implements IDataContext {
     Commit() {
         if (!this.transactionOn) return;
         return new Promise((resolve, reject) => {
-            this.mysqlPool.getConnection((err, conn) => {
-                console.log("mysql Commit error:",err);
+            this.mysqlPool.getConnection(async (err, conn) => {
                 if (err) reject(err);
                 conn.beginTransaction(err => {
                     if (err) reject(err);
-
                 });
-                conn.query(this.querySentence.join(" "), (err, ...args) => {
-                    if (err) {
-                        conn.rollback(() => { reject(err) });
-                    }
-                    else {
-                        conn.commit(err => {
-                            if (err) conn.rollback(() => { reject(err) });
-                            this.querySentence = [];
-                            this.transactionOn = false;
-                            resolve(args);
-                        });
-                    }
+                for (let sql of this.querySentence) {
+                    let r = await this.TrasnQuery(conn, sql);
+                }
+                conn.commit(err => {
+                    if (err) conn.rollback(() => { reject(err) });
+                    this.querySentence = [];
+                    this.transactionOn = false;
+                    resolve(true);
                 });
             });
         });
     }
+
+    private async TrasnQuery(conn: mysql.IConnection, sql: string) {
+        return new Promise((resolve, reject) => {
+            conn.query(sql, (err, result) => {
+                if (err) {
+                    conn.rollback(() => { reject(err) });
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+
+    RollBack() { }
     /**
      * @param  {string} sqlStr
      */
     Query(sqlStr: string) {
-        console.log(sqlStr);   
+        console.log(sqlStr);
         return this.onSubmit(sqlStr);
     }
 
     private onSubmit(sqlStr: string) {
         return new Promise((resolve, reject) => {
             this.mysqlPool.getConnection((err, conn) => {
-                console.log("mysql onSubmits error:",err);
-                if(err) reject(err);
+                console.log("mysql onSubmits error:", err);
+                if (err) reject(err);
                 conn.query(sqlStr, (err, ...args) => {
                     if (err) reject(err);
                     else resolve(args);
@@ -128,6 +138,7 @@ export class DataContext implements IDataContext {
         let propertyValueList = [];
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key])) {
+                if (!obj[key]) continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
@@ -170,6 +181,24 @@ export class DataContext implements IDataContext {
 interface PropertyFormatResult {
     PropertyNameList: string[];
     PropertyValueList: any[];
+}
+
+export function Transaction(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
+    let method = descriptor.value;
+    descriptor.value = async function () {
+        console.log("BeginTranscation propertyName:", propertyName);
+        this.ctx.BeginTranscation();
+        let result;
+        try {
+            result = await method.apply(this, arguments);
+            this.ctx.Commit();
+            return result;
+        } catch (error) {
+            console.log("RollBack propertyName:", propertyName);
+            await this.ctx.RollBack();
+            throw error;
+        }
+    }
 }
 
 

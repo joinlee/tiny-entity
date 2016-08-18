@@ -20,7 +20,6 @@ class EntityObject {
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
         let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        console.log(sql);
         this.sqlTemp.push(sql);
         return this;
     }
@@ -141,6 +140,7 @@ class EntityObject {
         qFnS = qFnS.replace(new RegExp(p, "gm"), this.toString());
         qFnS = qFnS.replace(/\&\&/g, "AND");
         qFnS = qFnS.replace(/\|\|/g, "OR");
+        qFnS = qFnS.replace(/\=\=/g, "=");
         if (paramsKey && paramsValue) {
             if (paramsKey.length != paramsValue.length)
                 throw 'paramsKey,paramsValue 参数异常';

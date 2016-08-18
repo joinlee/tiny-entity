@@ -1,4 +1,4 @@
-import {  DataContext, EntityObject, EntityCopier } from "../index";
+import {  DataContext, EntityObject, EntityCopier, Transaction} from "../index";
 import { Order, Employee} from "./model";
 class Guid {
     static GetGuid(): string {
@@ -134,17 +134,49 @@ async function Test2() {
 async function Test3() {
     try {
         let ctx = new TestDataContext();
-        let r =  await ctx.Order.Contains(x => x.id, ['c871cafb03984f8e853be7f6ca351e0e', 'c8d303eaf26249e18837cea2fe9c3b66']);
+        let r = await ctx.Order.Contains(x => x.id, ['c871cafb03984f8e853be7f6ca351e0e', 'c8d303eaf26249e18837cea2fe9c3b66']);
         console.log(r);
         let r2 = await ctx.Order.First();
-        console.log("select First one:",r2);
-        console.log("entity name:",r2.toString());
-        
+        console.log("select First one:", r2);
+        console.log("entity name:", r2.toString());
+
     } catch (error) {
 
     }
 }
 
+
+function Test4() {
+    class TransactionCtx {
+        ctx = new TestDataContext();
+        @Transaction
+        async TransTest() {
+            let r1 = await this.ctx.Employee.First(x => x.id == "1777d5935e8941d885a83659141cf9cd");
+            await this.ctx.Delete(r1);
+
+            let emp: any = {};
+            emp.id = Guid.GetGuid();
+            emp.joinTime = new Date();
+            emp.account = "likecheng";
+            emp.password = "123";
+            emp.note = "我是大魔王";
+            emp.storeId = Guid.GetGuid();
+            emp.employeeNumber = "0001";
+            emp.userId = Guid.GetGuid();
+            (<any>emp).iid = "12312312321";
+
+            let e = EntityCopier.Copy(emp, new Employee());
+            await this.ctx.Create(e);
+
+            throw "trnascation error!!!";
+        }
+    }
+
+    let t1 = new TransactionCtx();
+    t1.TransTest();
+}
+
 // Test1();
 // Test2();
-Test3();
+// Test3();
+Test4();

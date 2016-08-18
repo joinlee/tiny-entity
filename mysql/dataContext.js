@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 const mysql = require("mysql");
 class DataContext {
     constructor(option) {
@@ -52,7 +60,8 @@ class DataContext {
      * @param  {IEntityObject} obj
      */
     Delete(obj) {
-        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id=" + obj.id + ";";
+        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
+        console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -73,31 +82,41 @@ class DataContext {
         if (!this.transactionOn)
             return;
         return new Promise((resolve, reject) => {
-            this.mysqlPool.getConnection((err, conn) => {
-                console.log("mysql Commit error:", err);
+            this.mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
                 if (err)
                     reject(err);
                 conn.beginTransaction(err => {
                     if (err)
                         reject(err);
                 });
-                conn.query(this.querySentence.join(" "), (err, ...args) => {
+                for (let sql of this.querySentence) {
+                    let r = yield this.TrasnQuery(conn, sql);
+                }
+                conn.commit(err => {
+                    if (err)
+                        conn.rollback(() => { reject(err); });
+                    this.querySentence = [];
+                    this.transactionOn = false;
+                    resolve(true);
+                });
+            }));
+        });
+    }
+    TrasnQuery(conn, sql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                conn.query(sql, (err, result) => {
                     if (err) {
                         conn.rollback(() => { reject(err); });
                     }
                     else {
-                        conn.commit(err => {
-                            if (err)
-                                conn.rollback(() => { reject(err); });
-                            this.querySentence = [];
-                            this.transactionOn = false;
-                            resolve(args);
-                        });
+                        resolve(result);
                     }
                 });
             });
         });
     }
+    RollBack() { }
     /**
      * @param  {string} sqlStr
      */
@@ -125,6 +144,8 @@ class DataContext {
         let propertyValueList = [];
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key])) {
+                if (!obj[key])
+                    continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
@@ -163,4 +184,25 @@ class DataContext {
     }
 }
 exports.DataContext = DataContext;
+function Transaction(target, propertyName, descriptor) {
+    let method = descriptor.value;
+    descriptor.value = function () {
+        return __awaiter(this, arguments, void 0, function* () {
+            console.log("BeginTranscation propertyName:", propertyName);
+            this.ctx.BeginTranscation();
+            let result;
+            try {
+                result = yield method.apply(this, arguments);
+                this.ctx.Commit();
+                return result;
+            }
+            catch (error) {
+                console.log("RollBack propertyName:", propertyName);
+                yield this.ctx.RollBack();
+                throw error;
+            }
+        });
+    };
+}
+exports.Transaction = Transaction;
 //# sourceMappingURL=dataContext.js.map

@@ -9,7 +9,10 @@ class EntityCopier {
                 continue;
             if (typeof (s[key]) != "function")
                 d[key] = s[key];
-            if (typeof (s[key]) == "object") {
+            if (s[key] instanceof Date) {
+                d[key] = s[key];
+            }
+            else if (typeof (s[key]) == "object") {
                 d[key] = JSON.stringify(s[key]);
             }
         }
