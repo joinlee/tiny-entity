@@ -1,13 +1,15 @@
 import mysql = require("mysql");
 import { EntityCopier} from "./entityCopier";
 
+var mysqlPool: mysql.IPool;
+
 export class DataContext implements IDataContext {
     private transactionOn: boolean = false;
     private querySentence: string[] = [];
     private mysqlPool: mysql.IPool;
 
     constructor(option: mysql.IPoolConfig) {
-        this.mysqlPool = mysql.createPool(option);
+        if (!mysqlPool) mysqlPool = mysql.createPool(option);
     }
     /**
      * @param  {IEntityObject} obj
@@ -86,7 +88,7 @@ export class DataContext implements IDataContext {
     Commit() {
         if (!this.transactionOn) return;
         return new Promise((resolve, reject) => {
-            this.mysqlPool.getConnection(async (err, conn) => {
+            mysqlPool.getConnection(async (err, conn) => {
                 if (err) reject(err);
                 conn.beginTransaction(err => {
                     if (err) reject(err);
@@ -128,7 +130,7 @@ export class DataContext implements IDataContext {
 
     private onSubmit(sqlStr: string) {
         return new Promise((resolve, reject) => {
-            this.mysqlPool.getConnection((err, conn) => {
+            mysqlPool.getConnection((err, conn) => {
                 console.log("mysql onSubmits error:", err);
                 if (err) reject(err);
                 conn.query(sqlStr, (err, ...args) => {
