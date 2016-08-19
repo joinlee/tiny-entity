@@ -1,6 +1,7 @@
 ///<reference path="typings/tinyDB.d.ts" />
 
 import { DataContext } from './dataContext';
+import { EntityCopier } from "./entityCopier";
 
 /**
  * EntityObject
@@ -83,7 +84,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
             obj = row[0][0];
         }
         if (obj)
-            return this.clone(obj, new Object() as T);
+            return this.clone(EntityCopier.Decode(obj), new Object() as T);
         else return null;
     }
     Take(count: number): IQueryObject<T> {
@@ -161,16 +162,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
     }
     clone(source: any, destination: T, isDeep: boolean = false): T {
         if (!source) return null;
-        // for (var key in source) {
-        //     if (typeof (key) != "function") {
-        //         if (isDeep) { }
-        //         else {
-        //             if (typeof (key) != "object") {
-        //                 destination[key] = source[key];
-        //             }
-        //         }
-        //     }
-        // }
+
         destination = JSON.parse(JSON.stringify(source));
         delete (destination as any).sqlTemp;
         delete (destination as any).queryParam;
@@ -182,7 +174,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
     private cloneList(list: [any]): T[] {
         let r: T[] = [];
         list.forEach(x => {
-            if (x) r.push(this.clone(x, new Object() as T, false));
+            if (x) r.push(this.clone(EntityCopier.Decode(x), new Object() as T, false));
         });
 
         return r;

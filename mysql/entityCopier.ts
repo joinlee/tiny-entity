@@ -5,16 +5,31 @@ export class EntityCopier {
         delete (<any>d).queryParam;
 
         for (let key in d) {
-            if (!s[key]) continue;
+            if (s[key] == undefined || s[key] == null) continue;
             if (typeof (s[key]) != "function")
                 d[key] = s[key];
             if (s[key] instanceof Date) {
                 d[key] = s[key];
-            } 
+            }
             else if (typeof (s[key]) == "object") {
                 d[key] = JSON.stringify(s[key]);
             }
         }
         return d;
+    }
+
+    static Decode<T>(s: any) {
+        delete (<any>s).sqlTemp;
+        delete (<any>s).ctx;
+        delete (<any>s).queryParam;
+
+        for (let key in s) {
+            try{
+                s[key] = JSON.parse(s[key]);
+            }
+            catch(err){}
+        }
+
+        return s;
     }
 }

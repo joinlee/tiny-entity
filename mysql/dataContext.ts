@@ -1,4 +1,5 @@
 import mysql = require("mysql");
+import { EntityCopier} from "./entityCopier";
 
 export class DataContext implements IDataContext {
     private transactionOn: boolean = false;
@@ -11,7 +12,7 @@ export class DataContext implements IDataContext {
     /**
      * @param  {IEntityObject} obj
      */
-    Create(obj: IEntityObject) {
+    async Create(obj: IEntityObject) {
         let sqlStr = "INSERT INTO " + obj.toString();
         let pt = this.propertyFormat(obj);
 
@@ -22,17 +23,19 @@ export class DataContext implements IDataContext {
             this.querySentence.push(sqlStr);
         }
         else {
-            return this.onSubmit(sqlStr);
+            let r = await this.onSubmit(sqlStr);
+            return EntityCopier.Decode(obj);
         }
     }
     /**
      * @param  {IEntityObject} obj
      */
-    Update(obj: IEntityObject) {
+    async Update(obj: IEntityObject) {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key]) && key != "Id") {
+            if (this.isNotObjectOrFunction(obj[key]) && key != "id") {
+                if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
                 if (isNaN(obj[key])) {
                     qList.push(key + "='" + obj[key] + "'");
                 }
@@ -45,13 +48,15 @@ export class DataContext implements IDataContext {
             }
         }
 
-        sqlStr += qList.join(',') + " WHERE id=" + obj.id + ";";
-
+        //todo:判断id的类型
+        sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
+        console.log("Update:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
         else {
-            return this.onSubmit(sqlStr);
+            let r = await this.onSubmit(sqlStr);
+            return EntityCopier.Decode(obj);
         }
 
     }
@@ -60,7 +65,7 @@ export class DataContext implements IDataContext {
      */
     Delete(obj: IEntityObject) {
         let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
-        console.log("DELETE:",sqlStr);
+        console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -138,7 +143,7 @@ export class DataContext implements IDataContext {
         let propertyValueList = [];
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key])) {
-                if (!obj[key]) continue;
+                if (obj[key] == undefined || obj[key] == null) continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
