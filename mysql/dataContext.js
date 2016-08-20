@@ -8,53 +8,66 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const mysql = require("mysql");
+const entityCopier_1 = require("./entityCopier");
+var mysqlPool;
 class DataContext {
     constructor(option) {
         this.transactionOn = false;
         this.querySentence = [];
-        this.mysqlPool = mysql.createPool(option);
+        if (!mysqlPool)
+            mysqlPool = mysql.createPool(option);
     }
     /**
      * @param  {IEntityObject} obj
      */
     Create(obj) {
-        let sqlStr = "INSERT INTO " + obj.toString();
-        let pt = this.propertyFormat(obj);
-        sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
-        console.log(sqlStr);
-        if (this.transactionOn) {
-            this.querySentence.push(sqlStr);
-        }
-        else {
-            return this.onSubmit(sqlStr);
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            let sqlStr = "INSERT INTO " + obj.toString();
+            let pt = this.propertyFormat(obj);
+            sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
+            console.log(sqlStr);
+            if (this.transactionOn) {
+                this.querySentence.push(sqlStr);
+            }
+            else {
+                let r = yield this.onSubmit(sqlStr);
+                return entityCopier_1.EntityCopier.Decode(obj);
+            }
+        });
     }
     /**
      * @param  {IEntityObject} obj
      */
     Update(obj) {
-        let sqlStr = "UPDATE " + obj.toString() + " SET ";
-        let qList = [];
-        for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key]) && key != "Id") {
-                if (isNaN(obj[key])) {
-                    qList.push(key + "='" + obj[key] + "'");
-                }
-                else if (obj[key] instanceof Date) {
-                    qList.push(key + "='" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
-                }
-                else {
-                    qList.push(key + "=" + obj[key]);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sqlStr = "UPDATE " + obj.toString() + " SET ";
+            let qList = [];
+            for (var key in obj) {
+                if (this.isNotObjectOrFunction(obj[key]) && key != "id") {
+                    if (obj[key] == undefined || obj[key] == null || obj[key] == "")
+                        continue;
+                    if (isNaN(obj[key])) {
+                        qList.push(key + "='" + obj[key] + "'");
+                    }
+                    else if (obj[key] instanceof Date) {
+                        qList.push(key + "='" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
+                    }
+                    else {
+                        qList.push(key + "=" + obj[key]);
+                    }
                 }
             }
-        }
-        sqlStr += qList.join(',') + " WHERE id=" + obj.id + ";";
-        if (this.transactionOn) {
-            this.querySentence.push(sqlStr);
-        }
-        else {
-            return this.onSubmit(sqlStr);
-        }
+            //todo:判断id的类型
+            sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
+            console.log("Update:", sqlStr);
+            if (this.transactionOn) {
+                this.querySentence.push(sqlStr);
+            }
+            else {
+                let r = yield this.onSubmit(sqlStr);
+                return entityCopier_1.EntityCopier.Decode(obj);
+            }
+        });
     }
     /**
      * @param  {IEntityObject} obj
@@ -82,21 +95,29 @@ class DataContext {
         if (!this.transactionOn)
             return;
         return new Promise((resolve, reject) => {
-            this.mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
-                if (err)
+            mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
+                if (err) {
+                    conn.release();
                     reject(err);
+                }
                 conn.beginTransaction(err => {
-                    if (err)
+                    if (err) {
+                        conn.release();
                         reject(err);
+                    }
                 });
                 for (let sql of this.querySentence) {
                     let r = yield this.TrasnQuery(conn, sql);
                 }
                 conn.commit(err => {
                     if (err)
-                        conn.rollback(() => { reject(err); });
+                        conn.rollback(() => {
+                            conn.release();
+                            reject(err);
+                        });
                     this.querySentence = [];
                     this.transactionOn = false;
+                    conn.release();
                     resolve(true);
                 });
             }));
@@ -126,11 +147,14 @@ class DataContext {
     }
     onSubmit(sqlStr) {
         return new Promise((resolve, reject) => {
-            this.mysqlPool.getConnection((err, conn) => {
+            mysqlPool.getConnection((err, conn) => {
                 console.log("mysql onSubmits error:", err);
-                if (err)
+                if (err) {
+                    conn.release();
                     reject(err);
+                }
                 conn.query(sqlStr, (err, ...args) => {
+                    conn.release();
                     if (err)
                         reject(err);
                     else
@@ -144,7 +168,7 @@ class DataContext {
         let propertyValueList = [];
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key])) {
-                if (!obj[key])
+                if (obj[key] == undefined || obj[key] == null)
                     continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {

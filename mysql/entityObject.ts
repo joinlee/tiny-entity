@@ -16,8 +16,9 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
         this.ctx = ctx;
     }
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
-        let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        this.sqlTemp.push(sql);
+        // let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+        // this.sqlTemp.push(sql);
+        this.sqlTemp.push(this.formateCode(qFn, paramsKey, paramsValue));
         return this;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
@@ -104,19 +105,19 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn);
     }
-    ToList(queryCallback?: (result: T[]) => void): T[] {
+    async ToList(queryCallback?: (result: T[]) => void){
         let row;
         if (this.sqlTemp.length > 0) {
-            let sql = this.sqlTemp[0];
+            let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.sqlTemp.join(' && ');
             sql = this.addQueryStence(sql) + ";";
-            row = this.ctx.Query(sql);
+            row = await this.ctx.Query(sql);
         }
         else {
             let sql = "SELECT * FROM " + this.toString();
             sql = this.addQueryStence(sql) + ";";
-            row = this.ctx.Query(sql);
+            row = await this.ctx.Query(sql);
         }
-        return this.cloneList(row);
+        return this.cloneList(row[0]);
     }
     Max(qFn: (x: T) => void) {
 

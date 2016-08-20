@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
+const entityCopier_1 = require("./entityCopier");
 /**
  * EntityObject
  */
@@ -19,8 +20,9 @@ class EntityObject {
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        this.sqlTemp.push(sql);
+        // let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+        // this.sqlTemp.push(sql);
+        this.sqlTemp.push(this.formateCode(qFn, paramsKey, paramsValue));
         return this;
     }
     Select(qFn) {
@@ -79,7 +81,7 @@ class EntityObject {
                 obj = row[0][0];
             }
             if (obj)
-                return this.clone(obj, new Object());
+                return this.clone(entityCopier_1.EntityCopier.Decode(obj), new Object());
             else
                 return null;
         });
@@ -102,18 +104,20 @@ class EntityObject {
         return this.OrderBy(qFn);
     }
     ToList(queryCallback) {
-        let row;
-        if (this.sqlTemp.length > 0) {
-            let sql = this.sqlTemp[0];
-            sql = this.addQueryStence(sql) + ";";
-            row = this.ctx.Query(sql);
-        }
-        else {
-            let sql = "SELECT * FROM " + this.toString();
-            sql = this.addQueryStence(sql) + ";";
-            row = this.ctx.Query(sql);
-        }
-        return this.cloneList(row);
+        return __awaiter(this, void 0, void 0, function* () {
+            let row;
+            if (this.sqlTemp.length > 0) {
+                let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.sqlTemp.join(' && ');
+                sql = this.addQueryStence(sql) + ";";
+                row = yield this.ctx.Query(sql);
+            }
+            else {
+                let sql = "SELECT * FROM " + this.toString();
+                sql = this.addQueryStence(sql) + ";";
+                row = yield this.ctx.Query(sql);
+            }
+            return this.cloneList(row[0]);
+        });
     }
     Max(qFn) {
     }
@@ -156,16 +160,6 @@ class EntityObject {
     clone(source, destination, isDeep = false) {
         if (!source)
             return null;
-        // for (var key in source) {
-        //     if (typeof (key) != "function") {
-        //         if (isDeep) { }
-        //         else {
-        //             if (typeof (key) != "object") {
-        //                 destination[key] = source[key];
-        //             }
-        //         }
-        //     }
-        // }
         destination = JSON.parse(JSON.stringify(source));
         delete destination.sqlTemp;
         delete destination.queryParam;
@@ -178,7 +172,7 @@ class EntityObject {
         let r = [];
         list.forEach(x => {
             if (x)
-                r.push(this.clone(x, new Object(), false));
+                r.push(this.clone(entityCopier_1.EntityCopier.Decode(x), new Object(), false));
         });
         return r;
     }

@@ -190,8 +190,18 @@ function Test4() {
     let t1 = new TransactionCtx();
     t1.TransTest();
 }
+function Test5() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let ctx = new TestDataContext();
+        ctx.Order.Where(x => x.id == "031623f514694a648dd84d3397239480");
+        ctx.Order.Where(x => x.amountDue == -0.01);
+        let r = yield ctx.Order.ToList();
+        console.log(r.length);
+    });
+}
 // Test1();
 // Test2();
 // Test3();
-Test4();
+// Test4();
+Test5();
 //# sourceMappingURL=test.js.map

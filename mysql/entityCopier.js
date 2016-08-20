@@ -5,7 +5,7 @@ class EntityCopier {
         delete d.ctx;
         delete d.queryParam;
         for (let key in d) {
-            if (!s[key])
+            if (s[key] == undefined || s[key] == null)
                 continue;
             if (typeof (s[key]) != "function")
                 d[key] = s[key];
@@ -17,6 +17,18 @@ class EntityCopier {
             }
         }
         return d;
+    }
+    static Decode(s) {
+        delete s.sqlTemp;
+        delete s.ctx;
+        delete s.queryParam;
+        for (let key in s) {
+            try {
+                s[key] = JSON.parse(s[key]);
+            }
+            catch (err) { }
+        }
+        return s;
     }
 }
 exports.EntityCopier = EntityCopier;

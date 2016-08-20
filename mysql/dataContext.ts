@@ -89,17 +89,27 @@ export class DataContext implements IDataContext {
         if (!this.transactionOn) return;
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection(async (err, conn) => {
-                if (err) reject(err);
+                if (err) {
+                    conn.release();
+                    reject(err);
+                }
                 conn.beginTransaction(err => {
-                    if (err) reject(err);
+                    if (err) {
+                        conn.release();
+                        reject(err);
+                    }
                 });
                 for (let sql of this.querySentence) {
                     let r = await this.TrasnQuery(conn, sql);
                 }
                 conn.commit(err => {
-                    if (err) conn.rollback(() => { reject(err) });
+                    if (err) conn.rollback(() => {
+                        conn.release();
+                        reject(err);
+                    });
                     this.querySentence = [];
                     this.transactionOn = false;
+                    conn.release();
                     resolve(true);
                 });
             });
@@ -132,8 +142,12 @@ export class DataContext implements IDataContext {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
                 console.log("mysql onSubmits error:", err);
-                if (err) reject(err);
+                if (err) {
+                    conn.release();
+                    reject(err);
+                }
                 conn.query(sqlStr, (err, ...args) => {
+                    conn.release();
                     if (err) reject(err);
                     else resolve(args);
                 });

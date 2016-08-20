@@ -145,7 +145,6 @@ async function Test3() {
     }
 }
 
-
 function Test4() {
     class TransactionCtx {
         ctx = new TestDataContext();
@@ -176,7 +175,16 @@ function Test4() {
     t1.TransTest();
 }
 
+async function Test5() {
+    let ctx = new TestDataContext();
+    ctx.Order.Where(x => x.id == "031623f514694a648dd84d3397239480");
+    ctx.Order.Where(x => x.amountDue == -0.01);
+    let r = await ctx.Order.ToList();
+    console.log(r.length);
+}
+
 // Test1();
 // Test2();
 // Test3();
-Test4();
+// Test4();
+Test5();
