@@ -197,11 +197,23 @@ function Test5() {
         ctx.Order.Where(x => x.amountDue == -0.01);
         let r = yield ctx.Order.ToList();
         console.log(r.length);
+        let r1 = yield ctx.Order.Where(x => x.id == "031623f514694a648dd84d3397239480" || x.amountDue == -0.01).ToList();
+        console.log(r1.length);
+    });
+}
+function Test6() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let ctx = new TestDataContext();
+        ctx.Order.Where(x => x.amountDue != -0.01);
+        ctx.Order.Contains(x => x.status, ["closed", "refund"]);
+        let r = yield ctx.Order.Select(x => x.id).ToList();
+        console.log(r.length);
     });
 }
 // Test1();
 // Test2();
 // Test3();
 // Test4();
-Test5();
+// Test5();
+Test6();
 //# sourceMappingURL=test.js.map

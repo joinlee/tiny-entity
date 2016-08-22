@@ -1,6 +1,6 @@
 {
   "name": "tiny-entity",
-  "version": "0.2.13",
+  "version": "0.2.15",
   "description": "一款简单易用的ORM框架，支持NEDB IndexedDB 以及Sqlite等常用的数据库",
   "main": "index.js",
   "scripts": {

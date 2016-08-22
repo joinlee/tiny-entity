@@ -6,7 +6,7 @@ import { EntityCopier } from "./entityCopier";
 /**
  * EntityObject
  */
-class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T> {
+export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T> {
     id: string;
     toString(): string { return ""; }
     private ctx: DataContext;
@@ -16,14 +16,12 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
         this.ctx = ctx;
     }
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
-        // let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        // this.sqlTemp.push(sql);
-        this.sqlTemp.push(this.formateCode(qFn, paramsKey, paramsValue));
+        this.sqlTemp.push("(" + this.formateCode(qFn, paramsKey, paramsValue) + ")");
         return this;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
-        let filed = this.formateCode(qFn);
-        this.queryParam.SelectFileds = filed.split("AND");
+        let fileds = this.formateCode(qFn);
+        this.queryParam.SelectFileds = fileds.split("AND");
         return this;
     }
     Any(qFn: (entityObject: T) => boolean,
@@ -58,9 +56,10 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
                     values[i] = "'" + values[i] + "'";
                 }
             }
-            sql = "SELECT * FROM " + this.toString() + " WHERE " + filed + " IN (" + values.join(",") + ");";
-            let row = await this.ctx.Query(sql);
-            return this.cloneList(row && row['0']);
+            sql = filed + " IN (" + values.join(",") + ")";
+
+            this.sqlTemp.push("(" + sql + ")");
+            return this;
         }
     }
     async First(qFn?: (entityObject: T) => boolean,
@@ -105,7 +104,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn);
     }
-    async ToList(queryCallback?: (result: T[]) => void){
+    async ToList(queryCallback?: (result: T[]) => void) {
         let row;
         if (this.sqlTemp.length > 0) {
             let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.sqlTemp.join(' && ');
@@ -117,6 +116,7 @@ class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObje
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
+        this.sqlTemp = [];
         return this.cloneList(row[0]);
     }
     Max(qFn: (x: T) => void) {
@@ -206,5 +206,3 @@ interface QueryParams {
     IsDesc: boolean;
     SelectFileds: string[];
 }
-
-export { EntityObject }

@@ -20,14 +20,12 @@ class EntityObject {
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        // let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        // this.sqlTemp.push(sql);
-        this.sqlTemp.push(this.formateCode(qFn, paramsKey, paramsValue));
+        this.sqlTemp.push("(" + this.formateCode(qFn, paramsKey, paramsValue) + ")");
         return this;
     }
     Select(qFn) {
-        let filed = this.formateCode(qFn);
-        this.queryParam.SelectFileds = filed.split("AND");
+        let fileds = this.formateCode(qFn);
+        this.queryParam.SelectFileds = fileds.split("AND");
         return this;
     }
     Any(qFn, paramsKey, paramsValue, queryCallback) {
@@ -57,9 +55,9 @@ class EntityObject {
                         values[i] = "'" + values[i] + "'";
                     }
                 }
-                sql = "SELECT * FROM " + this.toString() + " WHERE " + filed + " IN (" + values.join(",") + ");";
-                let row = yield this.ctx.Query(sql);
-                return this.cloneList(row && row['0']);
+                sql = filed + " IN (" + values.join(",") + ")";
+                this.sqlTemp.push("(" + sql + ")");
+                return this;
             }
         });
     }
@@ -116,6 +114,7 @@ class EntityObject {
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
+            this.sqlTemp = [];
             return this.cloneList(row[0]);
         });
     }
