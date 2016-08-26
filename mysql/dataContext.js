@@ -26,13 +26,13 @@ class DataContext {
             let pt = this.propertyFormat(obj);
             sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
             console.log(sqlStr);
-            if (this.transactionOn) {
-                this.querySentence.push(sqlStr);
-            }
-            else {
-                let r = yield this.onSubmit(sqlStr);
-                return entityCopier_1.EntityCopier.Decode(obj);
-            }
+            // if (this.transactionOn) {
+            //     this.querySentence.push(sqlStr);
+            // }
+            // else {
+            //     let r = await this.onSubmit(sqlStr);
+            //     return EntityCopier.Decode(obj);
+            // }
         });
     }
     /**

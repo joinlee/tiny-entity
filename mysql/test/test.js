@@ -146,11 +146,8 @@ function Test3() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let ctx = new TestDataContext();
-            let r = yield ctx.Order.Contains(x => x.id, ['c871cafb03984f8e853be7f6ca351e0e', 'c8d303eaf26249e18837cea2fe9c3b66']);
+            let r = yield ctx.Order.First(x => x.id == "123095d3787c4a648a0814e18be1b74e");
             console.log(r);
-            let r2 = yield ctx.Order.First();
-            console.log("select First one:", r2);
-            console.log("entity name:", r2.toString());
         }
         catch (error) {
         }
@@ -210,10 +207,47 @@ function Test6() {
         console.log(r.length);
     });
 }
+function Test7() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let ctx = new TestDataContext();
+        let o = {
+            "sqlTemp": [],
+            "queryParam": {},
+            "amountDue": 28,
+            "remainAmount": 28,
+            "id": "123095d3787c4a648a0814e18be1b74e",
+            "storeId": "1doq6jxo4tdwosgk0s8og0408",
+            "terminalName": "wexin",
+            "createTime": 1471859159539,
+            "payments": [
+                {
+                    "id": "8008123001201608030483940039",
+                    "channel": "wechat-pay",
+                    "channelId": "wechat-pay",
+                    "amount": 28,
+                    "storeId": "1doq6jxo4tdwosgk0s8og0408",
+                    "received": 28,
+                    "payMode": "pay",
+                    "createTime": "1471402710081",
+                    "extended": {
+                        "trade_type": "JSAPI"
+                    }
+                }
+            ],
+            "paidAmount": 28,
+            "payState": "paid",
+            "closeTime": 1471859447038
+        };
+        let oo = index_1.EntityCopier.Copy(o, new model_1.Order());
+        console.log(oo);
+        yield ctx.Create(oo);
+    });
+}
 // Test1();
 // Test2();
-// Test3();
+Test3();
 // Test4();
 // Test5();
-Test6();
+// Test6();
+// Test7(); 
 //# sourceMappingURL=test.js.map

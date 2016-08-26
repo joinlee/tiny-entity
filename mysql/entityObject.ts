@@ -47,7 +47,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
 
         return result;
     }
-    async Contains(feild: (x: T) => void, values: any[]) {
+    Contains(feild: (x: T) => void, values: any[]) {
         let filed = this.formateCode(feild);
         if (values && values.length > 0) {
             let sql = "";

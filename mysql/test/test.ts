@@ -50,6 +50,7 @@ async function Test1() {
         emp.userId = Guid.GetGuid();
         (<any>emp).iid = "12312312321";
 
+
         let e = EntityCopier.Copy(emp, new Employee());
         console.log(e);
         await ctx.Create(e);
@@ -134,11 +135,8 @@ async function Test2() {
 async function Test3() {
     try {
         let ctx = new TestDataContext();
-        let r = await ctx.Order.Contains(x => x.id, ['c871cafb03984f8e853be7f6ca351e0e', 'c8d303eaf26249e18837cea2fe9c3b66']);
+        let r = await ctx.Order.First(x => x.id == "123095d3787c4a648a0814e18be1b74e");
         console.log(r);
-        let r2 = await ctx.Order.First();
-        console.log("select First one:", r2);
-        console.log("entity name:", r2.toString());
 
     } catch (error) {
 
@@ -189,14 +187,52 @@ async function Test5() {
 async function Test6() {
     let ctx = new TestDataContext();
     ctx.Order.Where(x => x.amountDue != -0.01);
-    ctx.Order.Contains(x => x.status, [ "closed", "refund"]);
-    let r = await ctx.Order.Select(x=>x.id).ToList();
+    ctx.Order.Contains(x => x.status, ["closed", "refund"]);
+    let r = await ctx.Order.Select(x => x.id).ToList();
     console.log(r.length);
+}
+
+async function Test7() {
+    let ctx = new TestDataContext();
+    let o = {
+        "sqlTemp": [],
+        "queryParam": {},
+        "amountDue": 28,
+        "remainAmount": 28,
+        "id": "123095d3787c4a648a0814e18be1b74e",
+        "storeId": "1doq6jxo4tdwosgk0s8og0408",
+        "terminalName": "wexin",
+        "createTime": 1471859159539,
+        "payments": [
+            {
+                "id": "8008123001201608030483940039",
+                "channel": "wechat-pay",
+                "channelId": "wechat-pay",
+                "amount": 28,
+                "storeId": "1doq6jxo4tdwosgk0s8og0408",
+                "received": 28,
+                "payMode": "pay",
+                "createTime": "1471402710081",
+                "extended": {
+                    "trade_type": "JSAPI"
+                }
+            }
+        ],
+        "paidAmount": 28,
+        "payState": "paid",
+        "closeTime": 1471859447038
+    }
+
+    let oo = EntityCopier.Copy(o, new Order());
+    console.log(oo);
+    await ctx.Create(oo);
+
 }
 
 // Test1();
 // Test2();
-// Test3();
+Test3();
 // Test4();
 // Test5();
-Test6();
+// Test6();
+// Test7();

@@ -46,20 +46,18 @@ class EntityObject {
         return result;
     }
     Contains(feild, values) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let filed = this.formateCode(feild);
-            if (values && values.length > 0) {
-                let sql = "";
-                if (isNaN(values[0])) {
-                    for (let i = 0; i < values.length; i++) {
-                        values[i] = "'" + values[i] + "'";
-                    }
+        let filed = this.formateCode(feild);
+        if (values && values.length > 0) {
+            let sql = "";
+            if (isNaN(values[0])) {
+                for (let i = 0; i < values.length; i++) {
+                    values[i] = "'" + values[i] + "'";
                 }
-                sql = filed + " IN (" + values.join(",") + ")";
-                this.sqlTemp.push("(" + sql + ")");
-                return this;
             }
-        });
+            sql = filed + " IN (" + values.join(",") + ")";
+            this.sqlTemp.push("(" + sql + ")");
+            return this;
+        }
     }
     First(qFn, paramsKey, paramsValue, queryCallback) {
         return __awaiter(this, void 0, Promise, function* () {
