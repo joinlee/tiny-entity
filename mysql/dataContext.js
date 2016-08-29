@@ -153,7 +153,7 @@ class DataContext {
                     conn.release();
                     reject(err);
                 }
-                conn.query(sqlStr, (err, ...args) => {
+                conn.query(sqlStr, (err, args) => {
                     conn.release();
                     if (err)
                         reject(err);

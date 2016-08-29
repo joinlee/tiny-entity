@@ -18,7 +18,8 @@ export class DataContext implements IDataContext {
     }
 
 
-    async Create(obj: IEntityObject, stillOpen: boolean = true): Promise<Object> {
+    async Create(obj: IEntityObject, stillOpen?: boolean): Promise<Object> {
+        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
         let promise = new Promise((resolve, reject) => {
             this.createInner(obj, stillOpen).then((r) => {
@@ -48,7 +49,8 @@ export class DataContext implements IDataContext {
         });
     }
 
-    async UpdateRange(list: [IEntityObject], stillOpen: boolean = true) {
+    async UpdateRange(list: [IEntityObject], stillOpen?: boolean) {
+        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
         let entityList = [];
         return new Promise((resolve, reject) => {
             try {
@@ -69,7 +71,8 @@ export class DataContext implements IDataContext {
         });
     }
 
-    async Update(obj: IEntityObject, stillOpen: boolean = true) {
+    async Update(obj: IEntityObject, stillOpen?: boolean) {
+        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
         let entity;
         if (this.transOn) {
@@ -112,7 +115,8 @@ export class DataContext implements IDataContext {
         });
     }
 
-    async Delete(obj: IEntityObject, stillOpen: boolean = true): Promise<boolean> {
+    async Delete(obj: IEntityObject, stillOpen?: boolean): Promise<boolean> {
+        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
         let entity;
         if (this.transOn) {
             entity = await this.getEntity(obj.toString(), obj.id, stillOpen);
@@ -155,7 +159,8 @@ export class DataContext implements IDataContext {
             this.transOn = false;
         };
     }
-    async Query(qFn: [((p) => Boolean)], tableName: string, queryMode: QueryMode = QueryMode.Normal, orderByFn?, inqObj?): Promise<any> {
+    async Query(qFn: [((p) => Boolean)], tableName: string, queryMode?: QueryMode , orderByFn?, inqObj?): Promise<any> {
+        if(queryMode == undefined || queryMode == null) queryMode = QueryMode.Normal
         let db = await this.Open(tableName);
         let promise = new Promise((resolve, reject) => {
             let queryFn = {};

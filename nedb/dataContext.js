@@ -21,8 +21,10 @@ class DataContext {
             this.nedb.loadDatabase();
         }
     }
-    Create(obj, stillOpen = true) {
+    Create(obj, stillOpen) {
         return __awaiter(this, void 0, Promise, function* () {
+            if (stillOpen == undefined || stillOpen == null)
+                stillOpen = true;
             delete obj.ctx;
             let promise = new Promise((resolve, reject) => {
                 this.createInner(obj, stillOpen).then((r) => {
@@ -55,8 +57,10 @@ class DataContext {
             });
         });
     }
-    UpdateRange(list, stillOpen = true) {
+    UpdateRange(list, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (stillOpen == undefined || stillOpen == null)
+                stillOpen = true;
             let entityList = [];
             return new Promise((resolve, reject) => {
                 try {
@@ -76,8 +80,10 @@ class DataContext {
             });
         });
     }
-    Update(obj, stillOpen = true) {
+    Update(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (stillOpen == undefined || stillOpen == null)
+                stillOpen = true;
             delete obj.ctx;
             let entity;
             if (this.transOn) {
@@ -123,8 +129,10 @@ class DataContext {
             });
         });
     }
-    Delete(obj, stillOpen = true) {
+    Delete(obj, stillOpen) {
         return __awaiter(this, void 0, Promise, function* () {
+            if (stillOpen == undefined || stillOpen == null)
+                stillOpen = true;
             let entity;
             if (this.transOn) {
                 entity = yield this.getEntity(obj.toString(), obj.id, stillOpen);
@@ -167,8 +175,10 @@ class DataContext {
         }
         ;
     }
-    Query(qFn, tableName, queryMode = QueryMode.Normal, orderByFn, inqObj) {
+    Query(qFn, tableName, queryMode, orderByFn, inqObj) {
         return __awaiter(this, void 0, Promise, function* () {
+            if (queryMode == undefined || queryMode == null)
+                queryMode = QueryMode.Normal;
             let db = yield this.Open(tableName);
             let promise = new Promise((resolve, reject) => {
                 let queryFn = {};

@@ -146,7 +146,7 @@ export class DataContext implements IDataContext {
                     conn.release();
                     reject(err);
                 }
-                conn.query(sqlStr, (err, ...args) => {
+                conn.query(sqlStr, (err, args) => {
                     conn.release();
                     if (err) reject(err);
                     else resolve(args);

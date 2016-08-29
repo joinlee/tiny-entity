@@ -125,19 +125,9 @@ class EntityObject {
         };
         return this.ctx.Query(null, this.toString(), dataContext_1.QueryMode.Contains, null, inq);
     }
-    clone(source, destination, isDeep = false) {
+    clone(source, destination, isDeep) {
         if (!source)
             return null;
-        // for (var key in source) {
-        //     if (typeof (key) != "function") {
-        //         if (isDeep) { }
-        //         else {
-        //             if (typeof (key) != "object") {
-        //                 destination[key] = source[key];
-        //             }
-        //         }
-        //     }
-        // }
         destination = source;
         delete destination.sqlTemp;
         delete destination.queryParam;

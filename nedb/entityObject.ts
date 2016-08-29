@@ -113,18 +113,9 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
     }
 
 
-    clone(source: any, destination: T, isDeep: boolean = false): T {
+    clone(source: any, destination: T, isDeep?: boolean): T {
         if (!source) return null;
-        // for (var key in source) {
-        //     if (typeof (key) != "function") {
-        //         if (isDeep) { }
-        //         else {
-        //             if (typeof (key) != "object") {
-        //                 destination[key] = source[key];
-        //             }
-        //         }
-        //     }
-        // }
+
         destination = source;
         delete (destination as any).sqlTemp;
         delete (destination as any).queryParam;
