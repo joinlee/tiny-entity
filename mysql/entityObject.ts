@@ -161,7 +161,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
 
         return qFnS;
     }
-    clone(source: any, destination: T, isDeep: boolean = false): T {
+    clone(source: any, destination: T, isDeep?: boolean): T {
         if (!source) return null;
 
         destination = JSON.parse(JSON.stringify(source));
