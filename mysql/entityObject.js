@@ -113,7 +113,10 @@ class EntityObject {
                 row = yield this.ctx.Query(sql);
             }
             this.sqlTemp = [];
-            return this.cloneList(row[0]);
+            if (row[0])
+                return this.cloneList(row[0]);
+            else
+                return [];
         });
     }
     Max(qFn) {
@@ -154,7 +157,7 @@ class EntityObject {
         }
         return qFnS;
     }
-    clone(source, destination, isDeep = false) {
+    clone(source, destination, isDeep) {
         if (!source)
             return null;
         destination = JSON.parse(JSON.stringify(source));

@@ -117,7 +117,9 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
             row = await this.ctx.Query(sql);
         }
         this.sqlTemp = [];
-        return this.cloneList(row[0]);
+        if (row[0])
+            return this.cloneList(row[0]);
+        else return [];
     }
     Max(qFn: (x: T) => void) {
 
