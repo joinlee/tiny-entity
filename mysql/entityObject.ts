@@ -80,8 +80,8 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
 
         let row = await this.ctx.Query(sql);
         let obj;
-        if (row && row[0] && row[0].length > 0) {
-            obj = row[0][0];
+        if (row && row[0]) {
+            obj = row[0];
         }
         if (obj)
             return this.clone(EntityCopier.Decode(obj), new Object() as T);
@@ -118,7 +118,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
         }
         this.sqlTemp = [];
         if (row[0])
-            return this.cloneList(row[0]);
+            return this.cloneList(row);
         else return [];
     }
     Max(qFn: (x: T) => void) {

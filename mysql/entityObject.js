@@ -73,8 +73,8 @@ class EntityObject {
             sql = this.addQueryStence(sql) + ";";
             let row = yield this.ctx.Query(sql);
             let obj;
-            if (row && row[0] && row[0].length > 0) {
-                obj = row[0][0];
+            if (row && row[0]) {
+                obj = row[0];
             }
             if (obj)
                 return this.clone(entityCopier_1.EntityCopier.Decode(obj), new Object());
@@ -114,7 +114,7 @@ class EntityObject {
             }
             this.sqlTemp = [];
             if (row[0])
-                return this.cloneList(row[0]);
+                return this.cloneList(row);
             else
                 return [];
         });

@@ -16,3 +16,4 @@
 /sqlite/*.db
 /nedb/db
 /indexedDB/.vscode
+/mysql/node_modules

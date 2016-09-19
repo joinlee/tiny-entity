@@ -1,8 +1,8 @@
 "use strict";
 const index_1 = require("../index");
 class Employee extends index_1.EntityObject {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
         this.id = "";
         this.account = "";
         this.employeeNumber = "";
@@ -37,8 +37,8 @@ exports.TableGroup = TableGroup;
  * TableParty 台桌服务记录
  */
 class TableParty extends index_1.EntityObject {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
         //是否有效台桌使用。例如未就餐的台桌服务为无效台桌服务。开始默认为 true
         this.valid = true;
     }
@@ -59,8 +59,8 @@ class Modifier extends index_1.EntityObject {
     toString() { return "Modifier"; }
 }
 class Order extends index_1.EntityObject {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
         this.id = null;
         this.amountDue = null;
         this.cart = null;
@@ -102,8 +102,8 @@ class Order extends index_1.EntityObject {
 }
 exports.Order = Order;
 class Checkout extends index_1.EntityObject {
-    constructor(...args) {
-        super(...args);
+    constructor(args) {
+        super(args);
         this.amountDue = 0;
         this.remainAmount = 0;
     }

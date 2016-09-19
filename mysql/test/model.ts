@@ -1,6 +1,9 @@
 import {  DataContext, EntityObject, EntityCopier } from "../index";
 
 export class Employee extends EntityObject<Employee> {
+    constructor(args?) {
+        super(args);
+    }
     id: string = "";
     account: string = "";
     employeeNumber: string = "";
@@ -52,6 +55,9 @@ export class TableGroup extends EntityObject<TableGroup> {
  * TableParty 台桌服务记录
  */
 export class TableParty extends EntityObject<TableParty>{
+    constructor(args?) {
+        super(args);
+    }
     //店铺id
     storeId: string | number;
     //台桌ID
@@ -128,6 +134,9 @@ class Modifier extends EntityObject<Modifier> {
     toString() { return "Modifier"; }
 }
 export class Order extends EntityObject<Order> {
+    constructor(args?) {
+        super(args);
+    }
     id: string = null;
     amountDue: number = null;
     cart: Cart = null;
@@ -168,6 +177,9 @@ export class Order extends EntityObject<Order> {
 }
 
 export class Checkout extends EntityObject<Checkout> {
+    constructor(args?) {
+        super(args);
+    }
     id: string;
     amountDue: number = 0;
     cashier: { id: string, name: string };
