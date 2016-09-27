@@ -24,10 +24,13 @@ export class EntityCopier {
         delete (<any>s).queryParam;
 
         for (let key in s) {
-            try{
-                s[key] = JSON.parse(s[key]);
+            try {
+                let d = JSON.parse(s[key]);
+                if (isNaN(d)) {
+                    s[key] = d;
+                }
             }
-            catch(err){}
+            catch (err) { }
         }
 
         return s;

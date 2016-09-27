@@ -60,7 +60,7 @@ class EntityObject {
         }
     }
     First(qFn, paramsKey, paramsValue, queryCallback) {
-        return __awaiter(this, void 0, Promise, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             let sql;
             if (qFn) {
                 sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
