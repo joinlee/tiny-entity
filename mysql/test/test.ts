@@ -135,7 +135,7 @@ async function Test2() {
 async function Test3() {
     try {
         let ctx = new TestDataContext();
-        let r = await ctx.Order.First(x => x.id == "123095d3787c4a648a0814e18be1b74e");
+        let r = await ctx.Order.First(x => x.id == "c98ad2a9afed42dd8299fb4983734316");
         console.log(r);
 
     } catch (error) {
@@ -231,8 +231,8 @@ async function Test7() {
 
 // Test1();
 // Test2();
-// Test3();
+Test3();
 // Test4();
-Test5();
+// Test5();
 // Test6();
 // Test7();
