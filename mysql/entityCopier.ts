@@ -26,7 +26,7 @@ export class EntityCopier {
         for (let key in s) {
             try {
                 let d = JSON.parse(s[key]);
-                if (isNaN(d) || d instanceof Array) {
+                if (isNaN(d) || Array.isArray(d)) {
                     s[key] = d;
                 }
             }
