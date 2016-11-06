@@ -1,2 +1,2 @@
-export * from './dataContext';
-export * from './entityObject';
+export * from './dataContextNeDB';
+export * from './entityObjectNeDB';

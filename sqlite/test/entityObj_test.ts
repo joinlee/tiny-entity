@@ -1,4 +1,5 @@
-import { DataContext, EntityObject } from '../index';
+import { DataContext } from '../index';
+import { EntityObject } from '../../entityObject';
 import { Assert } from './assert';
 
 class Account extends EntityObject<Account> {
@@ -64,7 +65,7 @@ function query() {
 
     ctx.BeginTranscation();
     let rr = ctx.Create(employee);
-    console.log("create result:",rr);
+    console.log("create result:", rr);
     ctx.Commit();
 
     //ctx.Update()

@@ -1,4 +1,5 @@
-import { DataContext, EntityObject, Transaction } from '../index';
+import { DataContext, Transaction } from '../index';
+import { EntityObject } from '../../entityObject';
 
 export class User extends EntityObject<User> {
     account: string;

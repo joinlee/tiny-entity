@@ -1,10 +1,9 @@
-///<reference path="typings/tinyDB.d.ts" />
 export class LocalIndexedDB {
     private _dbFactory: IDBFactory;
     private _db: IDBDatabase;
 
     constructor() {
-        this._dbFactory = window.indexedDB || window.msIndexedDB;
+        this._dbFactory = window.indexedDB || (<any>window).msIndexedDB;
     }
     /**
      * 打开数据库

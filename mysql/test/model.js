@@ -1,6 +1,6 @@
 "use strict";
-const index_1 = require("../index");
-class Employee extends index_1.EntityObject {
+const entityObject_1 = require("../../entityObject");
+class Employee extends entityObject_1.EntityObject {
     constructor(args) {
         super(args);
         this.id = "";
@@ -16,11 +16,11 @@ class Employee extends index_1.EntityObject {
     toString() { return "Employee"; }
 }
 exports.Employee = Employee;
-class Table extends index_1.EntityObject {
+class Table extends entityObject_1.EntityObject {
     toString() { return "DeskTable"; }
 }
 exports.Table = Table;
-class TableZone extends index_1.EntityObject {
+class TableZone extends entityObject_1.EntityObject {
     toString() { return "TableZone"; }
     clone(source) {
         let r = super.clone(source, new TableZone(), false);
@@ -29,36 +29,32 @@ class TableZone extends index_1.EntityObject {
     }
 }
 exports.TableZone = TableZone;
-class TableGroup extends index_1.EntityObject {
+class TableGroup extends entityObject_1.EntityObject {
     toString() { return "TableGroup"; }
 }
 exports.TableGroup = TableGroup;
-/**
- * TableParty 台桌服务记录
- */
-class TableParty extends index_1.EntityObject {
+class TableParty extends entityObject_1.EntityObject {
     constructor(args) {
         super(args);
-        //是否有效台桌使用。例如未就餐的台桌服务为无效台桌服务。开始默认为 true
         this.valid = true;
     }
     toString() { return "TableParty"; }
 }
 exports.TableParty = TableParty;
-class Inventory extends index_1.EntityObject {
+class Inventory extends entityObject_1.EntityObject {
     toString() { return "Inventory"; }
 }
 exports.Inventory = Inventory;
-class Category extends index_1.EntityObject {
+class Category extends entityObject_1.EntityObject {
     toString() { return "Category"; }
 }
-class Unit extends index_1.EntityObject {
+class Unit extends entityObject_1.EntityObject {
     toString() { return "Units"; }
 }
-class Modifier extends index_1.EntityObject {
+class Modifier extends entityObject_1.EntityObject {
     toString() { return "Modifier"; }
 }
-class Order extends index_1.EntityObject {
+class Order extends entityObject_1.EntityObject {
     constructor(args) {
         super(args);
         this.id = null;
@@ -101,7 +97,7 @@ class Order extends index_1.EntityObject {
     toString() { return "Orders"; }
 }
 exports.Order = Order;
-class Checkout extends index_1.EntityObject {
+class Checkout extends entityObject_1.EntityObject {
     constructor(args) {
         super(args);
         this.amountDue = 0;

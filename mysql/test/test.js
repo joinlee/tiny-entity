@@ -25,8 +25,8 @@ class Guid {
         for (var i = 0; i < 36; i++) {
             s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
         }
-        s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
-        s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+        s[14] = "4";
+        s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
         s[8] = s[13] = s[18] = s[23] = "";
         var uuid = s.join("");
         return uuid;
@@ -102,17 +102,14 @@ function Test2() {
                                                 name: "加哨子",
                                                 price: 2,
                                                 id: "6o58uuzsq0ow44w4kc8cowgsk"
-                                            }
-                                        ],
+                                            }],
                                         amount: 2
-                                    }
-                                ],
+                                    }],
                                 amount: 2
                             },
                             inventoryCode: "ddep",
                             amount: 30
-                        }
-                    ],
+                        }],
                     qty: 1
                 },
                 createTime: 1471266782269,
@@ -182,10 +179,10 @@ function Test4() {
         }
     }
     __decorate([
-        index_1.Transaction,
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", Promise)
+        index_1.Transaction, 
+        __metadata('design:type', Function), 
+        __metadata('design:paramtypes', []), 
+        __metadata('design:returntype', Promise)
     ], TransactionCtx.prototype, "TransTest", null);
     let t1 = new TransactionCtx();
     t1.TransTest();
@@ -246,11 +243,5 @@ function Test7() {
         yield ctx.Create(oo);
     });
 }
-// Test1();
-// Test2();
 Test3();
-// Test4();
-// Test5();
-// Test6();
-// Test7(); 
 //# sourceMappingURL=test.js.map

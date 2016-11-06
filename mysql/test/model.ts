@@ -1,4 +1,5 @@
-import {  DataContext, EntityObject, EntityCopier } from "../index";
+import { DataContext, EntityCopier } from "../index";
+import { EntityObject } from "../../entityObject";
 
 export class Employee extends EntityObject<Employee> {
     constructor(args?) {

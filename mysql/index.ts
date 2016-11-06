@@ -1,3 +1,3 @@
-export * from "./dataContext";
-export * from "./entityObject";
+export * from "./dataContextMysql";
+export * from "./entityObjectMysql";
 export * from "./entityCopier";

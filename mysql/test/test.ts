@@ -1,4 +1,4 @@
-import {  DataContext, EntityObject, EntityCopier, Transaction} from "../index";
+import {  DataContext, EntityCopier, Transaction} from "../index";
 import { Order, Employee} from "./model";
 class Guid {
     static GetGuid(): string {

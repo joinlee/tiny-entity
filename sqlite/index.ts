@@ -1,2 +1,2 @@
-export * from './dataContext';
-export * from './entityObject';
+export * from './dataContextSqlite';
+export * from './entityObjectSqlite';

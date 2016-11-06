@@ -1,0 +1,85 @@
+export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
+    constructor(ctx?: IDataContext) { }
+    id: string | number;
+    toString(): string { return ""; }
+    clone(source: any, destination, isDeep: boolean): any { }
+    /**
+     * 查询，最后通过toList方法提交查询。
+     * @param  {(x:T)=>boolean} qFn 查询条件函数
+     * @param  {string[]} paramsKey? 参数名称列表
+     * @param  {any[]} paramsValue? 参数值列表
+     * @returns IQueryObject 查询对象
+     */
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
+    /**
+     * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
+     * @param  {(entityObject:T)=>boolean} qFn 查询条件函数
+     * @param  {string[]} paramsKey? 参数名称列表
+     * @param  {any[]} paramsValue? 参数值列表
+     * @param  {(result:boolean)=>void} queryCallback? 结果回调函数
+     * @returns boolean
+     */
+    Any(qFn: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: boolean) => void) { }
+    /**
+     * 根据查询条件返回第一项结果，存在返回实体对象，不存在返回null
+     * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
+     * @param  {string[]} paramsKey? 参数名称列表
+     * @param  {any[]} paramsValue? 参数值列表
+     * @param  {(result:T)=>void} queryCallback?  结果回调函数
+     * @returns T
+     */
+    First(qFn?: (entityObject: T) => boolean,
+        paramsKey?: string[],
+        paramsValue?: any[],
+        queryCallback?: (result: T) => void): Promise<T> { return null; }
+    /**
+     *  执行查询条件。
+     * @param  {(result:T[])=>void} queryCallback? 结果集回调函数
+     * @returns T[]
+     */
+    ToList(queryCallback?: (result: T[]) => void): Promise<IEntityObject[]> {
+        return null;
+    }
+    /**
+     * 获取查询结果集中的结果条数
+     * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
+     * @param  {string[]} paramsKey? 参数名称列表
+     * @param  {any[]} paramsValue? 参数值列表
+     * @param  {(result:number)=>void} queryCallback? 结果回调函数
+     * @returns number
+     */
+    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void) { }
+    /**
+     * 查询排序
+     * @param  {(x:T)=>void} qFn 查询条件函数
+     * @returns IQueryObject 查询对象
+     */
+    OrderBy(qFn: (x: T) => void): IQueryObject<T> { return this; }
+    /**
+     * 查询排序，倒序
+     * @param  {(x:T)=>void} qFn 查询条件函数
+     * @returns IQueryObject 查询对象
+     */
+    OrderByDesc(qFn: (x: T) => void): IQueryObject<T> { return this; }
+    /**
+     * 设置需要查询的字段
+     * @param  {(x:T)=>void} qFn 查询条件函数
+     * @returns IQueryObject 查询对象
+     */
+    Select(qFn: (x: T) => void): IQueryObject<T> { return this; }
+    /**
+     * 获取的结果条数
+     * @param  {number} count 获取的数目
+     * @returns IQueryObject 查询对象
+     */
+    Take(count: number): IQueryObject<T> { return this; }
+    /**
+     * 跳过的结果条数
+     * @param  {number} count 跳过查询的数目
+     * @returns IQueryObject 查询对象
+     */
+    Skip(count: number): IQueryObject<T> { return this; }
+    Max(qFn: (x: T) => void) { }
+    Min(qFn: (x: T) => void) { }
+    Contains(feild: (x: T) => void, values: any[]) { }
+}

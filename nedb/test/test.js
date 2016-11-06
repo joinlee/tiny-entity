@@ -17,11 +17,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const index_1 = require('../index');
-class User extends index_1.EntityObject {
+const entityObject_1 = require('../../entityObject');
+class User extends entityObject_1.EntityObject {
     toString() { return "User"; }
 }
 exports.User = User;
-class Employee extends index_1.EntityObject {
+class Employee extends entityObject_1.EntityObject {
     toString() { return "Employee"; }
 }
 class TestDemoDataContext extends index_1.DataContext {
@@ -44,8 +45,6 @@ function query() {
             throw new Error(err);
         }
         yield ctx.User.First();
-        // let t = new tt();
-        // await t.xx("123")
     });
 }
 class tt {
@@ -64,7 +63,6 @@ class tt {
             let rr = yield this.ctx.User.First(x => x.id == "3d07e702-d750-46c6-8791-60bc6f76fcc4");
             rr.name = pp;
             yield this.ctx.Update(rr);
-            //await this.ctx.Delete(rr);
             throw "人为抛出异常xx（）方法";
         });
     }
@@ -73,22 +71,20 @@ __decorate([
     index_1.Transaction, 
     __metadata('design:type', Function), 
     __metadata('design:paramtypes', [String]), 
-    __metadata('design:returntype', void 0)
+    __metadata('design:returntype', Promise)
 ], tt.prototype, "xx", null);
-//query();
 function GetGuid() {
     var s = [];
     var hexDigits = "0123456789abcdef";
     for (var i = 0; i < 36; i++) {
         s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
     }
-    s[14] = "4"; // bits 12-15 of the time_hi_and_version field to 0010
-    s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1); // bits 6-7 of the clock_seq_hi_and_reserved to 01
+    s[14] = "4";
+    s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
     s[8] = s[13] = s[18] = s[23] = "";
     var uuid = s.join("");
     return uuid;
 }
-// import {DataSyncAddEventHandler, DataSyncEventListener }  from "../dataSyncEventListener";
 let list = [];
 function CreateTest() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -109,23 +105,12 @@ function CreateTest() {
             u.password = "202cb962ac59075b964b07152d234b70";
             u.id = GetGuid();
         }
-        // let count = await ctx.User.Count();
-        // console.log(count);
     });
 }
-//CreateTest();
 function openDBTest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let ctx = new TestDemoDataContext();
-            // let u = new User();
-            // u.mobile = "15908101316";
-            // u.email = "lp@qq.com";
-            // u.name = "牛魔王1";
-            // u.password = "202cb962ac59075b964b07152d234b70";
-            // u.id = "3d07e702-d750-46c6-8791-60bc6f76fcc4";
-            // let r = await ctx.Create(u);
-            // console.log(r);
             let uu = yield ctx.User.First(x => x.email == "lp@qq.com");
             console.log(uu);
         }
