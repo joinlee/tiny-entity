@@ -12,7 +12,7 @@
 /@tiny/nedb/*.map
 /@tiny/nedb/db
 /nedb/node_modules
-/sqlite/node_modules
+node_modules
 /sqlite/*.db
 /nedb/db
 /indexedDB/.vscode
