@@ -8,9 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const mysql = require("mysql");
-const entityCopier_1 = require("./entityCopier");
+const entityCopier_1 = require("../entityCopier");
 var mysqlPool;
-class DataContext {
+class MysqlDataContext {
     constructor(option) {
         this.transactionOn = false;
         this.querySentence = [];
@@ -188,26 +188,5 @@ class DataContext {
         return fmt;
     }
 }
-exports.DataContext = DataContext;
-function Transaction(target, propertyName, descriptor) {
-    let method = descriptor.value;
-    descriptor.value = function () {
-        return __awaiter(this, arguments, void 0, function* () {
-            console.log("BeginTranscation propertyName:", propertyName);
-            this.ctx.BeginTranscation();
-            let result;
-            try {
-                result = yield method.apply(this, arguments);
-                this.ctx.Commit();
-                return result;
-            }
-            catch (error) {
-                console.log("RollBack propertyName:", propertyName);
-                yield this.ctx.RollBack();
-                throw error;
-            }
-        });
-    };
-}
-exports.Transaction = Transaction;
+exports.MysqlDataContext = MysqlDataContext;
 //# sourceMappingURL=dataContextMysql.js.map

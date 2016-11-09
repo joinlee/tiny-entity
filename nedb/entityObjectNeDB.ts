@@ -1,5 +1,6 @@
 import { QueryMode } from './dataContextNeDB';
 import { EntityObject } from "../entityObject";
+import { IQueryObject, IDataContext, IEntityObject } from '../tinyDB';
 
 export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
     id: string;

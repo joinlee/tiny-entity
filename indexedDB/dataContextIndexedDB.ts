@@ -1,6 +1,7 @@
 import { LocalIndexedDB, DBTranscationModel } from "./indexedDB";
+import { IDataContext, ITableDefine, IEntityObject } from '../tinyDB';
 
-export class DataContext implements IDataContext {
+export class IndexedDBDataContext implements IDataContext {
     private db: LocalIndexedDB;
     private tableDefines;
     private dbName: string;

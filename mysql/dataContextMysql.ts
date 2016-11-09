@@ -1,9 +1,10 @@
 import mysql = require("mysql");
-import { EntityCopier} from "./entityCopier";
+import { EntityCopier } from "../entityCopier";
+import { IDataContext, IEntityObject } from '../tinyDB';
 
 var mysqlPool;
 
-export class DataContext implements IDataContext {
+export class MysqlDataContext implements IDataContext {
     private transactionOn: boolean = false;
     private querySentence: string[] = [];
     private mysqlPool;
@@ -202,24 +203,6 @@ export class DataContext implements IDataContext {
 interface PropertyFormatResult {
     PropertyNameList: string[];
     PropertyValueList: any[];
-}
-
-export function Transaction(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
-    let method = descriptor.value;
-    descriptor.value = async function () {
-        console.log("BeginTranscation propertyName:", propertyName);
-        this.ctx.BeginTranscation();
-        let result;
-        try {
-            result = await method.apply(this, arguments);
-            this.ctx.Commit();
-            return result;
-        } catch (error) {
-            console.log("RollBack propertyName:", propertyName);
-            await this.ctx.RollBack();
-            throw error;
-        }
-    }
 }
 
 

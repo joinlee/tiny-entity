@@ -1,4 +1,4 @@
-import { DataContext, Transaction } from '../index';
+import { NeDBDataContext } from '../index';
 import { EntityObject } from '../../entityObject';
 
 export class User extends EntityObject<User> {
@@ -26,7 +26,7 @@ class Employee extends EntityObject<Employee> {
     toString(): string { return "Employee"; }
 }
 
-class TestDemoDataContext extends DataContext {
+class TestDemoDataContext extends NeDBDataContext {
     private _user: User;
     private _employee: Employee;
 
@@ -101,6 +101,7 @@ function GetGuid(): string {
 }
 
 // import {DataSyncAddEventHandler, DataSyncEventListener }  from "../dataSyncEventListener";
+import { Transaction } from '../../transcation';
 
 let list = [];
 async function CreateTest() {

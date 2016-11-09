@@ -1,5 +1,7 @@
-import {  DataContext, EntityCopier, Transaction} from "../index";
-import { Order, Employee} from "./model";
+import { MysqlDataContext } from "../index";
+import { Order, Employee } from "./model";
+import { EntityCopier } from "../../entityCopier";
+import { Transaction } from '../../transcation';
 class Guid {
     static GetGuid(): string {
         var s = [];
@@ -16,7 +18,7 @@ class Guid {
     }
 }
 
-class TestDataContext extends DataContext {
+class TestDataContext extends MysqlDataContext {
     private employee: Employee;
     private order: Order;
     constructor() {

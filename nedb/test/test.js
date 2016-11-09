@@ -25,7 +25,7 @@ exports.User = User;
 class Employee extends entityObject_1.EntityObject {
     toString() { return "Employee"; }
 }
-class TestDemoDataContext extends index_1.DataContext {
+class TestDemoDataContext extends index_1.NeDBDataContext {
     constructor() {
         super({ FilePath: './db/', DBName: "clerkDB.db", IsMulitTabel: true });
         this._user = new User(this);
@@ -68,7 +68,7 @@ class tt {
     }
 }
 __decorate([
-    index_1.Transaction, 
+    transcation_1.Transaction, 
     __metadata('design:type', Function), 
     __metadata('design:paramtypes', [String]), 
     __metadata('design:returntype', Promise)
@@ -85,6 +85,7 @@ function GetGuid() {
     var uuid = s.join("");
     return uuid;
 }
+const transcation_1 = require('../../transcation');
 let list = [];
 function CreateTest() {
     return __awaiter(this, void 0, void 0, function* () {

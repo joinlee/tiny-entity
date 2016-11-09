@@ -7,7 +7,7 @@ class Account extends entityObject_1.EntityObject {
 class Employee extends entityObject_1.EntityObject {
     toString() { return "Employee"; }
 }
-class TestDemoDataContext extends index_1.DataContext {
+class TestDemoDataContext extends index_1.SqliteDataContext {
     constructor() {
         super("./clerkDB.db");
         this._account = new Account(this);

@@ -1,3 +1,4 @@
+import { ITableDefine } from '../tinyDB';
 export class LocalIndexedDB {
     private _dbFactory: IDBFactory;
     private _db: IDBDatabase;

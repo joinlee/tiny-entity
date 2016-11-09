@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const Datastore = require("nedb");
 const dbOpenWorker_1 = require("./dbOpenWorker");
 var dbconfig;
-class DataContext {
+class NeDBDataContext {
     constructor(config) {
         this.transList = [];
         this.dbLinks = [];
@@ -307,7 +307,7 @@ class DataContext {
         }
     }
 }
-exports.DataContext = DataContext;
+exports.NeDBDataContext = NeDBDataContext;
 let timer;
 (function (QueryMode) {
     QueryMode[QueryMode["Normal"] = 0] = "Normal";
@@ -316,25 +316,4 @@ let timer;
     QueryMode[QueryMode["Contains"] = 3] = "Contains";
 })(exports.QueryMode || (exports.QueryMode = {}));
 var QueryMode = exports.QueryMode;
-function Transaction(target, propertyName, descriptor) {
-    let method = descriptor.value;
-    descriptor.value = function () {
-        return __awaiter(this, arguments, void 0, function* () {
-            console.log("BeginTranscation propertyName:", propertyName);
-            this.ctx.BeginTranscation();
-            let result;
-            try {
-                result = yield method.apply(this, arguments);
-                this.ctx.Commit();
-                return result;
-            }
-            catch (error) {
-                console.log("RollBack propertyName:", propertyName);
-                yield this.ctx.RollBack();
-                throw error;
-            }
-        });
-    };
-}
-exports.Transaction = Transaction;
 //# sourceMappingURL=dataContextNeDB.js.map

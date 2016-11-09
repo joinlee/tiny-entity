@@ -18,6 +18,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 const index_1 = require("../index");
 const model_1 = require("./model");
+const entityCopier_1 = require("../../entityCopier");
+const transcation_1 = require('../../transcation');
 class Guid {
     static GetGuid() {
         var s = [];
@@ -32,7 +34,7 @@ class Guid {
         return uuid;
     }
 }
-class TestDataContext extends index_1.DataContext {
+class TestDataContext extends index_1.MysqlDataContext {
     constructor() {
         super({
             connectionLimit: 50,
@@ -61,7 +63,7 @@ function Test1() {
             emp.employeeNumber = "0001";
             emp.userId = Guid.GetGuid();
             emp.iid = "12312312321";
-            let e = index_1.EntityCopier.Copy(emp, new model_1.Employee());
+            let e = entityCopier_1.EntityCopier.Copy(emp, new model_1.Employee());
             console.log(e);
             yield ctx.Create(e);
             console.log("success");
@@ -133,7 +135,7 @@ function Test2() {
                 terminalName: "wexin",
                 sourceid: "mpj/msite/wx-fast"
             };
-            let order = index_1.EntityCopier.Copy(od, new model_1.Order());
+            let order = entityCopier_1.EntityCopier.Copy(od, new model_1.Order());
             console.log(order);
             let r = yield ctx.Create(order);
         }
@@ -172,14 +174,14 @@ function Test4() {
                 emp.employeeNumber = "0001";
                 emp.userId = Guid.GetGuid();
                 emp.iid = "12312312321";
-                let e = index_1.EntityCopier.Copy(emp, new model_1.Employee());
+                let e = entityCopier_1.EntityCopier.Copy(emp, new model_1.Employee());
                 yield this.ctx.Create(e);
                 throw "trnascation error!!!";
             });
         }
     }
     __decorate([
-        index_1.Transaction, 
+        transcation_1.Transaction, 
         __metadata('design:type', Function), 
         __metadata('design:paramtypes', []), 
         __metadata('design:returntype', Promise)
@@ -238,7 +240,7 @@ function Test7() {
             "payState": "paid",
             "closeTime": 1471859447038
         };
-        let oo = index_1.EntityCopier.Copy(o, new model_1.Order());
+        let oo = entityCopier_1.EntityCopier.Copy(o, new model_1.Order());
         console.log(oo);
         yield ctx.Create(oo);
     });

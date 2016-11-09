@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const entityCopier_1 = require("./entityCopier");
+const entityCopier_1 = require("../entityCopier");
 const entityObject_1 = require('../entityObject');
 class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {

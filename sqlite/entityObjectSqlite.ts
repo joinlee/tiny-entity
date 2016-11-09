@@ -1,15 +1,16 @@
-import { DataContext } from './dataContextSqlite';
+import { SqliteDataContext } from './dataContextSqlite';
 import { EntityObject } from '../entityObject';
+import { IEntityObject, IQueryObject } from '../tinyDB';
 /**
  * EntityObject
  */
 class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
     id: string;
     toString(): string { return ""; }
-    private ctx: DataContext;
+    private ctx: SqliteDataContext;
     private sqlTemp = [];
     private queryParam: QueryParams = new Object() as QueryParams;
-    constructor(ctx?: DataContext) {
+    constructor(ctx?: SqliteDataContext) {
         super(ctx);
         this.ctx = ctx;
     }

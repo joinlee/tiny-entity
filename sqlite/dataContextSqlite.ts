@@ -1,6 +1,7 @@
+import { IEntityObject, IDataContext } from '../tinyDB';
 import sqlite = require("sqlite-sync");
 
-export class DataContext implements IDataContext {
+export class SqliteDataContext implements IDataContext {
     private dbName: string = "js/Test.db3";
     private transactionOn: boolean = false;
     private querySentence: string[] = [];

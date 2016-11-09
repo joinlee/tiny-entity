@@ -18,7 +18,7 @@ class EntityObject {
     Skip(count) { return this; }
     Max(qFn) { }
     Min(qFn) { }
-    Contains(feild, values) { }
+    Contains(feild, values) { return null; }
 }
 exports.EntityObject = EntityObject;
 //# sourceMappingURL=entityObject.js.map

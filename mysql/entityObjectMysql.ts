@@ -1,5 +1,6 @@
-import { EntityCopier } from "./entityCopier";
+import { EntityCopier } from "../entityCopier";
 import { EntityObject } from '../entityObject';
+import { IDataContext, IEntityObject, IQueryObject } from '../tinyDB';
 
 /**
  * EntityObject

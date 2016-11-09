@@ -1,8 +1,9 @@
+import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
     constructor(ctx?: IDataContext) { }
     id: string | number;
     toString(): string { return ""; }
-    clone(source: any, destination, isDeep: boolean): any { }
+    clone(source: any, destination, isDeep?: boolean): any { }
     /**
      * 查询，最后通过toList方法提交查询。
      * @param  {(x:T)=>boolean} qFn 查询条件函数
@@ -37,7 +38,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(result:T[])=>void} queryCallback? 结果集回调函数
      * @returns T[]
      */
-    ToList(queryCallback?: (result: T[]) => void): Promise<IEntityObject[]> {
+    ToList(queryCallback?: (result: T[]) => void): Promise<T[]> {
         return null;
     }
     /**
@@ -81,5 +82,5 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
     Skip(count: number): IQueryObject<T> { return this; }
     Max(qFn: (x: T) => void) { }
     Min(qFn: (x: T) => void) { }
-    Contains(feild: (x: T) => void, values: any[]) { }
+    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T> { return null; }
 }

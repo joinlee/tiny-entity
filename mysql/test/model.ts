@@ -1,4 +1,4 @@
-import { DataContext, EntityCopier } from "../index";
+import { MysqlDataContext } from "../index";
 import { EntityObject } from "../../entityObject";
 
 export class Employee extends EntityObject<Employee> {

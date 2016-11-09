@@ -4,5 +4,4 @@ function __export(m) {
 }
 __export(require("./dataContextMysql"));
 __export(require("./entityObjectMysql"));
-__export(require("./entityCopier"));
 //# sourceMappingURL=index.js.map

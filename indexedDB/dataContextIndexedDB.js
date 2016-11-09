@@ -1,6 +1,6 @@
 "use strict";
 const indexedDB_1 = require("./indexedDB");
-class DataContext {
+class IndexedDBDataContext {
     constructor(dbName, dbVersion, tableDefines) {
         this.dbVersion = 12;
         this._qScratchpad = [];
@@ -217,7 +217,7 @@ class DataContext {
     Query(...args) { }
     ;
 }
-exports.DataContext = DataContext;
+exports.IndexedDBDataContext = IndexedDBDataContext;
 (function (QueryActionType) {
     QueryActionType[QueryActionType["Insert"] = 0] = "Insert";
     QueryActionType[QueryActionType["Update"] = 1] = "Update";

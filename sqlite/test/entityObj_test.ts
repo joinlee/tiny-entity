@@ -1,4 +1,4 @@
-import { DataContext } from '../index';
+import { SqliteDataContext } from '../index';
 import { EntityObject } from '../../entityObject';
 import { Assert } from './assert';
 
@@ -20,7 +20,7 @@ class Employee extends EntityObject<Employee> {
     toString(): string { return "Employee"; }
 }
 
-class TestDemoDataContext extends DataContext {
+class TestDemoDataContext extends SqliteDataContext {
     private _account: Account;
     private _employee: Employee;
 

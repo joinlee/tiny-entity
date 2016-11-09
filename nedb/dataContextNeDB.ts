@@ -1,8 +1,9 @@
 import Datastore = require("nedb");
 import { DBOpenWorker, OpenWorkerManager } from "./dbOpenWorker";
+import { IEntityObject, IDataContext } from '../tinyDB';
 var dbconfig;
 
-export class DataContext implements IDataContext {
+export class NeDBDataContext implements IDataContext {
     private nedb: Datastore;
     private config: ContextConfig;
     private transOn: boolean;
@@ -18,7 +19,7 @@ export class DataContext implements IDataContext {
 
 
     async Create(obj: IEntityObject, stillOpen?: boolean): Promise<Object> {
-        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
+        if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
         let promise = new Promise((resolve, reject) => {
             this.createInner(obj, stillOpen).then((r) => {
@@ -49,7 +50,7 @@ export class DataContext implements IDataContext {
     }
 
     async UpdateRange(list: [IEntityObject], stillOpen?: boolean) {
-        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
+        if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         let entityList = [];
         return new Promise((resolve, reject) => {
             try {
@@ -71,7 +72,7 @@ export class DataContext implements IDataContext {
     }
 
     async Update(obj: IEntityObject, stillOpen?: boolean) {
-        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
+        if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
         let entity;
         if (this.transOn) {
@@ -115,7 +116,7 @@ export class DataContext implements IDataContext {
     }
 
     async Delete(obj: IEntityObject, stillOpen?: boolean): Promise<boolean> {
-        if(stillOpen == undefined || stillOpen == null) stillOpen = true;
+        if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         let entity;
         if (this.transOn) {
             entity = await this.getEntity(obj.toString(), obj.id, stillOpen);
@@ -158,8 +159,8 @@ export class DataContext implements IDataContext {
             this.transOn = false;
         };
     }
-    async Query(qFn: [((p) => Boolean)], tableName: string, queryMode?: QueryMode , orderByFn?, inqObj?): Promise<any> {
-        if(queryMode == undefined || queryMode == null) queryMode = QueryMode.Normal
+    async Query(qFn: [((p) => Boolean)], tableName: string, queryMode?: QueryMode, orderByFn?, inqObj?): Promise<any> {
+        if (queryMode == undefined || queryMode == null) queryMode = QueryMode.Normal
         let db = await this.Open(tableName);
         let promise = new Promise((resolve, reject) => {
             let queryFn = {};
@@ -320,23 +321,4 @@ interface ContextConfig {
 interface TransQuery {
     key: string;
     entity: IEntityObject;
-}
-
-export function Transaction(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
-    let method = descriptor.value;
-    descriptor.value = async function () {
-        console.log("BeginTranscation propertyName:", propertyName);
-        this.ctx.BeginTranscation();
-        let result;
-        try {
-            result = await method.apply(this, arguments);
-            this.ctx.Commit();
-            return result;
-        } catch (error) {
-            console.log("RollBack propertyName:", propertyName);
-            await this.ctx.RollBack();
-
-            throw error;
-        }
-    }
 }

@@ -1,15 +1,16 @@
 import { QueryActionType } from './DataContextIndexedDB';
 import { EntityObject } from "../entityObject";
-import { DataContext } from './dataContextIndexedDB';
+import { IndexedDBDataContext } from './dataContextIndexedDB';
+import { IEntityObject, IDataContext, IQueryObject } from '../tinyDB';
 
 export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject<T> {
     id: string;
 
-    private ctx: DataContext
+    private ctx: IndexedDBDataContext
     constructor(ctx?: IDataContext) {
         super(ctx);
         if (ctx) {
-            this.ctx = ctx as DataContext;
+            this.ctx = ctx as IndexedDBDataContext;
         }
     }
     toString(): string { return ""; }

@@ -1,6 +1,6 @@
 "use strict";
 const sqlite = require("sqlite-sync");
-class DataContext {
+class SqliteDataContext {
     constructor(dbName) {
         this.dbName = "js/Test.db3";
         this.transactionOn = false;
@@ -117,7 +117,7 @@ class DataContext {
         return fmt;
     }
 }
-exports.DataContext = DataContext;
+exports.SqliteDataContext = SqliteDataContext;
 function Transaction(target, propertyName, descriptor) {
     let method = descriptor.value;
 }

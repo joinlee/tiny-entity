@@ -3,7 +3,7 @@
  * ITableDefine 数据表的结构定义
  * 
 */
-interface ITableDefine {
+export interface ITableDefine {
     /**
      * 表名称
      */
@@ -40,7 +40,7 @@ interface ITableDefine {
  *   }
  *]
 */
-interface ITableIndexDefine {
+export interface ITableIndexDefine {
     /**
      * 索引名称
      */
@@ -118,7 +118,7 @@ interface IIndexedDBDriver {
 /**
  * 实体对象接口定义
 */
-interface IEntityObject {
+export interface IEntityObject {
     id: string | number;
     /**
      * 返回实体名称
@@ -130,7 +130,7 @@ interface IEntityObject {
 /**
  * 查询对象接口定义
 */
-interface IQueryObject<T> {
+export interface IQueryObject<T> {
     /**
      * 查询，最后通过toList方法提交查询。
      * @param  {(x:T)=>boolean} qFn 查询条件函数
@@ -207,13 +207,12 @@ interface IQueryObject<T> {
     Skip(count: number): IQueryObject<T>;
     Max(qFn: (x: T) => void);
     Min(qFn: (x: T) => void);
-    Contains(feild: (x: T) => void, values: any[]);
-
+    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
 }
 
 interface DBTranscationModel { }
 
-interface IDataContext {
+export interface IDataContext {
     Create(obj: IEntityObject);
     Update(obj: IEntityObject);
     Delete(obj: IEntityObject);
