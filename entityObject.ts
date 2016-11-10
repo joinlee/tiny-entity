@@ -1,7 +1,7 @@
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
     constructor(ctx?: IDataContext) { }
-    id: string | number;
+    id: string;
     toString(): string { return ""; }
     clone(source: any, destination, isDeep?: boolean): any { }
     /**
