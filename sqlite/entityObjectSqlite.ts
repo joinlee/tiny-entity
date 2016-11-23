@@ -143,7 +143,7 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
 
         return qFnS;
     }
-    clone(source: any, destination: T, isDeep: boolean = false): T {
+    clone(source: any, destination: T,  isDeep?: boolean): T {
         if (!source) return null;
         for (var key in source) {
             if (typeof (key) != "function") {
