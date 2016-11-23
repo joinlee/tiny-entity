@@ -1,7 +1,6 @@
 "use strict";
 class EntityObject {
-    constructor(ctx) {
-    }
+    constructor(ctx) { }
     toString() { return ""; }
     clone(source, destination, isDeep) { }
     Where(qFn, paramsKey, paramsValue) { return this; }

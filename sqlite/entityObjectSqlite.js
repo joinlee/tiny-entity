@@ -1,5 +1,5 @@
 "use strict";
-const entityObject_1 = require('../entityObject');
+const entityObject_1 = require("../entityObject");
 class EntityObjectSqlite extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
@@ -122,7 +122,7 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
         }
         return qFnS;
     }
-    clone(source, destination, isDeep = false) {
+    clone(source, destination, isDeep) {
         if (!source)
             return null;
         for (var key in source) {

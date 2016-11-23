@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const dataContextNeDB_1 = require('./dataContextNeDB');
+const dataContextNeDB_1 = require("./dataContextNeDB");
 const entityObject_1 = require("../entityObject");
 class EntityObjectNeDB extends entityObject_1.EntityObject {
     constructor(ctx) {

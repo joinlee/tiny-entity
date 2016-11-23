@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const entityCopier_1 = require("../entityCopier");
-const entityObject_1 = require('../entityObject');
+const entityObject_1 = require("../entityObject");
 class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);

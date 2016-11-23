@@ -16,8 +16,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const index_1 = require('../index');
-const entityObject_1 = require('../../entityObject');
+const index_1 = require("../index");
+const entityObject_1 = require("../../entityObject");
 class User extends entityObject_1.EntityObject {
     toString() { return "User"; }
 }
@@ -68,10 +68,10 @@ class tt {
     }
 }
 __decorate([
-    transcation_1.Transaction, 
-    __metadata('design:type', Function), 
-    __metadata('design:paramtypes', [String]), 
-    __metadata('design:returntype', Promise)
+    transcation_1.Transaction,
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
 ], tt.prototype, "xx", null);
 function GetGuid() {
     var s = [];
@@ -85,7 +85,7 @@ function GetGuid() {
     var uuid = s.join("");
     return uuid;
 }
-const transcation_1 = require('../../transcation');
+const transcation_1 = require("../../transcation");
 let list = [];
 function CreateTest() {
     return __awaiter(this, void 0, void 0, function* () {
