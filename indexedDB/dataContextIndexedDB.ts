@@ -258,7 +258,7 @@ export class IndexedDBDataContext implements IDataContext {
         return this.db.GetTransaction(tbNames, dbMode);
     }
 
-    private Clone(source: any, destination: any, isDeep: boolean = false): Object {
+    private Clone(source: any, destination: any, isDeep?: boolean): Object {
         if (!source) return null;
         for (var key in source) {
             if (typeof (key) != "function") {

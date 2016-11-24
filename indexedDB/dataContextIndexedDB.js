@@ -194,7 +194,7 @@ class IndexedDBDataContext {
         });
         return this.db.GetTransaction(tbNames, dbMode);
     }
-    Clone(source, destination, isDeep = false) {
+    Clone(source, destination, isDeep) {
         if (!source)
             return null;
         for (var key in source) {
