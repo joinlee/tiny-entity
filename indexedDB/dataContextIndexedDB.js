@@ -138,7 +138,18 @@ class IndexedDBDataContext {
                     });
                 }
                 else if (ii.QueryAction == QueryActionType.SelectCount) {
-                    store.count();
+                    let countResult = 0;
+                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                        if (cursor) {
+                            if (ii.QueryFunction(cursor.value)) {
+                                countResult++;
+                                cursor.continue();
+                            }
+                        }
+                        else {
+                            queryCallback && queryCallback(countResult);
+                        }
+                    });
                 }
                 else if (ii.QueryAction == QueryActionType.SelectFirst) {
                     this.db.GetIndexCursor(store.index("id"), (cursor) => {

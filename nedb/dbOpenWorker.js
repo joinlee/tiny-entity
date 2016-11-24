@@ -48,6 +48,6 @@ class OpenWorkerManager {
         process.nextTick(task.BeginTask.bind(task));
     }
 }
-exports.OpenWorkerManager = OpenWorkerManager;
 OpenWorkerManager.Current = new OpenWorkerManager();
+exports.OpenWorkerManager = OpenWorkerManager;
 //# sourceMappingURL=dbOpenWorker.js.map

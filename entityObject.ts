@@ -3,7 +3,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
     constructor(ctx?: IDataContext) { }
     id: string;
     toString(): string { return ""; }
-    
+
     /**
       * 克隆复制对象
      * 
@@ -31,7 +31,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(result:boolean)=>void} queryCallback? 结果回调函数
      * @returns boolean
      */
-    Any(qFn: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: boolean) => void) { }
+    Any(qFn: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: boolean) => void): Promise<boolean> { return null; }
     /**
      * 根据查询条件返回第一项结果，存在返回实体对象，不存在返回null
      * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
@@ -60,7 +60,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(result:number)=>void} queryCallback? 结果回调函数
      * @returns number
      */
-    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void) { }
+    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> { return null; }
     /**
      * 查询排序
      * @param  {(x:T)=>void} qFn 查询条件函数
@@ -91,7 +91,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @returns IQueryObject 查询对象
      */
     Skip(count: number): IQueryObject<T> { return this; }
-    Max(qFn: (x: T) => void) { }
-    Min(qFn: (x: T) => void) { }
+    Max(qFn: (x: T) => void): Promise<number> { return null; }
+    Min(qFn: (x: T) => void): Promise<number> { return null; }
     Contains(feild: (x: T) => void, values: any[]): IQueryObject<T> { return null; }
 }

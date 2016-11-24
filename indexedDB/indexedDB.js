@@ -73,8 +73,8 @@ class DBTranscationModel {
         return this._value;
     }
 }
-exports.DBTranscationModel = DBTranscationModel;
 DBTranscationModel.ReadOnly = new DBTranscationModel("只读", "readonly");
 DBTranscationModel.Readwrite = new DBTranscationModel("读写", "readwrite");
 DBTranscationModel.Versionchange = new DBTranscationModel("版本变更", "versionchange");
+exports.DBTranscationModel = DBTranscationModel;
 //# sourceMappingURL=indexedDB.js.map

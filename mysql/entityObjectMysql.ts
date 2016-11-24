@@ -24,14 +24,16 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.queryParam.SelectFileds = fileds.split("AND");
         return this;
     }
-    Any(qFn: (entityObject: T) => boolean,
+    async Any(qFn: (entityObject: T) => boolean,
         paramsKey?: string[],
         paramsValue?: any[],
-        queryCallback?: (result: boolean) => void): boolean {
-        let result = this.Count(qFn, paramsKey, paramsValue, (queryCallback as any));
-        return result > 0;
+        queryCallback?: (result: boolean) => void): Promise<boolean> {
+        let result = await this.Count(qFn, paramsKey, paramsValue, (queryCallback as any));
+        return new Promise<boolean>((resolve, reject) => {
+            resolve(result > 0);
+        });
     }
-    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): number {
+    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
         let sql = "";
         if (qFn) {
             sql = "SELECT COUNT(id) FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
@@ -45,7 +47,9 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         let r = this.ctx.Query(sql);
         let result = r ? r[0]["COUNT(id)"] : 0;
 
-        return result;
+        return new Promise<number>((resolve, reject) => {
+            resolve(result);
+        });
     }
     Contains(feild: (x: T) => void, values: any[]) {
         let filed = this.formateCode(feild);
@@ -121,11 +125,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             return this.cloneList(row);
         else return [];
     }
-    Max(qFn: (x: T) => void) {
-
+    Max(qFn: (x: T) => void): Promise<number> {
+        return null;
     }
-    Min(qFn: (x: T) => void) {
-
+    Min(qFn: (x: T) => void): Promise<number> {
+        return null;
     }
     private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
         let qFnS = qFn.toString();

@@ -19,7 +19,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const index_1 = require("../index");
 const model_1 = require("./model");
 const entityCopier_1 = require("../../entityCopier");
-const transcation_1 = require("../../transcation");
+const transcation_1 = require('../../transcation');
 class Guid {
     static GetGuid() {
         var s = [];
@@ -104,17 +104,14 @@ function Test2() {
                                                 name: "加哨子",
                                                 price: 2,
                                                 id: "6o58uuzsq0ow44w4kc8cowgsk"
-                                            }
-                                        ],
+                                            }],
                                         amount: 2
-                                    }
-                                ],
+                                    }],
                                 amount: 2
                             },
                             inventoryCode: "ddep",
                             amount: 30
-                        }
-                    ],
+                        }],
                     qty: 1
                 },
                 createTime: 1471266782269,
@@ -184,10 +181,10 @@ function Test4() {
         }
     }
     __decorate([
-        transcation_1.Transaction,
-        __metadata("design:type", Function),
-        __metadata("design:paramtypes", []),
-        __metadata("design:returntype", Promise)
+        transcation_1.Transaction, 
+        __metadata('design:type', Function), 
+        __metadata('design:paramtypes', []), 
+        __metadata('design:returntype', Promise)
     ], TransactionCtx.prototype, "TransTest", null);
     let t1 = new TransactionCtx();
     t1.TransTest();

@@ -27,16 +27,21 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
             });
         });
     }
-    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void) {
-
+    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
+        return new Promise((resolve, reject) => {
+            this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.SelectCount, qFn);
+            this.ctx.OnSubmit(r => {
+                resolve(r);
+            });
+        });
     }
     OrderBy(qFn: (x: T) => void): IQueryObject<T> { return this; }
     OrderByDesc(qFn: (x: T) => void): IQueryObject<T> { return this; }
     Select(qFn: (x: T) => void): IQueryObject<T> { return this; }
     Take(count: number): IQueryObject<T> { return this; }
     Skip(count: number): IQueryObject<T> { return this; }
-    Max(qFn: (x: T) => void) { return null; }
-    Min(qFn: (x: T) => void) { return null; }
+    Max(qFn: (x: T) => void): Promise<number> { return null; }
+    Min(qFn: (x: T) => void): Promise<number> { return null; }
     First(qFn?: (entityObject: T) => boolean,
         paramsKey?: string[],
         paramsValue?: any[],
@@ -56,20 +61,8 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
         });
     }
 
-    clone(source: any, destination: T, isDeep: boolean = false): T {
+    clone(source: any, destination: T, isDeep?: boolean): T {
         if (!source) return null;
-        // for (var key in source) {
-        //     if (typeof (key) != "function") {
-        //         if (isDeep) { 
-
-        //         }
-        //         else {
-        //             if (typeof (key) != "object") {
-        //                 destination[key] = source[key];
-        //             }
-        //         }
-        //     }
-        // }
 
         destination = JSON.parse(JSON.stringify(source));
 
@@ -80,6 +73,14 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
         destination.toString = this.toString;
         return destination;
     }
+    /**
+     * Obsolete 过时的方法，后期的版本中不再提供次方法。
+     * 
+     * @param {any[]} list
+     * @returns {T[]}
+     * 
+     * @memberOf EntityObjectIndexedDB
+     */
     cloneList(list: any[]): T[] {
         let r: T[] = [];
         list.forEach(x => {

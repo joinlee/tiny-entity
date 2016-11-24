@@ -25,14 +25,14 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
         this.queryParam.SelectFileds = filed.split("AND");
         return this;
     }
-    Any(qFn: (entityObject: T) => boolean,
+    async Any(qFn: (entityObject: T) => boolean,
         paramsKey?: string[],
         paramsValue?: any[],
-        queryCallback?: (result: boolean) => void): boolean {
-        let result = this.Count(qFn, paramsKey, paramsValue, (queryCallback as any));
+        queryCallback?: (result: boolean) => void): Promise<boolean> {
+        let result = await this.Count(qFn, paramsKey, paramsValue, (queryCallback as any));
         return result > 0;
     }
-    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): number {
+    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
         let sql = "";
         if (qFn) {
             sql = "SELECT COUNT(id) FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
@@ -46,7 +46,9 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
         let r = this.ctx.Query(sql);
         let result = r ? r[0]["COUNT(id)"] : 0;
 
-        return result;
+        return new Promise((resolve, reject) => {
+            resolve(result);
+        });
     }
     First(qFn?: (entityObject: T) => boolean,
         paramsKey?: string[],
@@ -103,10 +105,10 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
         })
     }
     Max(qFn: (x: T) => void) {
-
+        return null;
     }
     Min(qFn: (x: T) => void) {
-
+        return null;
     }
     private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
         let qFnS = qFn.toString();
@@ -143,7 +145,7 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
 
         return qFnS;
     }
-    clone(source: any, destination: T,  isDeep?: boolean): T {
+    clone(source: any, destination: T, isDeep?: boolean): T {
         if (!source) return null;
         for (var key in source) {
             if (typeof (key) != "function") {

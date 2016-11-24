@@ -147,7 +147,7 @@ export interface IQueryObject<T> {
      * @param  {(result:boolean)=>void} queryCallback? 结果回调函数
      * @returns boolean
      */
-    Any(qFn: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: boolean) => void);
+    Any(qFn: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: boolean) => void): Promise<boolean>;
     /**
      * 根据查询条件返回第一项结果，存在返回实体对象，不存在返回null
      * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
@@ -159,13 +159,13 @@ export interface IQueryObject<T> {
     First(qFn?: (entityObject: T) => boolean,
         paramsKey?: string[],
         paramsValue?: any[],
-        queryCallback?: (result: T) => void);
+        queryCallback?: (result: T) => void): Promise<T>;
     /**
      *  执行查询条件。
      * @param  {(result:T[])=>void} queryCallback? 结果集回调函数
      * @returns T[]
      */
-    ToList(queryCallback?: (result: T[]) => void);
+    ToList(queryCallback?: (result: T[]) => void): Promise<T[]>;
     /**
      * 获取查询结果集中的结果条数
      * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
@@ -174,7 +174,7 @@ export interface IQueryObject<T> {
      * @param  {(result:number)=>void} queryCallback? 结果回调函数
      * @returns number
      */
-    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void);
+    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number>;
     /**
      * 查询排序
      * @param  {(x:T)=>void} qFn 查询条件函数
@@ -205,8 +205,8 @@ export interface IQueryObject<T> {
      * @returns IQueryObject 查询对象
      */
     Skip(count: number): IQueryObject<T>;
-    Max(qFn: (x: T) => void);
-    Min(qFn: (x: T) => void);
+    Max(qFn: (x: T) => void): Promise<number>;
+    Min(qFn: (x: T) => void): Promise<number>;
     Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
 }
 

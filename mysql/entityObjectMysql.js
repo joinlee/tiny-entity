@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const entityCopier_1 = require("../entityCopier");
-const entityObject_1 = require("../entityObject");
+const entityObject_1 = require('../entityObject');
 class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
@@ -27,8 +27,12 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return this;
     }
     Any(qFn, paramsKey, paramsValue, queryCallback) {
-        let result = this.Count(qFn, paramsKey, paramsValue, queryCallback);
-        return result > 0;
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.Count(qFn, paramsKey, paramsValue, queryCallback);
+            return new Promise((resolve, reject) => {
+                resolve(result > 0);
+            });
+        });
     }
     Count(qFn, paramsKey, paramsValue, queryCallback) {
         let sql = "";
@@ -41,7 +45,9 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         sql = this.addQueryStence(sql) + ";";
         let r = this.ctx.Query(sql);
         let result = r ? r[0]["COUNT(id)"] : 0;
-        return result;
+        return new Promise((resolve, reject) => {
+            resolve(result);
+        });
     }
     Contains(feild, values) {
         let filed = this.formateCode(feild);
@@ -118,8 +124,10 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         });
     }
     Max(qFn) {
+        return null;
     }
     Min(qFn) {
+        return null;
     }
     formateCode(qFn, paramsKey, paramsValue) {
         let qFnS = qFn.toString();
