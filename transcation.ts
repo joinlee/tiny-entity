@@ -1,3 +1,11 @@
+/**
+ * 
+ * 
+ * @export
+ * @param {*} target
+ * @param {string} propertyName
+ * @param {TypedPropertyDescriptor<Function>} descriptor
+ */
 export function Transaction(target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) {
     let method = descriptor.value;
     descriptor.value = async function () {
