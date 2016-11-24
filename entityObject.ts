@@ -3,7 +3,18 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
     constructor(ctx?: IDataContext) { }
     id: string;
     toString(): string { return ""; }
-    clone(source: any, destination, isDeep?: boolean): any { }
+    
+    /**
+      * 克隆复制对象
+     * 
+     * @param {*} source 目标对象
+     * @param {any} destination 目的对象
+     * @param {boolean} [isDeep]
+     * @returns {T}
+     * 
+     * @memberOf EntityObject
+     */
+    clone(source: any, destination, isDeep?: boolean): T { return null; }
     /**
      * 查询，最后通过toList方法提交查询。
      * @param  {(x:T)=>boolean} qFn 查询条件函数

@@ -2,7 +2,7 @@
 class EntityObject {
     constructor(ctx) { }
     toString() { return ""; }
-    clone(source, destination, isDeep) { }
+    clone(source, destination, isDeep) { return null; }
     Where(qFn, paramsKey, paramsValue) { return this; }
     Any(qFn, paramsKey, paramsValue, queryCallback) { }
     First(qFn, paramsKey, paramsValue, queryCallback) { return null; }
