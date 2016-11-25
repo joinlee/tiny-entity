@@ -17,3 +17,5 @@ node_modules
 /nedb/db
 /indexedDB/.vscode
 /mysql/node_modules
+/sqlite/*.js
+/sqlite/*.map
