@@ -1,7 +1,8 @@
 import { NeDBDataContext } from '../index';
-import { EntityObject } from '../../entityObject';
+import { Transaction } from "../../transcation";
+import { EntityObjectNeDB } from "../entityObjectNeDB";
 
-export class User extends EntityObject<User> {
+export class User extends EntityObjectNeDB<User> {
     account: string;
     mobile: string;
     email: string;
@@ -14,7 +15,7 @@ export class User extends EntityObject<User> {
     toString(): string { return "User"; }
 }
 
-class Employee extends EntityObject<Employee> {
+class Employee extends EntityObjectNeDB<Employee> {
     account: string;
     employeeNumber: string;
     joinTime: Date;
@@ -60,9 +61,9 @@ async function query() {
 }
 
 class tt {
-    ctx = new TestDemoDataContext();
+    ctx: TestDemoDataContext;
 
-    @Transaction
+    @Transaction(new TestDemoDataContext())
     async xx(pp: string) {
         let u = new User();
         u.mobile = "15908101316";
@@ -71,20 +72,22 @@ class tt {
         u.password = "202cb962ac59075b964b07152d234b70";
         u.id = "3d07e702-d750-46c6-8791-60bc6f76fcc4";
 
-        await this.ctx.Create(u);
-
+        let r = await this.ctx.Create(u);
         let rr = await this.ctx.User.First(x => x.id == "3d07e702-d750-46c6-8791-60bc6f76fcc4");
         rr.name = pp;
         await this.ctx.Update(rr);
 
         //await this.ctx.Delete(rr);
 
-        throw "人为抛出异常xx（）方法";
+        // throw "人为抛出异常xx（）方法";
     }
 }
 
+let t = new tt();
+t.xx("cvfff");
 
-//query();
+
+// query();
 
 function GetGuid(): string {
     var s = [];
@@ -101,7 +104,6 @@ function GetGuid(): string {
 }
 
 // import {DataSyncAddEventHandler, DataSyncEventListener }  from "../dataSyncEventListener";
-import { Transaction } from '../../transcation';
 
 let list = [];
 async function CreateTest() {
@@ -164,7 +166,9 @@ async function openDBTest() {
 
 
 
-openDBTest();
+// openDBTest();
+
+
 
 
 

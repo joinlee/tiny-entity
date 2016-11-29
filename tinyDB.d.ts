@@ -219,4 +219,5 @@ export interface IDataContext {
     BeginTranscation();
     Commit();
     Query(...args);
+    RollBack();
 }

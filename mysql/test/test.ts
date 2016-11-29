@@ -148,7 +148,7 @@ async function Test3() {
 function Test4() {
     class TransactionCtx {
         ctx = new TestDataContext();
-        @Transaction
+        @Transaction(new TestDataContext())
         async TransTest() {
             let r1 = await this.ctx.Employee.First(x => x.id == "1777d5935e8941d885a83659141cf9cd");
             await this.ctx.Delete(r1);

@@ -101,6 +101,8 @@ export class SqliteDataContext implements IDataContext {
         return sqlite.run(sqlStr);
     }
 
+    RollBack(){}
+
     private onSubmit(sqlStr: string): any {
         return sqlite.run(sqlStr);
     }
