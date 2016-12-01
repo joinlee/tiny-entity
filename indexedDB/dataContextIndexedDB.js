@@ -10,32 +10,44 @@ class IndexedDBDataContext {
         this.db = new indexedDB_1.LocalIndexedDB();
         this.db.Open(this.dbName, this.dbVersion, this.tableDefines);
     }
-    Create(obj, callback) {
-        this.GetMaxIdentity(obj.toString()).onsuccess = (evt) => {
+    Create(obj) {
+        return new Promise((resolve, reject) => {
+            this.GetMaxIdentity(obj.toString()).onsuccess = (evt) => {
+                this.ExcuteQuery([{
+                        QueryAction: QueryActionType.Insert,
+                        TableName: obj.toString(),
+                        EntityObject: obj,
+                        ResultCallback: (r) => {
+                            resolve(r);
+                        }
+                    }]);
+            };
+        });
+    }
+    Delete(obj) {
+        return new Promise((resolve, reject) => {
             this.ExcuteQuery([{
-                    QueryAction: QueryActionType.Insert,
+                    QueryAction: QueryActionType.Delete,
                     TableName: obj.toString(),
                     EntityObject: obj,
-                    ResultCallback: callback
+                    ResultCallback: (r) => {
+                        resolve(r);
+                    }
                 }]);
-        };
-    }
-    Delete(obj, callback) {
-        this.ExcuteQuery([{
-                QueryAction: QueryActionType.Delete,
-                TableName: obj.toString(),
-                EntityObject: obj,
-                ResultCallback: callback
-            }]);
+        });
     }
     ;
-    Update(obj, callback) {
-        this.ExcuteQuery([{
-                QueryAction: QueryActionType.Update,
-                TableName: obj.toString(),
-                EntityObject: obj,
-                ResultCallback: callback
-            }]);
+    Update(obj) {
+        return new Promise((resolve, reject) => {
+            this.ExcuteQuery([{
+                    QueryAction: QueryActionType.Update,
+                    TableName: obj.toString(),
+                    EntityObject: obj,
+                    ResultCallback: (r) => {
+                        resolve(r);
+                    }
+                }]);
+        });
     }
     AddQueryScratchpad(tbName, qActionType, queryFunction) {
         this._qScratchpad.push({

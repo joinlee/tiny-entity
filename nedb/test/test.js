@@ -70,8 +70,6 @@ __decorate([
     __metadata('design:paramtypes', [String]), 
     __metadata('design:returntype', Promise)
 ], tt.prototype, "xx", null);
-let t = new tt();
-t.xx("cvfff");
 function GetGuid() {
     var s = [];
     var hexDigits = "0123456789abcdef";
@@ -118,4 +116,18 @@ function openDBTest() {
         }
     });
 }
+function updateAndCreateDataTest() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let ctx = new TestDemoDataContext();
+        let u = new User();
+        u.mobile = "15908101316";
+        u.email = "lp@qq.com";
+        u.name = "牛魔王";
+        u.password = "202cb962ac59075b964b07152d234b70";
+        u.id = "11111111111111111111111";
+        let t = yield ctx.Update(u);
+        console.log("test finsh");
+    });
+}
+updateAndCreateDataTest();
 //# sourceMappingURL=test.js.map

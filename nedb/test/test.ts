@@ -83,8 +83,8 @@ class tt {
     }
 }
 
-let t = new tt();
-t.xx("cvfff");
+// let t = new tt();
+// t.xx("cvfff");
 
 
 // query();
@@ -168,6 +168,24 @@ async function openDBTest() {
 
 // openDBTest();
 
+
+async function updateAndCreateDataTest() {
+    let ctx = new TestDemoDataContext();
+
+    let u = new User();
+    u.mobile = "15908101316";
+    u.email = "lp@qq.com";
+    u.name = "牛魔王";
+    u.password = "202cb962ac59075b964b07152d234b70";
+    u.id = "11111111111111111111111";
+
+    let t = await ctx.Update(u);
+
+    console.log("test finsh");
+}
+
+
+updateAndCreateDataTest();
 
 
 

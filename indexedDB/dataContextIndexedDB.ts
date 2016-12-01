@@ -23,17 +23,22 @@ export class IndexedDBDataContext implements IDataContext {
      * 添加实体对象到数据库
      * @param  {DataEngine.IEntityObject} obj 实体对象
      * @param  {any} callback? 回调函数
-     * @returns void
+     * @returns 
      */
-    Create(obj: IEntityObject, callback?): void {
-        this.GetMaxIdentity(obj.toString()).onsuccess = (evt: any) => {
-            this.ExcuteQuery([{
-                QueryAction: QueryActionType.Insert,
-                TableName: obj.toString(),
-                EntityObject: obj,
-                ResultCallback: callback
-            }])
-        }
+    Create(obj: IEntityObject) {
+        return new Promise<any>((resolve, reject) => {
+            this.GetMaxIdentity(obj.toString()).onsuccess = (evt: any) => {
+                this.ExcuteQuery([{
+                    QueryAction: QueryActionType.Insert,
+                    TableName: obj.toString(),
+                    EntityObject: obj,
+                    ResultCallback: (r) => {
+                        resolve(r);
+                    }
+                }])
+            }
+        });
+
     }
 
     /**
@@ -41,29 +46,41 @@ export class IndexedDBDataContext implements IDataContext {
      * 调用 Delete 删除后需要 调用 OnSubmit 函数提交并执行删除操作
      * @param  {DataEngine.IEntityObject} obj 实体兑现
      * @param  {any} callback? 回调函数
-     * @returns void
+     * @returns 
      */
-    Delete(obj: IEntityObject, callback?): void {
-        this.ExcuteQuery([{
-            QueryAction: QueryActionType.Delete,
-            TableName: obj.toString(),
-            EntityObject: obj,
-            ResultCallback: callback
-        }])
+    Delete(obj: IEntityObject) {
+        return new Promise<any>((resolve, reject) => {
+            this.ExcuteQuery([{
+                QueryAction: QueryActionType.Delete,
+                TableName: obj.toString(),
+                EntityObject: obj,
+                ResultCallback: (r) => {
+                    resolve(r);
+                }
+            }])
+        });
+
     };
+
     /**
+     * 
      * 更新数据
      * @param  {DataEngine.IEntityObject} obj 实体对象
      * @param  {any} callback? 回调函数
-     * @returns void
+     * 
+     * @memberOf IndexedDBDataContext
      */
-    Update(obj: IEntityObject, callback?): void {
-        this.ExcuteQuery([{
-            QueryAction: QueryActionType.Update,
-            TableName: obj.toString(),
-            EntityObject: obj,
-            ResultCallback: callback
-        }])
+    Update(obj: IEntityObject) {
+        return new Promise<any>((resolve, reject) => {
+            this.ExcuteQuery([{
+                QueryAction: QueryActionType.Update,
+                TableName: obj.toString(),
+                EntityObject: obj,
+                ResultCallback: (r) => {
+                    resolve(r);
+                }
+            }])
+        });
     }
     /**
      * 添加查询到查询暂存器
