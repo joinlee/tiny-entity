@@ -94,7 +94,7 @@ export class NeDBDataContext implements IDataContext {
         let db = await this.Open(obj.toString(), stillOpen);
 
         return new Promise((resolve, reject) => {
-            db.update({ id: obj.id }, obj, { upsert: false }, (err, numReplaced: number, upsert) => {
+            db.update({ id: obj.id }, obj, { upsert: true }, (err, numReplaced: number, upsert) => {
                 if (err) {
                     reject(err);
                 }

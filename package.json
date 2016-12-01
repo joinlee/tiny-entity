@@ -1,6 +1,6 @@
 {
   "name": "tiny-entity",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "一款简单易用的ORM框架，支持NEDB IndexedDB 以及Sqlite等常用的数据库",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/joinlee/tiny-entity#readme",
   "dependencies": {
-    "nedb": "^1.8.0",
+    "nedb": "*",
     "sqlite-sync": "^0.3.5",
     "mysql": "^2.11.1"
   }

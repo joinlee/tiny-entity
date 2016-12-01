@@ -104,7 +104,7 @@ class NeDBDataContext {
             delete obj._id;
             let db = yield this.Open(obj.toString(), stillOpen);
             return new Promise((resolve, reject) => {
-                db.update({ id: obj.id }, obj, { upsert: false }, (err, numReplaced, upsert) => {
+                db.update({ id: obj.id }, obj, { upsert: true }, (err, numReplaced, upsert) => {
                     if (err) {
                         reject(err);
                     }
