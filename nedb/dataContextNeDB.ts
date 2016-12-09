@@ -221,23 +221,6 @@ export class NeDBDataContext implements IDataContext {
     private dbLinks = [];
 
     private Open(tbName: string, stillOpen?): Promise<Datastore> {
-        // if (this.config.IsMulitTabel) {
-        //     // let _db = this.dbLinks.find(x => x.key == tbName);
-        //     // if (_db) return _db.db;
-        //     // else {
-        //     //     let db: Datastore = new Datastore({ filename: this.config.FilePath + tbName + ".db", autoload: true });
-        //     //     db.loadDatabase((err) => {
-        //     //         console.log("数据库打开失败：" + tbName, err);
-        //     //     });
-        //     //     this.dbLinks.push({ key: tbName, db: db });
-        //     //     return db;
-        //     // }
-
-        // }
-        // else {
-        //     return this.nedb;
-        // }
-
         return new Promise((resolve, reject) => {
             let db = new Datastore({
                 filename: this.config.FilePath + tbName + ".db",

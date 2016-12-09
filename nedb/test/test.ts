@@ -175,7 +175,7 @@ async function updateAndCreateDataTest() {
     let u = new User();
     u.mobile = "15908101316";
     u.email = "lp@qq.com";
-    u.name = "牛魔王22222222";
+    u.name = "牛魔王2222222";
     u.password = "202cb962ac59075b964b07152d234b70";
     u.id = "22222222222222222222222";
 
