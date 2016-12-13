@@ -1,6 +1,5 @@
-import { QueryActionType } from './DataContextIndexedDB';
+import { QueryActionType,IndexedDBDataContext } from './dataContextIndexedDB';
 import { EntityObject } from "../entityObject";
-import { IndexedDBDataContext } from './dataContextIndexedDB';
 import { IEntityObject, IDataContext, IQueryObject } from '../tinyDB';
 
 export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject<T> {

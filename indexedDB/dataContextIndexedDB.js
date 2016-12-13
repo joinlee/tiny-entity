@@ -243,6 +243,7 @@ class IndexedDBDataContext {
     ;
 }
 exports.IndexedDBDataContext = IndexedDBDataContext;
+var QueryActionType;
 (function (QueryActionType) {
     QueryActionType[QueryActionType["Insert"] = 0] = "Insert";
     QueryActionType[QueryActionType["Update"] = 1] = "Update";
@@ -252,6 +253,5 @@ exports.IndexedDBDataContext = IndexedDBDataContext;
     QueryActionType[QueryActionType["SelectCount"] = 5] = "SelectCount";
     QueryActionType[QueryActionType["SelectFirst"] = 6] = "SelectFirst";
     QueryActionType[QueryActionType["SelectAll"] = 7] = "SelectAll";
-})(exports.QueryActionType || (exports.QueryActionType = {}));
-var QueryActionType = exports.QueryActionType;
+})(QueryActionType = exports.QueryActionType || (exports.QueryActionType = {}));
 //# sourceMappingURL=dataContextIndexedDB.js.map

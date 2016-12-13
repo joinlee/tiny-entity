@@ -1,5 +1,5 @@
 "use strict";
-const DataContextIndexedDB_1 = require('./DataContextIndexedDB');
+const dataContextIndexedDB_1 = require("./dataContextIndexedDB");
 const entityObject_1 = require("../entityObject");
 class EntityObjectIndexedDB extends entityObject_1.EntityObject {
     constructor(ctx) {
@@ -10,12 +10,12 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        this.ctx.AddQueryScratchpad(this.toString(), DataContextIndexedDB_1.QueryActionType.Select, qFn);
+        this.ctx.AddQueryScratchpad(this.toString(), dataContextIndexedDB_1.QueryActionType.Select, qFn);
         return this;
     }
     Any(qFn, paramsKey, paramsValue, queryCallback) {
         return new Promise((resolve, reject) => {
-            this.ctx.AddQueryScratchpad(this.toString(), DataContextIndexedDB_1.QueryActionType.SelectAny, qFn);
+            this.ctx.AddQueryScratchpad(this.toString(), dataContextIndexedDB_1.QueryActionType.SelectAny, qFn);
             this.ctx.OnSubmit(r => {
                 resolve(r);
             });
@@ -23,7 +23,7 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
     }
     Count(qFn, paramsKey, paramsValue, queryCallback) {
         return new Promise((resolve, reject) => {
-            this.ctx.AddQueryScratchpad(this.toString(), DataContextIndexedDB_1.QueryActionType.SelectCount, qFn);
+            this.ctx.AddQueryScratchpad(this.toString(), dataContextIndexedDB_1.QueryActionType.SelectCount, qFn);
             this.ctx.OnSubmit(r => {
                 resolve(r);
             });
@@ -38,7 +38,7 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
     Min(qFn) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) {
         return new Promise((resolve, reject) => {
-            this.ctx.AddQueryScratchpad(this.toString(), DataContextIndexedDB_1.QueryActionType.SelectFirst, qFn);
+            this.ctx.AddQueryScratchpad(this.toString(), dataContextIndexedDB_1.QueryActionType.SelectFirst, qFn);
             this.ctx.OnSubmit(x => {
                 resolve(this.clone(x, this));
             });

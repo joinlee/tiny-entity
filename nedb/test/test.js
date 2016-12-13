@@ -11,12 +11,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const index_1 = require('../index');
+const index_1 = require("../index");
 const transcation_1 = require("../../transcation");
 const entityObjectNeDB_1 = require("../entityObjectNeDB");
 class User extends entityObjectNeDB_1.EntityObjectNeDB {
@@ -65,10 +65,10 @@ class tt {
     }
 }
 __decorate([
-    transcation_1.Transaction(new TestDemoDataContext()), 
-    __metadata('design:type', Function), 
-    __metadata('design:paramtypes', [String]), 
-    __metadata('design:returntype', Promise)
+    transcation_1.Transaction(new TestDemoDataContext()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
 ], tt.prototype, "xx", null);
 function GetGuid() {
     var s = [];
