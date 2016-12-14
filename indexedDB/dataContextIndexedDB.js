@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 const indexedDB_1 = require("./indexedDB");
 class IndexedDBDataContext {
     constructor(dbName, dbVersion, tableDefines) {
@@ -7,21 +15,18 @@ class IndexedDBDataContext {
         this.dbName = dbName;
         this.dbVersion = dbVersion;
         this.tableDefines = tableDefines;
-        this.db = new indexedDB_1.LocalIndexedDB();
-        this.db.Open(this.dbName, this.dbVersion, this.tableDefines);
+        this.db = new indexedDB_1.LocalIndexedDB(this.dbName, this.dbVersion, this.tableDefines);
     }
     Create(obj) {
         return new Promise((resolve, reject) => {
-            this.GetMaxIdentity(obj.toString()).onsuccess = (evt) => {
-                this.ExcuteQuery([{
-                        QueryAction: QueryActionType.Insert,
-                        TableName: obj.toString(),
-                        EntityObject: obj,
-                        ResultCallback: (r) => {
-                            resolve(r);
-                        }
-                    }]);
-            };
+            this.ExcuteQuery([{
+                    QueryAction: QueryActionType.Insert,
+                    TableName: obj.toString(),
+                    EntityObject: obj,
+                    ResultCallback: (r) => {
+                        resolve(r);
+                    }
+                }]);
         });
     }
     Delete(obj) {
@@ -37,6 +42,21 @@ class IndexedDBDataContext {
         });
     }
     ;
+    Clear(tbName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let trans = yield this.db.GetTransaction([tbName], indexedDB_1.DBTranscationModel.Readwrite);
+            let store = this.db.GetStore(tbName, trans);
+            return new Promise((resolve, reject) => {
+                let request = store.clear();
+                request.onsuccess = (evt) => {
+                    resolve(evt);
+                };
+                request.onerror = (evt) => {
+                    reject(evt);
+                };
+            });
+        });
+    }
     Update(obj) {
         return new Promise((resolve, reject) => {
             this.ExcuteQuery([{
@@ -63,129 +83,131 @@ class IndexedDBDataContext {
         return this.ExcuteQuery(this._qScratchpad, queryCallback);
     }
     ExcuteQuery(qs, queryCallback) {
-        if (qs && qs.length > 0) {
-            let trans = this.GetTranscationByQuery(qs);
-            qs.forEach(ii => {
-                let dbRequest, store = trans.objectStore(ii.TableName);
-                if (ii.QueryAction == QueryActionType.Insert) {
-                    let o = JSON.parse(JSON.stringify(ii.EntityObject));
-                    dbRequest = store.add(o);
-                    dbRequest.onsuccess = (evt) => {
-                        let rId = evt.target.result;
-                        ii.ResultCallback && ii.ResultCallback(rId);
-                    };
-                }
-                else if (ii.QueryAction == QueryActionType.Update) {
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            if (cursor.value.id == ii.EntityObject.id) {
-                                let p = ii.EntityObject;
-                                delete p.ctx;
-                                let o = this.copy(cursor.value, p);
-                                cursor.update(o);
+        return __awaiter(this, void 0, void 0, function* () {
+            if (qs && qs.length > 0) {
+                let trans = yield this.GetTranscationByQuery(qs);
+                qs.forEach(ii => {
+                    let dbRequest, store = trans.objectStore(ii.TableName);
+                    if (ii.QueryAction == QueryActionType.Insert) {
+                        let o = JSON.parse(JSON.stringify(ii.EntityObject));
+                        dbRequest = store.add(o);
+                        dbRequest.onsuccess = (evt) => {
+                            let rId = evt.target.result;
+                            ii.ResultCallback && ii.ResultCallback(rId);
+                        };
+                    }
+                    else if (ii.QueryAction == QueryActionType.Update) {
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                if (cursor.value.id == ii.EntityObject.id) {
+                                    let p = ii.EntityObject;
+                                    delete p.ctx;
+                                    let o = this.copy(cursor.value, p);
+                                    cursor.update(o);
+                                }
+                                else
+                                    cursor.continue();
                             }
-                            else
-                                cursor.continue();
-                        }
-                        else {
-                            queryCallback && queryCallback(true);
-                        }
-                    });
-                }
-                else if (ii.QueryAction == QueryActionType.Delete) {
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            if (cursor.value.id == ii.EntityObject.id) {
-                                let idbQuest = cursor.delete();
-                                idbQuest.onerror = (evt) => {
-                                    console.log(evt);
-                                };
-                            }
-                            else
-                                cursor.continue();
-                        }
-                        else {
-                            queryCallback && queryCallback(true);
-                        }
-                    });
-                }
-                else if (ii.QueryAction == QueryActionType.Select) {
-                    let resultAssemble = [];
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            if (ii.QueryFunction(cursor.value)) {
-                                resultAssemble.push(cursor.value);
-                            }
-                            cursor.continue();
-                        }
-                        else {
-                            queryCallback && queryCallback(resultAssemble);
-                        }
-                    });
-                }
-                else if (ii.QueryAction == QueryActionType.SelectAll) {
-                    let resultAssemble = [];
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            resultAssemble.push(cursor.value);
-                            cursor.continue();
-                        }
-                        else {
-                            queryCallback && queryCallback(resultAssemble);
-                        }
-                    });
-                }
-                else if (ii.QueryAction == QueryActionType.SelectAny) {
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            if (ii.QueryFunction(cursor.value)) {
+                            else {
                                 queryCallback && queryCallback(true);
                             }
-                            else
-                                cursor.continue();
-                        }
-                        else {
-                            queryCallback && queryCallback(false);
-                        }
-                    });
-                }
-                else if (ii.QueryAction == QueryActionType.SelectCount) {
-                    let countResult = 0;
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            if (ii.QueryFunction(cursor.value)) {
-                                countResult++;
+                        });
+                    }
+                    else if (ii.QueryAction == QueryActionType.Delete) {
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                if (cursor.value.id == ii.EntityObject.id) {
+                                    let idbQuest = cursor.delete();
+                                    idbQuest.onerror = (evt) => {
+                                        console.log(evt);
+                                    };
+                                }
+                                else
+                                    cursor.continue();
+                            }
+                            else {
+                                queryCallback && queryCallback(true);
+                            }
+                        });
+                    }
+                    else if (ii.QueryAction == QueryActionType.Select) {
+                        let resultAssemble = [];
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                if (ii.QueryFunction(cursor.value)) {
+                                    resultAssemble.push(cursor.value);
+                                }
                                 cursor.continue();
                             }
-                        }
-                        else {
-                            queryCallback && queryCallback(countResult);
-                        }
-                    });
-                }
-                else if (ii.QueryAction == QueryActionType.SelectFirst) {
-                    this.db.GetIndexCursor(store.index("id"), (cursor) => {
-                        if (cursor) {
-                            let r = cursor.value;
-                            if (ii.QueryFunction(r))
-                                queryCallback && queryCallback(r);
-                            else
+                            else {
+                                queryCallback && queryCallback(resultAssemble);
+                            }
+                        });
+                    }
+                    else if (ii.QueryAction == QueryActionType.SelectAll) {
+                        let resultAssemble = [];
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                resultAssemble.push(cursor.value);
                                 cursor.continue();
-                        }
-                        else
-                            queryCallback && queryCallback(null);
-                    });
-                }
-            });
-            this._qScratchpad = [];
-            trans.oncomplete = () => {
+                            }
+                            else {
+                                queryCallback && queryCallback(resultAssemble);
+                            }
+                        });
+                    }
+                    else if (ii.QueryAction == QueryActionType.SelectAny) {
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                if (ii.QueryFunction(cursor.value)) {
+                                    queryCallback && queryCallback(true);
+                                }
+                                else
+                                    cursor.continue();
+                            }
+                            else {
+                                queryCallback && queryCallback(false);
+                            }
+                        });
+                    }
+                    else if (ii.QueryAction == QueryActionType.SelectCount) {
+                        let countResult = 0;
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                if (ii.QueryFunction(cursor.value)) {
+                                    countResult++;
+                                    cursor.continue();
+                                }
+                            }
+                            else {
+                                queryCallback && queryCallback(countResult);
+                            }
+                        });
+                    }
+                    else if (ii.QueryAction == QueryActionType.SelectFirst) {
+                        this.db.GetIndexCursor(store.index("id"), (cursor) => {
+                            if (cursor) {
+                                let r = cursor.value;
+                                if (ii.QueryFunction(r))
+                                    queryCallback && queryCallback(r);
+                                else
+                                    cursor.continue();
+                            }
+                            else
+                                queryCallback && queryCallback(null);
+                        });
+                    }
+                });
                 this._qScratchpad = [];
-            };
-            trans.onerror = (evt) => {
-                this._qScratchpad = [];
-                console.error("trans.onerror", evt);
-            };
-        }
+                trans.oncomplete = () => {
+                    this._qScratchpad = [];
+                };
+                trans.onerror = (evt) => {
+                    this._qScratchpad = [];
+                    console.error("trans.onerror", evt);
+                };
+            }
+        });
     }
     copy(s, d) {
         for (let key in d) {
@@ -199,9 +221,17 @@ class IndexedDBDataContext {
         return s;
     }
     GetMaxIdentity(tbName) {
-        let dbMode = indexedDB_1.DBTranscationModel.ReadOnly;
-        let store = this.db.GetStore(tbName, this.db.GetTransaction([tbName], dbMode));
-        return store.count();
+        return __awaiter(this, void 0, void 0, function* () {
+            let dbMode = indexedDB_1.DBTranscationModel.ReadOnly;
+            let trans = yield this.db.GetTransaction([tbName], dbMode);
+            let store = this.db.GetStore(tbName, trans);
+            let request = store.count();
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    resolve(request.result);
+                };
+            });
+        });
     }
     GetTranscationByQuery(qs) {
         let dbMode = indexedDB_1.DBTranscationModel.ReadOnly;

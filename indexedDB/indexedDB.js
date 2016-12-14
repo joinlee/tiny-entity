@@ -1,17 +1,25 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments)).next());
+    });
+};
 class LocalIndexedDB {
-    constructor() {
+    constructor(dbName, dbVersion, tbsObj) {
         this._dbFactory = window.indexedDB || window.msIndexedDB;
+        this.dbName = dbName;
+        this.dbVersion = dbVersion;
+        this.tbsObj = tbsObj;
     }
-    Open(dbName, dbVersion, tbsObj) {
-        let request = this._dbFactory.open(dbName, dbVersion);
-        request.onerror = (evt) => {
-            throw evt;
-        };
+    Open() {
+        let request = this._dbFactory.open(this.dbName, this.dbVersion);
         request.onupgradeneeded = (evt) => {
             let db = evt.currentTarget.result;
             this._db = db;
-            tbsObj.forEach(item => {
+            this.tbsObj.forEach(item => {
                 if (db.objectStoreNames.contains(item.TableName)) {
                     db.deleteObjectStore(item.TableName);
                 }
@@ -23,12 +31,23 @@ class LocalIndexedDB {
                 }
             });
         };
-        request.onsuccess = (ev) => {
-            this._db = ev.target.result;
-        };
+        return new Promise((resolve, reject) => {
+            request.onsuccess = (ev) => {
+                this._db = ev.target.result;
+                resolve(this._db);
+            };
+            request.onerror = (evt) => {
+                reject(evt);
+            };
+        });
     }
     GetTransaction(tbNames, mode) {
-        return (() => { return this._db.transaction(tbNames, mode.Value); })();
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this._db) {
+                this._db = yield this.Open();
+            }
+            return this._db.transaction(tbNames, mode.Value);
+        });
     }
     GetStore(tbName, trans) {
         return trans.objectStore(tbName);

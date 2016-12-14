@@ -1,5 +1,6 @@
 import { LocalIndexedDB, DBTranscationModel } from "./indexedDB";
 import { IDataContext, ITableDefine, IEntityObject } from '../tinyDB';
+import { QueryMode } from '../nedb/dataContextNeDB';
 
 export class IndexedDBDataContext implements IDataContext {
     private db: LocalIndexedDB;
@@ -11,8 +12,7 @@ export class IndexedDBDataContext implements IDataContext {
         this.dbName = dbName;
         this.dbVersion = dbVersion;
         this.tableDefines = tableDefines;
-        this.db = new LocalIndexedDB();
-        this.db.Open(this.dbName, this.dbVersion, this.tableDefines);
+        this.db = new LocalIndexedDB(this.dbName, this.dbVersion, this.tableDefines);
     }
 
     /**
@@ -27,16 +27,14 @@ export class IndexedDBDataContext implements IDataContext {
      */
     Create(obj: IEntityObject) {
         return new Promise<any>((resolve, reject) => {
-            this.GetMaxIdentity(obj.toString()).onsuccess = (evt: any) => {
-                this.ExcuteQuery([{
-                    QueryAction: QueryActionType.Insert,
-                    TableName: obj.toString(),
-                    EntityObject: obj,
-                    ResultCallback: (r) => {
-                        resolve(r);
-                    }
-                }])
-            }
+            this.ExcuteQuery([{
+                QueryAction: QueryActionType.Insert,
+                TableName: obj.toString(),
+                EntityObject: obj,
+                ResultCallback: (r) => {
+                    resolve(r);
+                }
+            }])
         });
 
     }
@@ -59,8 +57,30 @@ export class IndexedDBDataContext implements IDataContext {
                 }
             }])
         });
-
     };
+
+    /**
+     * 清空当前表的所有数据
+     * 
+     * @param {string} tbName
+     * @returns
+     * 
+     * @memberOf IndexedDBDataContext
+     */
+    async Clear(tbName: string) {
+        let trans = await this.db.GetTransaction([tbName], DBTranscationModel.Readwrite);
+
+        let store = this.db.GetStore(tbName, trans);
+        return new Promise((resolve, reject) => {
+            let request = store.clear();
+            request.onsuccess = (evt) => {
+                resolve(evt);
+            }
+            request.onerror = (evt) => {
+                reject(evt);
+            }
+        });
+    }
 
     /**
      * 
@@ -101,7 +121,7 @@ export class IndexedDBDataContext implements IDataContext {
      * @param  {any} queryCallback? 查询结果集回调函数
      * @returns void
      */
-    OnSubmit(queryCallback?, tableName?: string): void {
+    OnSubmit(queryCallback?, tableName?: string) {
         if (this._qScratchpad.length == 0) {
             this.AddQueryScratchpad(tableName, QueryActionType.SelectAll, null);
         }
@@ -113,9 +133,9 @@ export class IndexedDBDataContext implements IDataContext {
      * @param  {any} queryCallback? 查询结果集回调
      * @returns void
      */
-    private ExcuteQuery(qs: IQueryScratchpad[], queryCallback?): void {
+    private async ExcuteQuery(qs: IQueryScratchpad[], queryCallback?) {
         if (qs && qs.length > 0) {
-            let trans = this.GetTranscationByQuery(qs);
+            let trans = await this.GetTranscationByQuery(qs);
 
             qs.forEach(ii => {
                 let dbRequest, store = trans.objectStore(ii.TableName);
@@ -259,10 +279,17 @@ export class IndexedDBDataContext implements IDataContext {
      * @param  {string} tbName 表名称
      * @returns IDBRequest 查询结果
      */
-    private GetMaxIdentity(tbName: string): IDBRequest {
+    private async GetMaxIdentity(tbName: string): Promise<number> {
         let dbMode: DBTranscationModel = DBTranscationModel.ReadOnly;
-        let store = this.db.GetStore(tbName, this.db.GetTransaction([tbName], dbMode));
-        return store.count();
+        let trans = await this.db.GetTransaction([tbName], dbMode);
+        let store = this.db.GetStore(tbName, trans);
+
+        let request = store.count();
+        return new Promise<number>((resolve, reject) => {
+            request.onsuccess = () => {
+                resolve(request.result);
+            }
+        });
     }
 
     /**
@@ -270,7 +297,7 @@ export class IndexedDBDataContext implements IDataContext {
      * @param  {IQueryScratchpad[]} qs 查询暂存器列表
      * @returns IDBTransaction 事务
      */
-    private GetTranscationByQuery(qs: IQueryScratchpad[]): IDBTransaction {
+    private GetTranscationByQuery(qs: IQueryScratchpad[]) {
         let dbMode: DBTranscationModel = DBTranscationModel.ReadOnly;
         let tbNames: string[] = [];
         qs.forEach(ii => {

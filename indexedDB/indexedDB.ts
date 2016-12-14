@@ -3,8 +3,15 @@ export class LocalIndexedDB {
     private _dbFactory: IDBFactory;
     private _db: IDBDatabase;
 
-    constructor() {
+    private dbName: string;
+    private dbVersion: number;
+    private tbsObj: ITableDefine[];
+
+    constructor(dbName: string, dbVersion: number, tbsObj: ITableDefine[]) {
         this._dbFactory = window.indexedDB || (<any>window).msIndexedDB;
+        this.dbName = dbName;
+        this.dbVersion = dbVersion;
+        this.tbsObj = tbsObj;
     }
     /**
      * 打开数据库
@@ -12,11 +19,8 @@ export class LocalIndexedDB {
      * @param  {number} dbVersion
      * @param  {ITableDefine[]} tbsObj
      */
-    Open(dbName: string, dbVersion: number, tbsObj: ITableDefine[]) {
-        let request: IDBOpenDBRequest = this._dbFactory.open(dbName, dbVersion);
-        request.onerror = (evt: any) => {
-            throw evt;
-        }
+    Open() {
+        let request: IDBOpenDBRequest = this._dbFactory.open(this.dbName, this.dbVersion);
         /**
          * when version changed do this function 
          * you can edit the version property call
@@ -26,7 +30,7 @@ export class LocalIndexedDB {
             this._db = db;
 
             //创建表结构和对应的索引
-            tbsObj.forEach(item => {
+            this.tbsObj.forEach(item => {
                 if (db.objectStoreNames.contains(item.TableName)) {
                     db.deleteObjectStore(item.TableName);
                 }
@@ -39,9 +43,16 @@ export class LocalIndexedDB {
                 }
             });
         }
-        request.onsuccess = (ev: any) => {
-            this._db = ev.target.result;
-        }
+
+        return new Promise<IDBDatabase>((resolve, reject) => {
+            request.onsuccess = (ev: any) => {
+                this._db = ev.target.result;
+                resolve(this._db);
+            }
+            request.onerror = (evt: any) => {
+                reject(evt);
+            }
+        })
     }
 
     /**
@@ -50,8 +61,12 @@ export class LocalIndexedDB {
     * @param  {DBTranscationModel} mode
     * @returns IDBTransaction
     */
-    GetTransaction(tbNames: string[], mode: DBTranscationModel): IDBTransaction {
-        return (() => { return this._db.transaction(tbNames, mode.Value); })();
+    async GetTransaction(tbNames: string[], mode: DBTranscationModel): Promise<IDBTransaction> {
+        if (!this._db) {
+            this._db = await this.Open();
+        }
+        return this._db.transaction(tbNames, mode.Value);
+
     }
 
     /**
