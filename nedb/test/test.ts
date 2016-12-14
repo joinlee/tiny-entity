@@ -32,7 +32,7 @@ class TestDemoDataContext extends NeDBDataContext {
     private _employee: Employee;
 
     constructor() {
-        super({ FilePath: './db/', DBName: "clerkDB.db", IsMulitTabel: true });
+        super({ FilePath: './db/', DBName: "clerkDB.db", IsMulitTabel: true, timestampData: true });
         this._user = new User(this);
         this._employee = new Employee(this);
     }
@@ -108,7 +108,8 @@ function GetGuid(): string {
 let list = [];
 async function CreateTest() {
     let ctx = new TestDemoDataContext();
-    for (let index = 0; index < 100; index++) {
+    console.time("CreateTest");
+    for (let index = 0; index < 1000; index++) {
         let u = new User();
         u.mobile = "15908101316";
         u.email = "lp@qq.com";
@@ -116,32 +117,51 @@ async function CreateTest() {
         u.password = "202cb962ac59075b964b07152d234b70";
         u.id = GetGuid();
 
-        //await ctx.Create(u);
+        await ctx.Create(u);
         // list.push({ isop: false, obj: u });
         // DataSyncEventListener.Current.OnAddDataSyncEvent(null, u);
     }
 
-    for (let index = 0; index < 100; index++) {
+    for (let index = 0; index < 1000; index++) {
         let u = new User();
         u.mobile = "15908101316";
         u.email = "lp@qq.com";
-        u.name = "孙悟空" + index;
+        u.name = "牛魔王" + index;
         u.password = "202cb962ac59075b964b07152d234b70";
         u.id = GetGuid();
 
-        //await ctx.Create(u);
+        await ctx.Create(u);
         // list.push({ isop: false, obj: u });
         // DataSyncEventListener.Current.OnAddDataSyncEvent(null, u);
     }
 
+    for (let index = 0; index < 1000; index++) {
+        // let u = new User();
+        // u.mobile = "15908101316";
+        // u.email = "lp@qq.com";
+        // u.name = "孙悟空" + index;
+        // u.password = "202cb962ac59075b964b07152d234b70";
+        // u.id = GetGuid();
 
+        //await ctx.Create(u);
+        // list.push({ isop: false, obj: u });
+        // DataSyncEventListener.Current.OnAddDataSyncEvent(null, u);
 
-    // let count = await ctx.User.Count();
-    // console.log(count);
+        let ee = new Employee();
+        ee.id = GetGuid();
+        ee.account = "孙悟空" + index;
+        ee.employeeNumber = "xxxx" + index;
+        await ctx.Create(ee);
+    }
+
+    console.timeEnd("CreateTest");
+    let count = await ctx.User.Count();
+    let count2 = await ctx.Employee.Count();
+    console.log(count, count2);
 
 }
 
-//CreateTest();
+CreateTest();
 
 async function openDBTest() {
     try {
@@ -184,11 +204,11 @@ async function updateAndCreateDataTest() {
     console.log("test finsh");
 
     let count = await ctx.User.Count();
-    console.log("result count ",count);
+    console.log("result count ", count);
 }
 
 
-updateAndCreateDataTest();
+// updateAndCreateDataTest();
 
 
 

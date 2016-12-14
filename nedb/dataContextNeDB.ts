@@ -2,6 +2,7 @@ import Datastore = require("nedb");
 import { DBOpenWorker, OpenWorkerManager } from "./dbOpenWorker";
 import { IEntityObject, IDataContext } from '../tinyDB';
 var dbconfig;
+import { NeDBPool } from './nedbPool';
 
 export class NeDBDataContext implements IDataContext {
     private nedb: Datastore;
@@ -38,7 +39,8 @@ export class NeDBDataContext implements IDataContext {
         return promise;
     }
     private async createInner(obj: IEntityObject, stillOpen?) {
-        let db = await this.Open(obj.toString(), stillOpen);
+        // let db = await this.Open(obj.toString(), stillOpen);
+        let db = await NeDBPool.Current.GetDBConnection(obj.toString(),this.config);
         return new Promise((resolve, reject) => {
             db.insert(obj, (err, r) => {
                 if (err) reject(err);
@@ -91,7 +93,8 @@ export class NeDBDataContext implements IDataContext {
     }
     private async UpdateInner(obj: IEntityObject, stillOpen?) {
         delete (<any>obj)._id;
-        let db = await this.Open(obj.toString(), stillOpen);
+        // let db = await this.Open(obj.toString(), stillOpen);
+        let db = await NeDBPool.Current.GetDBConnection(obj.toString(),this.config);
 
         return new Promise((resolve, reject) => {
             db.update({ id: obj.id }, obj, { upsert: true }, (err, numReplaced: number, upsert) => {
@@ -106,7 +109,8 @@ export class NeDBDataContext implements IDataContext {
     }
 
     private async getEntity(name, id, stillOpen) {
-        let db = await this.Open(name, stillOpen);
+        // let db = await this.Open(name, stillOpen);
+        let db = await NeDBPool.Current.GetDBConnection(name,this.config);
         return new Promise((resolve, reject) => {
             db.findOne({ id: id }, (err, r) => {
                 if (err) reject(err);
@@ -135,7 +139,8 @@ export class NeDBDataContext implements IDataContext {
         return promise;
     }
     private async deleteInner(obj: IEntityObject, stillOpen?) {
-        let db = await this.Open(obj.toString(), stillOpen);
+        // let db = await this.Open(obj.toString(), stillOpen);
+         let db = await NeDBPool.Current.GetDBConnection(obj.toString(),this.config);
         let promise = new Promise<boolean>((resolve, reject) => {
             db.remove({ id: obj.id }, {}, (err, numRemoved) => {
                 if (err) reject(err);
@@ -161,7 +166,8 @@ export class NeDBDataContext implements IDataContext {
     }
     async Query(qFn: [((p) => Boolean)], tableName: string, queryMode?: QueryMode, orderByFn?, inqObj?): Promise<any> {
         if (queryMode == undefined || queryMode == null) queryMode = QueryMode.Normal
-        let db = await this.Open(tableName);
+        // let db = await this.Open(tableName);
+         let db = await NeDBPool.Current.GetDBConnection(tableName,this.config);
         let promise = new Promise((resolve, reject) => {
             let queryFn = {};
             if (qFn) {
@@ -220,35 +226,34 @@ export class NeDBDataContext implements IDataContext {
 
     private dbLinks = [];
 
-    private Open(tbName: string, stillOpen?): Promise<Datastore> {
-        return new Promise((resolve, reject) => {
-            let db = new Datastore({
-                filename: this.config.FilePath + tbName + ".db",
-                inMemoryOnly: false,
-                autoload: true,
-                onload: (err: any) => {
-                    if (err) {
-                        if (err.errorType == "uniqueViolated") reject(err);
-                        else {
-                            console.log("启动open task:" + tbName);
-                            OpenWorkerManager.Current.Task(new DBOpenWorker(
-                                { path: dbconfig.FilePath + tbName + ".db" }, resolve
-                            ));
-                        }
+    // private Open(tbName: string, stillOpen?): Promise<Datastore> {
+    //     return new Promise((resolve, reject) => {
+    //         let db = new Datastore({
+    //             filename: this.config.FilePath + tbName + ".db",
+    //             inMemoryOnly: false,
+    //             autoload: true,
+    //             onload: (err: any) => {
+    //                 if (err) {
+    //                     if (err.errorType == "uniqueViolated") reject(err);
+    //                     else {
+    //                         console.log("启动open task:" + tbName);
+    //                         OpenWorkerManager.Current.Task(new DBOpenWorker(
+    //                             { path: dbconfig.FilePath + tbName + ".db" }, resolve
+    //                         ));
+    //                     }
+    //                 }
+    //                 else {
+    //                     db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
+    //                         if (err) console.log("添加索引失败：", err);
+    //                     });
+    //                     resolve(db);
+    //                 }
+    //             }
+    //         });
 
-                    }
-                    else {
-                        db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
-                            if (err) console.log("添加索引失败：", err);
-                        });
-                        resolve(db);
-                    }
-                }
-            });
-
-            (<any>db).persistence.setAutocompactionInterval(120 * 60 * 1000);
-        });
-    }
+    //         (<any>db).persistence.setAutocompactionInterval(120 * 60 * 1000);
+    //     });
+    // }
 
     async RollBack() {
         if (this.transOn) {
@@ -296,10 +301,11 @@ export enum QueryMode {
     Contains
 }
 
-interface ContextConfig {
+export interface ContextConfig {
     IsMulitTabel?: boolean;
     FilePath: string;
-    DBName: string
+    DBName: string;
+    timestampData?: boolean;
 }
 interface TransQuery {
     key: string;

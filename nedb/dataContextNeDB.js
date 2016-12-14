@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 const Datastore = require("nedb");
-const dbOpenWorker_1 = require("./dbOpenWorker");
 var dbconfig;
+const nedbPool_1 = require("./nedbPool");
 class NeDBDataContext {
     constructor(config) {
         this.transList = [];
@@ -44,7 +44,7 @@ class NeDBDataContext {
     }
     createInner(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(obj.toString(), stillOpen);
+            let db = yield nedbPool_1.NeDBPool.Current.GetDBConnection(obj.toString(), this.config);
             return new Promise((resolve, reject) => {
                 db.insert(obj, (err, r) => {
                     if (err)
@@ -102,7 +102,7 @@ class NeDBDataContext {
     UpdateInner(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
             delete obj._id;
-            let db = yield this.Open(obj.toString(), stillOpen);
+            let db = yield nedbPool_1.NeDBPool.Current.GetDBConnection(obj.toString(), this.config);
             return new Promise((resolve, reject) => {
                 db.update({ id: obj.id }, obj, { upsert: true }, (err, numReplaced, upsert) => {
                     if (err) {
@@ -117,7 +117,7 @@ class NeDBDataContext {
     }
     getEntity(name, id, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(name, stillOpen);
+            let db = yield nedbPool_1.NeDBPool.Current.GetDBConnection(name, this.config);
             return new Promise((resolve, reject) => {
                 db.findOne({ id: id }, (err, r) => {
                     if (err)
@@ -150,7 +150,7 @@ class NeDBDataContext {
     }
     deleteInner(obj, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = yield this.Open(obj.toString(), stillOpen);
+            let db = yield nedbPool_1.NeDBPool.Current.GetDBConnection(obj.toString(), this.config);
             let promise = new Promise((resolve, reject) => {
                 db.remove({ id: obj.id }, {}, (err, numRemoved) => {
                     if (err)
@@ -178,7 +178,7 @@ class NeDBDataContext {
         return __awaiter(this, void 0, void 0, function* () {
             if (queryMode == undefined || queryMode == null)
                 queryMode = QueryMode.Normal;
-            let db = yield this.Open(tableName);
+            let db = yield nedbPool_1.NeDBPool.Current.GetDBConnection(tableName, this.config);
             let promise = new Promise((resolve, reject) => {
                 let queryFn = {};
                 if (qFn) {
@@ -240,33 +240,6 @@ class NeDBDataContext {
                 }
             });
             return promise;
-        });
-    }
-    Open(tbName, stillOpen) {
-        return new Promise((resolve, reject) => {
-            let db = new Datastore({
-                filename: this.config.FilePath + tbName + ".db",
-                inMemoryOnly: false,
-                autoload: true,
-                onload: (err) => {
-                    if (err) {
-                        if (err.errorType == "uniqueViolated")
-                            reject(err);
-                        else {
-                            console.log("启动open task:" + tbName);
-                            dbOpenWorker_1.OpenWorkerManager.Current.Task(new dbOpenWorker_1.DBOpenWorker({ path: dbconfig.FilePath + tbName + ".db" }, resolve));
-                        }
-                    }
-                    else {
-                        db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
-                            if (err)
-                                console.log("添加索引失败：", err);
-                        });
-                        resolve(db);
-                    }
-                }
-            });
-            db.persistence.setAutocompactionInterval(120 * 60 * 1000);
         });
     }
     RollBack() {

@@ -28,7 +28,7 @@ class Employee extends entityObjectNeDB_1.EntityObjectNeDB {
 }
 class TestDemoDataContext extends index_1.NeDBDataContext {
     constructor() {
-        super({ FilePath: './db/', DBName: "clerkDB.db", IsMulitTabel: true });
+        super({ FilePath: './db/', DBName: "clerkDB.db", IsMulitTabel: true, timestampData: true });
         this._user = new User(this);
         this._employee = new Employee(this);
     }
@@ -86,24 +86,39 @@ let list = [];
 function CreateTest() {
     return __awaiter(this, void 0, void 0, function* () {
         let ctx = new TestDemoDataContext();
-        for (let index = 0; index < 100; index++) {
+        console.time("CreateTest");
+        for (let index = 0; index < 1000; index++) {
             let u = new User();
             u.mobile = "15908101316";
             u.email = "lp@qq.com";
             u.name = "牛魔王" + index;
             u.password = "202cb962ac59075b964b07152d234b70";
             u.id = GetGuid();
+            yield ctx.Create(u);
         }
-        for (let index = 0; index < 100; index++) {
+        for (let index = 0; index < 1000; index++) {
             let u = new User();
             u.mobile = "15908101316";
             u.email = "lp@qq.com";
-            u.name = "孙悟空" + index;
+            u.name = "牛魔王" + index;
             u.password = "202cb962ac59075b964b07152d234b70";
             u.id = GetGuid();
+            yield ctx.Create(u);
         }
+        for (let index = 0; index < 1000; index++) {
+            let ee = new Employee();
+            ee.id = GetGuid();
+            ee.account = "孙悟空" + index;
+            ee.employeeNumber = "xxxx" + index;
+            yield ctx.Create(ee);
+        }
+        console.timeEnd("CreateTest");
+        let count = yield ctx.User.Count();
+        let count2 = yield ctx.Employee.Count();
+        console.log(count, count2);
     });
 }
+CreateTest();
 function openDBTest() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -131,5 +146,4 @@ function updateAndCreateDataTest() {
         console.log("result count ", count);
     });
 }
-updateAndCreateDataTest();
 //# sourceMappingURL=test.js.map
