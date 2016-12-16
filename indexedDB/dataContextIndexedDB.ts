@@ -1,12 +1,11 @@
 import { LocalIndexedDB, DBTranscationModel } from "./indexedDB";
 import { IDataContext, ITableDefine, IEntityObject } from '../tinyDB';
-import { QueryMode } from '../nedb/dataContextNeDB';
 
 export class IndexedDBDataContext implements IDataContext {
     private db: LocalIndexedDB;
     private tableDefines;
     private dbName: string;
-    private dbVersion: number = 12;
+    private dbVersion: number = 0;
 
     constructor(dbName: string, dbVersion: number, tableDefines: ITableDefine[]) {
         this.dbName = dbName;

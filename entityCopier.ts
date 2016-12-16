@@ -12,7 +12,7 @@ export class EntityCopier {
                 d[key] = s[key];
             }
             else if (typeof (s[key]) == "object") {
-                d[key] = JSON.stringify(s[key]);
+                d[<any>key] = JSON.stringify(s[key]);
             }
         }
         return d;

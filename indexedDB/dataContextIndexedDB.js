@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const indexedDB_1 = require("./indexedDB");
 class IndexedDBDataContext {
     constructor(dbName, dbVersion, tableDefines) {
-        this.dbVersion = 12;
+        this.dbVersion = 0;
         this._qScratchpad = [];
         this.dbName = dbName;
         this.dbVersion = dbVersion;
