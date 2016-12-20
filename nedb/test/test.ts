@@ -161,7 +161,7 @@ async function CreateTest() {
 
 }
 
-CreateTest();
+// CreateTest();
 
 async function openDBTest() {
     try {
@@ -195,7 +195,7 @@ async function updateAndCreateDataTest() {
     let u = new User();
     u.mobile = "15908101316";
     u.email = "lp@qq.com";
-    u.name = "牛魔王2222222";
+    u.name = "牛魔王22222";
     u.password = "202cb962ac59075b964b07152d234b70";
     u.id = "22222222222222222222222";
 
@@ -205,10 +205,13 @@ async function updateAndCreateDataTest() {
 
     let count = await ctx.User.Count();
     console.log("result count ", count);
+
+    let f = await ctx.User.First(x => x.id == "22222222222222222222222");
+    console.log(f.name);
 }
 
 
-// updateAndCreateDataTest();
+updateAndCreateDataTest();
 
 
 

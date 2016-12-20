@@ -187,6 +187,8 @@ class NeDBDataContext {
                             try {
                                 let r = true;
                                 for (let i = 0; i < qFn.length; i++) {
+                                    if (qFn[i] == null || qFn[i] == undefined)
+                                        break;
                                     if (!qFn[i](this)) {
                                         r = false;
                                         break;
