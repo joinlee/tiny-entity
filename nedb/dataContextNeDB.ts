@@ -18,7 +18,6 @@ export class NeDBDataContext implements IDataContext {
         }
     }
 
-
     async Create(obj: IEntityObject, stillOpen?: boolean): Promise<Object> {
         if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
