@@ -1,10 +1,12 @@
 "use strict";
-class EntityCopier {
-    static Copy(s, d) {
+var EntityCopier = (function () {
+    function EntityCopier() {
+    }
+    EntityCopier.Copy = function (s, d) {
         delete d.sqlTemp;
         delete d.ctx;
         delete d.queryParam;
-        for (let key in d) {
+        for (var key in d) {
             if (s[key] == undefined || s[key] == null)
                 continue;
             if (typeof (s[key]) != "function")
@@ -17,14 +19,14 @@ class EntityCopier {
             }
         }
         return d;
-    }
-    static Decode(s) {
+    };
+    EntityCopier.Decode = function (s) {
         delete s.sqlTemp;
         delete s.ctx;
         delete s.queryParam;
-        for (let key in s) {
+        for (var key in s) {
             try {
-                let d = JSON.parse(s[key]);
+                var d = JSON.parse(s[key]);
                 if (isNaN(d) || Array.isArray(d)) {
                     s[key] = d;
                 }
@@ -32,7 +34,8 @@ class EntityCopier {
             catch (err) { }
         }
         return s;
-    }
-}
+    };
+    return EntityCopier;
+}());
 exports.EntityCopier = EntityCopier;
 //# sourceMappingURL=entityCopier.js.map

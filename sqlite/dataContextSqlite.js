@@ -1,16 +1,16 @@
 "use strict";
-const sqlite = require("sqlite-sync");
-class SqliteDataContext {
-    constructor(dbName) {
+var sqlite = require("sqlite-sync");
+var SqliteDataContext = (function () {
+    function SqliteDataContext(dbName) {
         this.dbName = "js/Test.db3";
         this.transactionOn = false;
         this.querySentence = [];
         this.dbName = dbName;
         var r = sqlite.connect(this.dbName);
     }
-    Create(obj) {
-        let sqlStr = "INSERT INTO " + obj.toString();
-        let pt = this.propertyFormat(obj);
+    SqliteDataContext.prototype.Create = function (obj) {
+        var sqlStr = "INSERT INTO " + obj.toString();
+        var pt = this.propertyFormat(obj);
         sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
         console.log(sqlStr);
         if (this.transactionOn) {
@@ -19,10 +19,10 @@ class SqliteDataContext {
         else {
             return this.onSubmit(sqlStr);
         }
-    }
-    Update(obj) {
-        let sqlStr = "UPDATE " + obj.toString() + " SET ";
-        let qList = [];
+    };
+    SqliteDataContext.prototype.Update = function (obj) {
+        var sqlStr = "UPDATE " + obj.toString() + " SET ";
+        var qList = [];
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key]) && key != "Id") {
                 if (isNaN(obj[key])) {
@@ -43,42 +43,42 @@ class SqliteDataContext {
         else {
             return this.onSubmit(sqlStr);
         }
-    }
-    Delete(obj) {
-        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id=" + obj.id + ";";
+    };
+    SqliteDataContext.prototype.Delete = function (obj) {
+        var sqlStr = "DELETE FROM " + obj.toString() + " WHERE id=" + obj.id + ";";
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
         else {
             return this.onSubmit(sqlStr);
         }
-    }
-    BeginTranscation() {
+    };
+    SqliteDataContext.prototype.BeginTranscation = function () {
         this.transactionOn = true;
         this.querySentence.push("BEGIN TRANSACTION;");
-    }
-    Commit() {
+    };
+    SqliteDataContext.prototype.Commit = function () {
         if (!this.transactionOn)
             return;
         this.querySentence.push("COMMIT;");
-        let r = sqlite.run(this.querySentence.join(" "));
+        var r = sqlite.run(this.querySentence.join(" "));
         if (r && r.error) {
             sqlite.run("ROLLBACK;");
         }
         this.querySentence = [];
         this.transactionOn = false;
         return r;
-    }
-    Query(sqlStr) {
+    };
+    SqliteDataContext.prototype.Query = function (sqlStr) {
         return sqlite.run(sqlStr);
-    }
-    RollBack() { }
-    onSubmit(sqlStr) {
+    };
+    SqliteDataContext.prototype.RollBack = function () { };
+    SqliteDataContext.prototype.onSubmit = function (sqlStr) {
         return sqlite.run(sqlStr);
-    }
-    propertyFormat(obj) {
-        let propertyNameList = [];
-        let propertyValueList = [];
+    };
+    SqliteDataContext.prototype.propertyFormat = function (obj) {
+        var propertyNameList = [];
+        var propertyValueList = [];
         for (var key in obj) {
             if (this.isNotObjectOrFunction(obj[key])) {
                 propertyNameList.push(key);
@@ -94,14 +94,14 @@ class SqliteDataContext {
             }
         }
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
-    }
-    isNotObjectOrFunction(value) {
+    };
+    SqliteDataContext.prototype.isNotObjectOrFunction = function (value) {
         if (value instanceof Date)
             return true;
         return typeof (value) != "object" && typeof (value) != "function" && value != "undefine" && value != null;
-    }
-    dateFormat(d, fmt) {
-        let o = {
+    };
+    SqliteDataContext.prototype.dateFormat = function (d, fmt) {
+        var o = {
             "M+": d.getMonth() + 1,
             "d+": d.getDate(),
             "H+": d.getHours(),
@@ -116,7 +116,8 @@ class SqliteDataContext {
             if (new RegExp("(" + k + ")").test(fmt))
                 fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
         return fmt;
-    }
-}
+    };
+    return SqliteDataContext;
+}());
 exports.SqliteDataContext = SqliteDataContext;
 //# sourceMappingURL=dataContextSqlite.js.map

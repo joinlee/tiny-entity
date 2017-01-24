@@ -1,53 +1,57 @@
 "use strict";
-const Datastore = require("nedb");
-class DBOpenWorker {
-    constructor(option, callback) {
+var Datastore = require("nedb");
+var DBOpenWorker = (function () {
+    function DBOpenWorker(option, callback) {
         this.interval = 200;
         this.option = option;
         this.callback = callback;
     }
-    BeginTask(interval) {
+    DBOpenWorker.prototype.BeginTask = function (interval) {
         if (interval)
             this.interval = interval;
         this.timer = setInterval(this.OpenDBTask.bind(this), this.interval);
-    }
-    Destory() {
+    };
+    DBOpenWorker.prototype.Destory = function () {
         if (this.timer)
             clearInterval(this.timer);
         if (this.OnDestory)
             this.OnDestory = null;
-    }
-    OpenDBTask() {
+    };
+    DBOpenWorker.prototype.OpenDBTask = function () {
+        var _this = this;
         clearInterval(this.timer);
-        let db = new Datastore(this.option.path);
-        db.loadDatabase(err => {
+        var db = new Datastore(this.option.path);
+        db.loadDatabase(function (err) {
             if (err)
-                this.timer = setInterval(this.OpenDBTask.bind(this), this.interval);
+                _this.timer = setInterval(_this.OpenDBTask.bind(_this), _this.interval);
             else {
-                this.callback(db);
-                this.OnDestory && this.OnDestory();
+                _this.callback(db);
+                _this.OnDestory && _this.OnDestory();
             }
         });
-    }
-}
+    };
+    return DBOpenWorker;
+}());
 exports.DBOpenWorker = DBOpenWorker;
-class OpenWorkerManager {
-    constructor() {
+var OpenWorkerManager = (function () {
+    function OpenWorkerManager() {
         this.taskList = new WeakMap();
     }
-    Task(task) {
-        task.OnDestory = () => {
-            if (this.taskList.has(task.WorkId)) {
+    OpenWorkerManager.prototype.Task = function (task) {
+        var _this = this;
+        task.OnDestory = function () {
+            if (_this.taskList.has(task.WorkId)) {
                 task.Destory();
-                this.taskList.delete(task.WorkId);
+                _this.taskList.delete(task.WorkId);
                 console.log("移除OpenDBWork，WorkId：" + task.WorkId);
             }
         };
         task.WorkId = { key: new Date().getTime() };
         this.taskList.set(task.WorkId, task);
         process.nextTick(task.BeginTask.bind(task));
-    }
-}
+    };
+    return OpenWorkerManager;
+}());
 OpenWorkerManager.Current = new OpenWorkerManager();
 exports.OpenWorkerManager = OpenWorkerManager;
 //# sourceMappingURL=dbOpenWorker.js.map

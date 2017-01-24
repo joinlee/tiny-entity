@@ -1,33 +1,34 @@
 "use strict";
-const dbOpenWorker_1 = require("./dbOpenWorker");
-const Datastore = require("nedb");
-class NeDBPool {
-    constructor() {
+var dbOpenWorker_1 = require("./dbOpenWorker");
+var Datastore = require("nedb");
+var NeDBPool = (function () {
+    function NeDBPool() {
         this.list = [];
     }
-    GetDBConnection(tbName, config) {
-        let db = null;
-        let connStr = config.FilePath + tbName + ".db";
-        let item = this.list.find(x => x.connStr == connStr);
-        return new Promise((resolve, reject) => {
+    NeDBPool.prototype.GetDBConnection = function (tbName, config) {
+        var _this = this;
+        var db = null;
+        var connStr = config.FilePath + tbName + ".db";
+        var item = this.list.find(function (x) { return x.connStr == connStr; });
+        return new Promise(function (resolve, reject) {
             if (item) {
                 resolve(item.db);
             }
             else {
-                this.Open(connStr).then(db => {
-                    this.list.push({ connStr: connStr, db: db });
+                _this.Open(connStr).then(function (db) {
+                    _this.list.push({ connStr: connStr, db: db });
                     resolve(db);
-                }).catch(err => { reject(err); });
+                }).catch(function (err) { reject(err); });
             }
         });
-    }
-    Open(connStr) {
-        return new Promise((resolve, reject) => {
-            let db = new Datastore({
+    };
+    NeDBPool.prototype.Open = function (connStr) {
+        return new Promise(function (resolve, reject) {
+            var db = new Datastore({
                 filename: connStr,
                 inMemoryOnly: false,
                 autoload: true,
-                onload: (err) => {
+                onload: function (err) {
                     if (err) {
                         if (err.errorType == "uniqueViolated")
                             reject(err);
@@ -37,7 +38,7 @@ class NeDBPool {
                         }
                     }
                     else {
-                        db.ensureIndex({ fieldName: 'id', unique: true }, (err) => {
+                        db.ensureIndex({ fieldName: 'id', unique: true }, function (err) {
                             if (err)
                                 console.log("添加索引失败：", err);
                         });
@@ -47,8 +48,9 @@ class NeDBPool {
             });
             db.persistence.setAutocompactionInterval(120 * 60 * 1000);
         });
-    }
-}
+    };
+    return NeDBPool;
+}());
 NeDBPool.Current = new NeDBPool();
 exports.NeDBPool = NeDBPool;
 //# sourceMappingURL=nedbPool.js.map

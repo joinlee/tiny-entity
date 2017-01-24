@@ -1,23 +1,25 @@
 "use strict";
-class EntityObject {
-    constructor(ctx) { }
-    toString() { return ""; }
-    clone(source, destination, isDeep) { return null; }
-    Where(qFn, paramsKey, paramsValue) { return this; }
-    Any(qFn, paramsKey, paramsValue, queryCallback) { return null; }
-    First(qFn, paramsKey, paramsValue, queryCallback) { return null; }
-    ToList(queryCallback) {
-        return null;
+var EntityObject = (function () {
+    function EntityObject(ctx) {
     }
-    Count(qFn, paramsKey, paramsValue, queryCallback) { return null; }
-    OrderBy(qFn) { return this; }
-    OrderByDesc(qFn) { return this; }
-    Select(qFn) { return this; }
-    Take(count) { return this; }
-    Skip(count) { return this; }
-    Max(qFn) { return null; }
-    Min(qFn) { return null; }
-    Contains(feild, values) { return null; }
-}
+    EntityObject.prototype.toString = function () { return ""; };
+    EntityObject.prototype.clone = function (source, destination, isDeep) { return null; };
+    EntityObject.prototype.Where = function (qFn, paramsKey, paramsValue) { return this; };
+    EntityObject.prototype.Any = function (qFn, paramsKey, paramsValue, queryCallback) { return null; };
+    EntityObject.prototype.First = function (qFn, paramsKey, paramsValue, queryCallback) { return null; };
+    EntityObject.prototype.ToList = function (queryCallback) {
+        return null;
+    };
+    EntityObject.prototype.Count = function (qFn, paramsKey, paramsValue, queryCallback) { return null; };
+    EntityObject.prototype.OrderBy = function (qFn) { return this; };
+    EntityObject.prototype.OrderByDesc = function (qFn) { return this; };
+    EntityObject.prototype.Select = function (qFn) { return this; };
+    EntityObject.prototype.Take = function (count) { return this; };
+    EntityObject.prototype.Skip = function (count) { return this; };
+    EntityObject.prototype.Max = function (qFn) { return null; };
+    EntityObject.prototype.Min = function (qFn) { return null; };
+    EntityObject.prototype.Contains = function (feild, values) { return null; };
+    return EntityObject;
+}());
 exports.EntityObject = EntityObject;
 //# sourceMappingURL=entityObject.js.map
