@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": [
-      "es2015.promise",
-      "es2015.collection"
-    ],
+    "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
