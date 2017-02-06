@@ -51,15 +51,18 @@ class DataContextMysql extends MysqlDataContext implements DataContextBase {
     user: User;
     article: Article;
     constructor() {
-        super({ "connectionLimit": 500, "database": "TestData", "host": "localhost", "password": "123456", "user": "root" });
+        super({ "connectionLimit": 500, "database": "test", "host": "localhost", "password": "123456", "user": "root" });
         this.user = new User(this);
         this.article = new Article(this);
     }
 }
 
 export class DataContextFactory {
-    static GetDataContext(type = "nedb"): DataContextBase {
+    static GetDataContext(type): DataContextBase {
         if (type == "nedb") return new DataContextNeDB();
-        else return new DataContextMysql();
+        else if (type == "mysql") return new DataContextMysql();
+        else {
+            throw new Error(type + "type is uncorrent database's type!!!");
+        }
     }
 }

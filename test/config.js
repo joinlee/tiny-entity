@@ -1,3 +1,3 @@
 "use strict";
-exports.currentDataBaseType = process.env.currentDataBaseType || "nedb";
+exports.currentDataBaseType = process.env.currentDataBaseType || "mysql";
 //# sourceMappingURL=config.js.map

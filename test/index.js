@@ -16,6 +16,7 @@ function extend(target, source) {
         target[key] = source[key];
     }
 }
+exports.extend = extend;
 function clearData(data) {
     const result = JSON.parse(JSON.stringify(data));
     delete result._id;

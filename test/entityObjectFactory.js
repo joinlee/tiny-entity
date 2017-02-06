@@ -5,9 +5,12 @@ class EntityObjectFactory {
             let a = require("./../nedb").EntityObjectNeDB;
             return a;
         }
-        else {
-            let entityObjectMysql = require("./../mysql");
+        else if (type == "mysql") {
+            let entityObjectMysql = require("./../mysql").MysqlDataContext;
             return entityObjectMysql;
+        }
+        else {
+            throw new Error(type + "type is uncorrent database's type!!!");
         }
     }
 }

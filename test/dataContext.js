@@ -23,17 +23,20 @@ class DataContextNeDB extends dataContextNeDB_1.NeDBDataContext {
 }
 class DataContextMysql extends dataContextMysql_1.MysqlDataContext {
     constructor() {
-        super({ "connectionLimit": 500, "database": "TestData", "host": "localhost", "password": "123456", "user": "root" });
+        super({ "connectionLimit": 500, "database": "test", "host": "localhost", "password": "123456", "user": "root" });
         this.user = new User(this);
         this.article = new Article(this);
     }
 }
 class DataContextFactory {
-    static GetDataContext(type = "nedb") {
+    static GetDataContext(type) {
         if (type == "nedb")
             return new DataContextNeDB();
-        else
+        else if (type == "mysql")
             return new DataContextMysql();
+        else {
+            throw new Error(type + "type is uncorrent database's type!!!");
+        }
     }
 }
 exports.DataContextFactory = DataContextFactory;

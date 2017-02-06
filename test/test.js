@@ -17,12 +17,17 @@ function extend(target, source) {
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         debugger;
-        const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
-        const seedUser = seed_1.SeedData.getUser();
-        const user = new dataContext_1.User();
-        extend(user, seedUser);
-        yield ctx.Create(user);
-        const createdUser = yield ctx.user.First(x => x.id == seedUser.id);
+        try {
+            const ctx = dataContext_1.DataContextFactory.GetDataContext("mysql");
+            const seedUser = seed_1.SeedData.getUser();
+            const user = new dataContext_1.User();
+            extend(user, seedUser);
+            yield ctx.Create(user);
+            const createdUser = yield ctx.user.First(x => x.id == seedUser.id);
+        }
+        catch (error) {
+            console.log("error", error);
+        }
     });
 }
 start();

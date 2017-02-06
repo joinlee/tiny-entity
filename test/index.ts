@@ -5,7 +5,7 @@ import * as lodash from "lodash";
 import * as mocha from "mocha";
 import * as assert from "power-assert";
 
-function extend(target, source: Object) {
+export function extend(target, source: Object) {
     for (const key in source) {
         target[key] = source[key];
     }
