@@ -1,37 +1,47 @@
-import { NeDBDataContext } from './../nedb/dataContextNeDB';
-import { IDataContext } from './../tinyDB.d';
-import { EntityObject } from './../entityObject';
-export class User extends EntityObject<User>{
-    id: string;
-    username: string;
-    password: string;
-    keyWord: any[]
-    toString(): string { return "User"; }
-}
+import { currentDataBaseType } from './config';
+import { seedData } from './seed';
+import { User, Article, DataContextFactory } from './dataContext';
+import * as lodash from "lodash";
+import * as mocha from "mocha";
+import * as assert from "power-assert";
 
-interface ArticleContent {
-    date: number;
-    title: string;
-    content: string;
-}
-
-export class Article extends EntityObject<Article>{
-    id: string;
-    description: string;
-    content: ArticleContent;
-    toString(): string { return "Article"; }
-}
-
-
-export interface DataContextBase extends IDataContext {
-    user: User;
-    article: Article;
-}
-
-class DataContextNeDB extends NeDBDataContext implements DataContextBase {
-    private user: User;
-    private article: Article;
-    constructor() {
-        super({ id: 1 });
+function extend(target, source: Object) {
+    for (const key in source) {
+        target[key] = source[key];
     }
 }
+
+describe('models/user', () => {
+    const ctx = DataContextFactory.GetDataContext(currentDataBaseType);
+    const seedUser = seedData.getUser();
+
+    before(function () {
+    });
+
+    after(function () {
+
+    })
+
+    it('ctx.Create', async () => {
+        const user = new User();
+        extend(user, seedUser);
+        const createdUser = await ctx.Create(user);
+        assert(createdUser != null);
+    });
+
+    it('ctx.Update', async () => {
+        const preUser = await ctx.user.First(x => x.id == seedUser.id);
+        preUser.password = "UpdatedPassword";
+        preUser.keyWords.push("UpdatedKeyWord");
+        const updatedUser = await ctx.Update(preUser);
+        assert(updatedUser.password == "UpdatedPassword");
+        assert(updatedUser.keyWords[updatedUser.keyWords.length - 1] == "UpdatedKeyWord");
+    });
+
+    it('ctx.Delete', async () => {
+        const preUser = await ctx.user.First(x => x.id == seedUser.id);
+        await ctx.Delete(preUser);
+        const deletedUser = await ctx.user.First(x => x.id == seedUser.id);
+        assert(deletedUser == null);
+    });
+});
