@@ -16,7 +16,7 @@ export class User extends EntityObject<User>{
     toString(): string { return "Users"; }
 }
 
-interface ArticleContent {
+interface ArticleDetail {
     date: number;
     title: string;
     content: string;
@@ -25,8 +25,9 @@ interface ArticleContent {
 export class Article extends EntityObject<Article>{
     id: string;
     description: string;
-    content: ArticleContent;
+    detail: ArticleDetail;
     userId: string;
+    topics: string[];
     toString(): string { return "Articles"; }
 }
 
@@ -50,7 +51,7 @@ class DataContextMysql extends MysqlDataContext implements DataContextBase {
     user: User;
     article: Article;
     constructor() {
-        super({ "connectionLimit": 500, "database": "cns", "host": "115.28.165.242", "password": "mpj2016", "user": "dev" });
+        super({ "connectionLimit": 500, "database": "TestData", "host": "localhost", "password": "123456", "user": "root" });
         this.user = new User(this);
         this.article = new Article(this);
     }

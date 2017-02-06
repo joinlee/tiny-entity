@@ -18,7 +18,7 @@ function start() {
     return __awaiter(this, void 0, void 0, function* () {
         debugger;
         const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
-        const seedUser = seed_1.seedData.getUser();
+        const seedUser = seed_1.SeedData.getUser();
         const user = new dataContext_1.User();
         extend(user, seedUser);
         yield ctx.Create(user);

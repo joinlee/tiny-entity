@@ -1,5 +1,5 @@
-import { seedData } from './seed';
-import { User, Article, DataContextFactory } from './dataContext';
+import { SeedData } from './seed';
+import { User, User, DataContextFactory } from './dataContext';
 import * as lodash from "lodash";
 import * as mocha from "mocha";
 import * as assert from "power-assert";
@@ -12,7 +12,7 @@ function extend(target, source: Object) {
 async function start() {
     debugger
     const ctx = DataContextFactory.GetDataContext("nedb");
-    const seedUser = seedData.getUser();
+    const seedUser = SeedData.getUser();
     const user = new User();
     extend(user, seedUser);
     await ctx.Create(user);

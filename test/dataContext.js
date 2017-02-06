@@ -23,7 +23,7 @@ class DataContextNeDB extends dataContextNeDB_1.NeDBDataContext {
 }
 class DataContextMysql extends dataContextMysql_1.MysqlDataContext {
     constructor() {
-        super({ "connectionLimit": 500, "database": "cns", "host": "115.28.165.242", "password": "mpj2016", "user": "dev" });
+        super({ "connectionLimit": 500, "database": "TestData", "host": "localhost", "password": "123456", "user": "root" });
         this.user = new User(this);
         this.article = new Article(this);
     }
