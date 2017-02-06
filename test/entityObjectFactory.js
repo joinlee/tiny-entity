@@ -6,7 +6,7 @@ class EntityObjectFactory {
             return a;
         }
         else if (type == "mysql") {
-            let entityObjectMysql = require("./../mysql").MysqlDataContext;
+            let entityObjectMysql = require("./../mysql").EntityObjectMysql;
             return entityObjectMysql;
         }
         else {

@@ -17,7 +17,7 @@ async function start() {
         const user = new User();
         extend(user, seedUser);
         await ctx.Create(user);
-        const createdUser = await ctx.user.First(x => x.id == seedUser.id);
+        const createdUser = await ctx.user.First(x => x.id == seedUser.id, ["seedUser.id"], [seedUser.id]);
     } catch (error) {
         console.log("error", error);
     }

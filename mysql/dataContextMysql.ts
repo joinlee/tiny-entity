@@ -37,7 +37,7 @@ export class MysqlDataContext implements IDataContext {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key]) && key != "id") {
+            if (this.isAvailableProperty(obj[key]) && key != "id") {
                 if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
                 if (isNaN(obj[key])) {
                     qList.push(key + "='" + obj[key] + "'");
@@ -156,11 +156,11 @@ export class MysqlDataContext implements IDataContext {
         });
     }
     private propertyFormat(obj: IEntityObject): PropertyFormatResult {
-        let propertyNameList: string[] = [];
-        let propertyValueList = [];
+        const propertyNameList: string[] = [];
+        const propertyValueList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key])) {
-                if (obj[key] == undefined || obj[key] == null) continue;
+            if (this.isAvailableProperty(obj[key])) {
+                if (key == "sqlTemp" || key == "queryParam") continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
@@ -178,9 +178,9 @@ export class MysqlDataContext implements IDataContext {
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
 
-    private isNotObjectOrFunction(value): boolean {
-        if (value instanceof Date) return true;
-        return typeof (value) != "object" && typeof (value) != "function" && value != "undefine" && value != null;
+    private isAvailableProperty(value): boolean {
+        if (!value) return false;
+        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }
 
     private dateFormat(d: Date, fmt: string) {
