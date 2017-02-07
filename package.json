@@ -4,9 +4,9 @@
   "description": "一款简单易用的ORM框架，支持NEDB IndexedDB 以及Sqlite等常用的数据库",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:mysql",
-    "test:nedb":"cross-env currentDataBaseType=nedb mocha",
-    "test:mysql":"cross-env currentDataBaseType=mysql mocha"
+    "test": "npm run test:nedb&&npm run test:mysql",
+    "test:nedb": "cross-env currentDataBaseType=nedb mocha",
+    "test:mysql": "cross-env currentDataBaseType=mysql mocha"
   },
   "repository": {
     "type": "git",
