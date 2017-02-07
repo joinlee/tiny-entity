@@ -24,7 +24,7 @@ function clearData(data) {
     delete result.sqlTemp;
     return result;
 }
-describe('common base', () => {
+describe(config_1.currentDataBaseType + ' base test', () => {
     let ctx, seedData;
     before(() => {
         ctx = dataContext_1.DataContextFactory.GetDataContext(config_1.currentDataBaseType);

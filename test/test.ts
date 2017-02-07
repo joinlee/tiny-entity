@@ -11,17 +11,17 @@ function extend(target, source: Object) {
 }
 async function start() {
     debugger
-    try {
-        const ctx = DataContextFactory.GetDataContext("mysql");
-        const seedData = SeedData.getArticle();
-        const data = new Article();
-        extend(data, seedData);
-        const createdData = await ctx.Create(data);
-        const result = await ctx.article.First(x => x.id == seedData.id, ['seedData.id'], [seedData.id]);
-        console.log("result", result)
-    } catch (error) {
-        console.log("error", error);
-    }
+    // try {
+    //     const ctx = DataContextFactory.GetDataContext("mysql");
+    //     const seedData = SeedData.getArticle();
+    //     const data = new Article();
+    //     extend(data, seedData);
+    //     const createdData = await ctx.Create(data);
+    //     const result = await ctx.article.First(x => x.id == seedData.id, ['seedData.id'], [seedData.id]);
+    //     console.log("result", result)
+    // } catch (error) {
+    //     console.log("error", error);
+    // }
 
 
 }

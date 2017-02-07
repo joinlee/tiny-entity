@@ -7,8 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const seed_1 = require('./seed');
-const dataContext_1 = require('./dataContext');
 function extend(target, source) {
     for (const key in source) {
         target[key] = source[key];
@@ -17,18 +15,6 @@ function extend(target, source) {
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         debugger;
-        try {
-            const ctx = dataContext_1.DataContextFactory.GetDataContext("mysql");
-            const seedData = seed_1.SeedData.getArticle();
-            const data = new dataContext_1.Article();
-            extend(data, seedData);
-            const createdData = yield ctx.Create(data);
-            const result = yield ctx.article.First(x => x.id == seedData.id, ['seedData.id'], [seedData.id]);
-            console.log("result", result);
-        }
-        catch (error) {
-            console.log("error", error);
-        }
     });
 }
 start();

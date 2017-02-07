@@ -19,7 +19,7 @@ function clearData(data) {
     return result;
 }
 
-describe('common base', () => {
+describe(currentDataBaseType + ' base test', () => {
     let ctx: DataContextBase, seedData;
 
     before(() => {
