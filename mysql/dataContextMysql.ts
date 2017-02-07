@@ -37,7 +37,7 @@ export class MysqlDataContext implements IDataContext {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if (this.isAvailableProperty(obj[key]) && key != "id") {
+            if (this.isAvailableValue(obj[key]) && key != "id") {
                 if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
                 if (isNaN(obj[key])) {
                     qList.push(key + "='" + obj[key] + "'");
@@ -159,8 +159,9 @@ export class MysqlDataContext implements IDataContext {
         const propertyNameList: string[] = [];
         const propertyValueList = [];
         for (var key in obj) {
-            if (this.isAvailableProperty(obj[key])) {
-                if (key == "sqlTemp" || key == "queryParam") continue;
+            //数组转换
+            if (this.isAvailableValue(obj[key])) {
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
@@ -178,8 +179,8 @@ export class MysqlDataContext implements IDataContext {
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
 
-    private isAvailableProperty(value): boolean {
-        if (!value) return false;
+    private isAvailableValue(value): boolean {
+        if (value == null || value == undefined) return false;
         return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }
 

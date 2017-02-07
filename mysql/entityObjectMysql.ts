@@ -131,9 +131,22 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     Min(qFn: (x: T) => void): Promise<number> {
         return null;
     }
-    private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
-        let qFnS = qFn.toString();
 
+    private getParameterNames(fn) {
+        const COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+        const DEFAULT_PARAMS = /=[^,]+/mg;
+        const FAT_ARROWS = /=>.*$/mg;
+        const code = fn.toString()
+            .replace(COMMENTS, '')
+            .replace(FAT_ARROWS, '')
+            .replace(DEFAULT_PARAMS, '');
+        const result = code.slice(code.indexOf('(') + 1, code.indexOf(')') == -1 ? code.length : code.indexOf(')')).match(/([^\s,]+)/g);
+        return result === null ? [] : result;
+    }
+
+    private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
+
+        let qFnS = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
         qFnS = qFnS.replace(/if/g, "");
@@ -147,11 +160,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         qFnS = qFnS.replace(/\;/g, "");
         qFnS = qFnS.replace(/=>/g, "");
         qFnS = qFnS.trim();
-        let p: string = qFnS[0];
-
-        qFnS = qFnS.substring(1, qFnS.length);
+        //p是参数
+        let p: string = this.getParameterNames(qFn)[0];
+        qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p, "gm"), this.toString());
+        qFnS = qFnS.replace(new RegExp(p + ".", "gm"), "");
         qFnS = qFnS.replace(/\&\&/g, "AND");
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");

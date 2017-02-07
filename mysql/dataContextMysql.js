@@ -37,7 +37,7 @@ class MysqlDataContext {
             let sqlStr = "UPDATE " + obj.toString() + " SET ";
             let qList = [];
             for (var key in obj) {
-                if (this.isAvailableProperty(obj[key]) && key != "id") {
+                if (this.isAvailableValue(obj[key]) && key != "id") {
                     if (obj[key] == undefined || obj[key] == null || obj[key] == "")
                         continue;
                     if (isNaN(obj[key])) {
@@ -148,8 +148,8 @@ class MysqlDataContext {
         const propertyNameList = [];
         const propertyValueList = [];
         for (var key in obj) {
-            if (this.isAvailableProperty(obj[key])) {
-                if (key == "sqlTemp" || key == "queryParam")
+            if (this.isAvailableValue(obj[key])) {
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
                     continue;
                 propertyNameList.push(key);
                 if (isNaN(obj[key])) {
@@ -165,8 +165,8 @@ class MysqlDataContext {
         }
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
-    isAvailableProperty(value) {
-        if (!value)
+    isAvailableValue(value) {
+        if (value == null || value == undefined)
             return false;
         return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }

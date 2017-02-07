@@ -9,6 +9,7 @@ import { IDataContext } from './../tinyDB.d';
 
 const EntityObject = EntityObjectFactory.GetEntityObjectType(currentDataBaseType);
 export class User extends EntityObject<User>{
+
     id: string;
     username: string;
     password: string;

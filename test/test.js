@@ -23,7 +23,8 @@ function start() {
             const user = new dataContext_1.User();
             extend(user, seedUser);
             yield ctx.Create(user);
-            const createdUser = yield ctx.user.First(x => x.id == seedUser.id, ["seedUser.id"], [seedUser.id]);
+            const createdUser = yield ctx.user.First(x12321x => x12321x.id == seedUser.id, ["seedUser.id"], [seedUser.id]);
+            console.log("createdUser", createdUser);
         }
         catch (error) {
             console.log("error", error);
