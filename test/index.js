@@ -24,7 +24,7 @@ function clearData(data) {
     delete result.sqlTemp;
     return result;
 }
-describe('common', () => {
+describe('common base', () => {
     let ctx, seedData;
     before(() => {
         ctx = dataContext_1.DataContextFactory.GetDataContext(config_1.currentDataBaseType);
@@ -43,11 +43,11 @@ describe('common', () => {
         assert.deepStrictEqual(seedData, clearData(createdData));
     }));
     it('ctx.article.First', () => __awaiter(this, void 0, void 0, function* () {
-        const data = yield ctx.article.First(x => x.id == seedData.id);
+        const data = yield ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         assert.deepStrictEqual(seedData, clearData(data));
     }));
     it('ctx.article.Where', () => __awaiter(this, void 0, void 0, function* () {
-        const data = yield ctx.article.Where(x => x.id == seedData.id).ToList();
+        const data = yield ctx.article.Where(x => x.id == seedData.id, ["seedData.id"], [seedData.id]).ToList();
         assert.deepStrictEqual(seedData, clearData(data[data.length - 1]));
     }));
     it('ctx.Update', () => __awaiter(this, void 0, void 0, function* () {
@@ -56,16 +56,16 @@ describe('common', () => {
             targetData.topics.push("UpdatedTopic");
             targetData.detail.title = "UpdateDetailTitle";
         }
-        const preData = yield ctx.article.First(x => x.id == seedData.id);
+        const preData = yield ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         updateData(preData);
         updateData(seedData);
         const updatedData = yield ctx.Update(preData);
         assert.deepStrictEqual(seedData, clearData(updatedData));
     }));
     it('ctx.Delete', () => __awaiter(this, void 0, void 0, function* () {
-        const preData = yield ctx.article.First(x => x.id == seedData.id);
+        const preData = yield ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         yield ctx.Delete(preData);
-        const deleteddata = yield ctx.article.First(x => x.id == seedData.id);
+        const deleteddata = yield ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         assert(deleteddata == null);
     }));
 });

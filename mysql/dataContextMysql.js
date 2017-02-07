@@ -152,7 +152,7 @@ class MysqlDataContext {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
                     continue;
                 propertyNameList.push(key);
-                if (Array.isArray(obj[key])) {
+                if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
                 }
                 else if (isNaN(obj[key])) {

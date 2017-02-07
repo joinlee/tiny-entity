@@ -19,12 +19,12 @@ function start() {
         debugger;
         try {
             const ctx = dataContext_1.DataContextFactory.GetDataContext("mysql");
-            const seedUser = seed_1.SeedData.getUser();
-            const user = new dataContext_1.User();
-            extend(user, seedUser);
-            yield ctx.Create(user);
-            const createdUser = yield ctx.user.First(x12321x => x12321x.id == seedUser.id, ["seedUser.id"], [seedUser.id]);
-            console.log("createdUser", createdUser);
+            const seedData = seed_1.SeedData.getArticle();
+            const data = new dataContext_1.Article();
+            extend(data, seedData);
+            const createdData = yield ctx.Create(data);
+            const result = yield ctx.article.First(x => x.id == seedData.id, ['seedData.id'], [seedData.id]);
+            console.log("result", result);
         }
         catch (error) {
             console.log("error", error);

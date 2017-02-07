@@ -163,7 +163,7 @@ export class MysqlDataContext implements IDataContext {
             if (this.isAvailableValue(obj[key])) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
                 propertyNameList.push(key);
-                if (Array.isArray(obj[key])) {
+                if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
                 } else if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");

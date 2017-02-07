@@ -13,12 +13,12 @@ async function start() {
     debugger
     try {
         const ctx = DataContextFactory.GetDataContext("mysql");
-        const seedUser = SeedData.getUser();
-        const user = new User();
-        extend(user, seedUser);
-        await ctx.Create(user);
-        const createdUser = await ctx.user.First(x12321x => x12321x.id == seedUser.id, ["seedUser.id"], [seedUser.id]);
-        console.log("createdUser", createdUser)
+        const seedData = SeedData.getArticle();
+        const data = new Article();
+        extend(data, seedData);
+        const createdData = await ctx.Create(data);
+        const result = await ctx.article.First(x => x.id == seedData.id, ['seedData.id'], [seedData.id]);
+        console.log("result", result)
     } catch (error) {
         console.log("error", error);
     }

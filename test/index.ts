@@ -19,7 +19,7 @@ function clearData(data) {
     return result;
 }
 
-describe('common', () => {
+describe('common base', () => {
     let ctx: DataContextBase, seedData;
 
     before(() => {
@@ -49,24 +49,23 @@ describe('common', () => {
 
 
     it('ctx.article.First', async () => {
-        const data = await ctx.article.First(x => x.id == seedData.id);
+        const data = await ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         assert.deepStrictEqual(seedData, clearData(data));
     });
 
     it('ctx.article.Where', async () => {
-        const data = await ctx.article.Where(x => x.id == seedData.id).ToList();
+        const data = await ctx.article.Where(x => x.id == seedData.id, ["seedData.id"], [seedData.id]).ToList();
         assert.deepStrictEqual(seedData, clearData(data[data.length - 1]));
     });
 
     it('ctx.Update', async () => {
-
         function updateData(targetData) {
             targetData.description = "UpdatedDescription";
             targetData.topics.push("UpdatedTopic");
             targetData.detail.title = "UpdateDetailTitle";
         }
 
-        const preData: Article = await ctx.article.First(x => x.id == seedData.id);
+        const preData: Article = await ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         updateData(preData);
         updateData(seedData);
         const updatedData = await ctx.Update(preData);
@@ -74,9 +73,9 @@ describe('common', () => {
     });
 
     it('ctx.Delete', async () => {
-        const preData = await ctx.article.First(x => x.id == seedData.id);
+        const preData = await ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         await ctx.Delete(preData);
-        const deleteddata = await ctx.article.First(x => x.id == seedData.id);
+        const deleteddata = await ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);
         assert(deleteddata == null);
     });
 
