@@ -1,1 +1,1 @@
-export const currentDataBaseType = process.env.currentDataBaseType || "mysql";
+export const currentDataBaseType = process.env.currentDataBaseType || "indexedDB";

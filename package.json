@@ -4,9 +4,10 @@
   "description": "一款简单易用的ORM框架，支持NEDB IndexedDB 以及Sqlite等常用的数据库",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:nedb&&npm run test:mysql",
+    "test": "npm run test:nedb&&npm run test:mysql&&npm run test:indexedDB",
     "test:nedb": "cross-env currentDataBaseType=nedb mocha",
-    "test:mysql": "cross-env currentDataBaseType=mysql mocha"
+    "test:mysql": "cross-env currentDataBaseType=mysql mocha",
+    "test:indexedDB": "cross-env currentDataBaseType=indexedDB karma start test/karma.conf.js --single-run"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,12 @@
   },
   "devDependencies": {
     "@types/power-assert": "^1.4.29",
+    "karma": "^1.4.1",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-mocha": "^1.3.0",
+    "karma-webpack": "^2.0.2",
     "mocha": "*",
-    "power-assert": "^1.4.2"
+    "power-assert": "^1.4.2",
+    "webpack": "^2.2.1"
   }
 }

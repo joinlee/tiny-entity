@@ -24,12 +24,31 @@ function clearData(data) {
     delete result.sqlTemp;
     return result;
 }
-describe(config_1.currentDataBaseType + ' base test', () => {
+function asyncWrap(fn) {
+    return (done) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield fn(done);
+            done();
+        }
+        catch (error) {
+            done(error);
+        }
+    });
+}
+;
+function deay() {
+    return new Promise((resove, reject) => {
+        setTimeout(function () {
+            resove(1);
+        }, 200);
+    });
+}
+describe(' base test for ' + config_1.currentDataBaseType, () => {
     let ctx, seedData;
-    before(() => {
+    before(() => __awaiter(this, void 0, void 0, function* () {
         ctx = dataContext_1.DataContextFactory.GetDataContext(config_1.currentDataBaseType);
         seedData = seed_1.SeedData.getArticle();
-    });
+    }));
     after(function () {
     });
     beforeEach(function () {

@@ -19,17 +19,38 @@ function clearData(data) {
     return result;
 }
 
-describe(currentDataBaseType + ' base test', () => {
+// Util function
+function asyncWrap(fn) {
+    return async (done) => {
+        try {
+            await fn(done);
+            done();
+        } catch (error) {
+            done(error);
+        }
+    }
+};
+
+function deay() {
+    return new Promise((resove, reject) => {
+        setTimeout(function () {
+            resove(1);
+        }, 200);
+    })
+}
+
+describe(' base test for ' + currentDataBaseType, () => {
+
     let ctx: DataContextBase, seedData;
 
-    before(() => {
+    before(async () => {
         // 在本区块的所有测试用例之前执行
         ctx = DataContextFactory.GetDataContext(currentDataBaseType);
         seedData = SeedData.getArticle();
     });
 
     after(function () {
-        // 在本区块的所有测试用例之后执行
+        // 在本区块的所有测试用例之后执行 
     });
 
     beforeEach(function () {
@@ -46,7 +67,6 @@ describe(currentDataBaseType + ' base test', () => {
         const createdData = await ctx.Create(data);
         assert.deepStrictEqual(seedData, clearData(createdData));
     });
-
 
     it('ctx.article.First', async () => {
         const data = await ctx.article.First(x => x.id == seedData.id, ["seedData.id"], [seedData.id]);

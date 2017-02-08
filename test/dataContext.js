@@ -1,4 +1,5 @@
 "use strict";
+const dataContextIndexedDB_1 = require('./../indexedDB/dataContextIndexedDB');
 const config_1 = require('./config');
 const entityObjectFactory_1 = require('./entityObjectFactory');
 const dataContextMysql_1 = require('./../mysql/dataContextMysql');
@@ -28,12 +29,39 @@ class DataContextMysql extends dataContextMysql_1.MysqlDataContext {
         this.article = new Article(this);
     }
 }
+class DataContextIndexed extends dataContextIndexedDB_1.IndexedDBDataContext {
+    constructor() {
+        super("testDB", 3, [{
+                TableName: "Users", IndexDefines: [
+                    {
+                        IndexName: "id",
+                        FieldName: "id",
+                        IsUnique: true
+                    }
+                ]
+            },
+            {
+                TableName: "Articles",
+                IndexDefines: [
+                    {
+                        IndexName: "id",
+                        FieldName: "id",
+                        IsUnique: true
+                    }
+                ]
+            }]);
+        this.user = new User(this);
+        this.article = new Article(this);
+    }
+}
 class DataContextFactory {
     static GetDataContext(type) {
         if (type == "nedb")
             return new DataContextNeDB();
         else if (type == "mysql")
             return new DataContextMysql();
+        else if (type == "indexedDB")
+            return new DataContextIndexed();
         else {
             throw new Error(type + "type is uncorrent database's type!!!");
         }

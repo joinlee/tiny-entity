@@ -1,3 +1,4 @@
+import { IndexedDBDataContext } from './../indexedDB/dataContextIndexedDB';
 import { currentDataBaseType } from './config';
 import { EntityObjectFactory } from './entityObjectFactory';
 import { MysqlDataContext } from './../mysql/dataContextMysql';
@@ -57,10 +58,40 @@ class DataContextMysql extends MysqlDataContext implements DataContextBase {
     }
 }
 
+class DataContextIndexed extends IndexedDBDataContext implements DataContextBase {
+    user: User;
+    article: Article;
+    constructor() {
+        super("testDB", 3, [{
+            TableName: "Users", IndexDefines: [
+                {
+                    IndexName: "id",
+                    FieldName: "id",
+                    IsUnique: true
+                }
+            ]
+        },
+        {
+            TableName: "Articles",
+            IndexDefines: [
+                {
+                    IndexName: "id",
+                    FieldName: "id",
+                    IsUnique: true
+                }
+            ]
+        }]
+        );
+        this.user = new User(this);
+        this.article = new Article(this);
+    }
+}
+
 export class DataContextFactory {
     static GetDataContext(type): DataContextBase {
         if (type == "nedb") return new DataContextNeDB();
         else if (type == "mysql") return new DataContextMysql();
+        else if (type == "indexedDB") return new DataContextIndexed();
         else {
             throw new Error(type + "type is uncorrent database's type!!!");
         }

@@ -82,6 +82,11 @@ class IndexedDBDataContext {
         }
         return this.ExcuteQuery(this._qScratchpad, queryCallback);
     }
+    extend(target, source) {
+        for (const key in source) {
+            target[key] = source[key];
+        }
+    }
     ExcuteQuery(qs, queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {
             if (qs && qs.length > 0) {
@@ -93,7 +98,7 @@ class IndexedDBDataContext {
                         dbRequest = store.add(o);
                         dbRequest.onsuccess = (evt) => {
                             let rId = evt.target.result;
-                            ii.ResultCallback && ii.ResultCallback(rId);
+                            ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                         };
                     }
                     else if (ii.QueryAction == QueryActionType.Update) {
@@ -102,14 +107,16 @@ class IndexedDBDataContext {
                                 if (cursor.value.id == ii.EntityObject.id) {
                                     let p = ii.EntityObject;
                                     delete p.ctx;
-                                    let o = this.copy(cursor.value, p);
-                                    cursor.update(o);
+                                    delete p.toString;
+                                    this.extend(cursor.value, p);
+                                    var request = cursor.update(cursor.value);
+                                    ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                                 }
                                 else
                                     cursor.continue();
                             }
                             else {
-                                queryCallback && queryCallback(true);
+                                ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                             }
                         });
                     }
@@ -122,11 +129,10 @@ class IndexedDBDataContext {
                                         console.log(evt);
                                     };
                                 }
-                                else
-                                    cursor.continue();
+                                cursor.continue();
                             }
                             else {
-                                queryCallback && queryCallback(true);
+                                ii.ResultCallback && ii.ResultCallback(true);
                             }
                         });
                     }
