@@ -1,7 +1,7 @@
 {
   "name": "tiny-entity",
   "version": "0.5.5",
-  "description": "一款简单易用的ORM框架，支持NEDB IndexedDB 以及Sqlite等常用的数据库",
+  "description": "一款简单易用的ORM框架，支持NEDB IndexedDB msql 以及Sqlite等常用的数据库",
   "main": "index.js",
   "scripts": {
     "test": "npm run test:nedb&&npm run test:mysql&&npm run test:indexedDB",

@@ -107,7 +107,7 @@ module.exports = function (config) {
       type: 'html',
       dir: './coverage/'
     },
- 
+
 
     // 添加以下部分
     webpack: {
@@ -118,7 +118,8 @@ module.exports = function (config) {
           exclude: /(test|node_modules|bower_components)\//, // 排除的文件
           loader: 'istanbul-instrumenter-loader'
         }]
-      }
+      },
+      devtool: 'inline-source-map'
     },
   })
 }
