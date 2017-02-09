@@ -64,14 +64,14 @@ module.exports = function (config) {
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     // 为测试文件添加 webpack preprocessors
     preprocessors: {
-      './index.js': ['webpack', "sourcemap"]
+      './index.js': ['webpack', "sourcemap", 'coverage']
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['progress', 'coverage'],
 
 
     // web server port
@@ -102,6 +102,23 @@ module.exports = function (config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+    coverageReporter: {
+      type: 'html',
+      dir: './coverage/'
+    },
+ 
+
+    // 添加以下部分
+    webpack: {
+      module: {
+        rules: [{
+          enforce: "post",
+          test: /index\.js$/, // 源文件
+          exclude: /(test|node_modules|bower_components)\//, // 排除的文件
+          loader: 'istanbul-instrumenter-loader'
+        }]
+      }
+    },
   })
 }
