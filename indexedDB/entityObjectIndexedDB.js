@@ -1,5 +1,5 @@
 "use strict";
-const dataContextIndexedDB_1 = require('./dataContextIndexedDB');
+const dataContextIndexedDB_1 = require("./dataContextIndexedDB");
 const entityObject_1 = require("../entityObject");
 class EntityObjectIndexedDB extends entityObject_1.EntityObject {
     constructor(ctx) {

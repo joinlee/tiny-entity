@@ -1,5 +1,5 @@
 "use strict";
-const dbOpenWorker_1 = require('./dbOpenWorker');
+const dbOpenWorker_1 = require("./dbOpenWorker");
 const Datastore = require("nedb");
 class NeDBPool {
     constructor() {
