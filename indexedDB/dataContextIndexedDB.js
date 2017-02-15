@@ -76,6 +76,12 @@ class IndexedDBDataContext {
             QueryFunction: queryFunction
         });
     }
+    AddTakeCount(count) {
+        this.takeCount = count;
+    }
+    AddSkipCount(count) {
+        this.skipCount = count;
+    }
     OnSubmit(queryCallback, tableName) {
         if (this._qScratchpad.length == 0) {
             this.AddQueryScratchpad(tableName, QueryActionType.SelectAll, null);
@@ -134,12 +140,29 @@ class IndexedDBDataContext {
                         let resultAssemble = [];
                         this.db.GetIndexCursor(store.index("id"), (cursor) => {
                             if (cursor) {
+                                if (this.skipCount != null && this.skipCount != undefined) {
+                                    if (this.skipCount != 0) {
+                                        this.skipCount--;
+                                        cursor.continue();
+                                        return;
+                                    }
+                                }
                                 if (ii.QueryFunction(cursor.value)) {
                                     resultAssemble.push(cursor.value);
+                                }
+                                if (this.takeCount != null && this.takeCount != undefined) {
+                                    if (resultAssemble.length >= this.takeCount) {
+                                        this.takeCount = null;
+                                        this.skipCount = null;
+                                        queryCallback && queryCallback(resultAssemble);
+                                        return;
+                                    }
                                 }
                                 cursor.continue();
                             }
                             else {
+                                this.takeCount = null;
+                                this.skipCount = null;
                                 queryCallback && queryCallback(resultAssemble);
                             }
                         });

@@ -32,8 +32,14 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
     OrderBy(qFn) { return this; }
     OrderByDesc(qFn) { return this; }
     Select(qFn) { return this; }
-    Take(count) { return this; }
-    Skip(count) { return this; }
+    Take(count) {
+        this.ctx.AddTakeCount(count);
+        return this;
+    }
+    Skip(count) {
+        this.ctx.AddSkipCount(count);
+        return this;
+    }
     Max(qFn) { return null; }
     Min(qFn) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) {
