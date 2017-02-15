@@ -37,7 +37,7 @@ export class MysqlDataContext implements IDataContext {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key]) && key != "id") {
+            if (this.isAvailableValue(obj[key]) && key != "id") {
                 if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
                 if (isNaN(obj[key])) {
                     qList.push(key + "='" + obj[key] + "'");
@@ -156,13 +156,16 @@ export class MysqlDataContext implements IDataContext {
         });
     }
     private propertyFormat(obj: IEntityObject): PropertyFormatResult {
-        let propertyNameList: string[] = [];
-        let propertyValueList = [];
+        const propertyNameList: string[] = [];
+        const propertyValueList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key])) {
-                if (obj[key] == undefined || obj[key] == null) continue;
+            //数组转换
+            if (this.isAvailableValue(obj[key])) {
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
                 propertyNameList.push(key);
-                if (isNaN(obj[key])) {
+                if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
+                    propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
+                } else if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
                 }
                 else if (obj[key] instanceof Date) {
@@ -178,9 +181,9 @@ export class MysqlDataContext implements IDataContext {
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
 
-    private isNotObjectOrFunction(value): boolean {
-        if (value instanceof Date) return true;
-        return typeof (value) != "object" && typeof (value) != "function" && value != "undefine" && value != null;
+    private isAvailableValue(value): boolean {
+        if (value == null || value == undefined) return false;
+        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }
 
     private dateFormat(d: Date, fmt: string) {

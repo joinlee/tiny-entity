@@ -2,13 +2,13 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
 const entityCopier_1 = require("../entityCopier");
-const entityObject_1 = require("../entityObject");
+const entityObject_1 = require('../entityObject');
 class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
@@ -129,6 +129,17 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     Min(qFn) {
         return null;
     }
+    getParameterNames(fn) {
+        const COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+        const DEFAULT_PARAMS = /=[^,]+/mg;
+        const FAT_ARROWS = /=>.*$/mg;
+        const code = fn.toString()
+            .replace(COMMENTS, '')
+            .replace(FAT_ARROWS, '')
+            .replace(DEFAULT_PARAMS, '');
+        const result = code.slice(code.indexOf('(') + 1, code.indexOf(')') == -1 ? code.length : code.indexOf(')')).match(/([^\s,]+)/g);
+        return result === null ? [] : result;
+    }
     formateCode(qFn, paramsKey, paramsValue) {
         let qFnS = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
@@ -144,10 +155,10 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         qFnS = qFnS.replace(/\;/g, "");
         qFnS = qFnS.replace(/=>/g, "");
         qFnS = qFnS.trim();
-        let p = qFnS[0];
-        qFnS = qFnS.substring(1, qFnS.length);
+        let p = this.getParameterNames(qFn)[0];
+        qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p, "gm"), this.toString());
+        qFnS = qFnS.replace(new RegExp(p + ".", "gm"), "");
         qFnS = qFnS.replace(/\&\&/g, "AND");
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");

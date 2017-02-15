@@ -136,6 +136,12 @@ export class IndexedDBDataContext implements IDataContext {
         }
         return this.ExcuteQuery(this._qScratchpad, queryCallback);
     }
+
+    private extend(target, source: Object) {
+        for (const key in source) {
+            target[key] = source[key];
+        }
+    }
     /**
      * 执行查询
      * @param  {IQueryScratchpad[]} qs 查询暂存器列表
@@ -155,7 +161,7 @@ export class IndexedDBDataContext implements IDataContext {
                         //插入数据后返回的自动id
                         let rId = evt.target.result;
 
-                        ii.ResultCallback && ii.ResultCallback(rId);
+                        ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                     }
                 }
                 else if (ii.QueryAction == QueryActionType.Update) {
@@ -164,15 +170,20 @@ export class IndexedDBDataContext implements IDataContext {
                             if (cursor.value.id == ii.EntityObject.id) {
                                 let p: any = ii.EntityObject;
                                 delete p.ctx;
-
-                                let o = this.copy(cursor.value, p);
-
-                                cursor.update(o);
+                                delete p.toString; //todo  这里吧toString删除了，那么返回的ii.EntityObject就不能被存储了
+                                this.extend(cursor.value, p);
+                                var request = cursor.update(cursor.value); //这里也有可能会出错 应该catch
+                                // request.onsuccess = function () { //应该在这里执行callback
+                                //     console.log('A better album year?');
+                                // }; 
+                                ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                             }
                             else cursor.continue();
                         }
                         else {
-                            queryCallback && queryCallback(true);
+                            //这里应该抛出异常，遍历完成还是没有找到这数据
+                            // queryCallback && queryCallback(true);
+                            ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                         }
                     });
                 }
@@ -185,10 +196,11 @@ export class IndexedDBDataContext implements IDataContext {
                                     console.log(evt);
                                 }
                             }
-                            else cursor.continue();
+                            cursor.continue();
                         }
                         else {
-                            queryCallback && queryCallback(true);
+                            // queryCallback && queryCallback(true);
+                            ii.ResultCallback && ii.ResultCallback(true);
                         }
                     });
                 }

@@ -2,7 +2,7 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
@@ -88,6 +88,11 @@ class IndexedDBDataContext {
         }
         return this.ExcuteQuery(this._qScratchpad, queryCallback);
     }
+    extend(target, source) {
+        for (const key in source) {
+            target[key] = source[key];
+        }
+    }
     ExcuteQuery(qs, queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {
             if (qs && qs.length > 0) {
@@ -99,7 +104,7 @@ class IndexedDBDataContext {
                         dbRequest = store.add(o);
                         dbRequest.onsuccess = (evt) => {
                             let rId = evt.target.result;
-                            ii.ResultCallback && ii.ResultCallback(rId);
+                            ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                         };
                     }
                     else if (ii.QueryAction == QueryActionType.Update) {
@@ -108,14 +113,16 @@ class IndexedDBDataContext {
                                 if (cursor.value.id == ii.EntityObject.id) {
                                     let p = ii.EntityObject;
                                     delete p.ctx;
-                                    let o = this.copy(cursor.value, p);
-                                    cursor.update(o);
+                                    delete p.toString;
+                                    this.extend(cursor.value, p);
+                                    var request = cursor.update(cursor.value);
+                                    ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                                 }
                                 else
                                     cursor.continue();
                             }
                             else {
-                                queryCallback && queryCallback(true);
+                                ii.ResultCallback && ii.ResultCallback(ii.EntityObject);
                             }
                         });
                     }
@@ -128,11 +135,10 @@ class IndexedDBDataContext {
                                         console.log(evt);
                                     };
                                 }
-                                else
-                                    cursor.continue();
+                                cursor.continue();
                             }
                             else {
-                                queryCallback && queryCallback(true);
+                                ii.ResultCallback && ii.ResultCallback(true);
                             }
                         });
                     }
@@ -296,7 +302,6 @@ class IndexedDBDataContext {
     ;
 }
 exports.IndexedDBDataContext = IndexedDBDataContext;
-var QueryActionType;
 (function (QueryActionType) {
     QueryActionType[QueryActionType["Insert"] = 0] = "Insert";
     QueryActionType[QueryActionType["Update"] = 1] = "Update";
@@ -306,5 +311,6 @@ var QueryActionType;
     QueryActionType[QueryActionType["SelectCount"] = 5] = "SelectCount";
     QueryActionType[QueryActionType["SelectFirst"] = 6] = "SelectFirst";
     QueryActionType[QueryActionType["SelectAll"] = 7] = "SelectAll";
-})(QueryActionType = exports.QueryActionType || (exports.QueryActionType = {}));
+})(exports.QueryActionType || (exports.QueryActionType = {}));
+var QueryActionType = exports.QueryActionType;
 //# sourceMappingURL=dataContextIndexedDB.js.map

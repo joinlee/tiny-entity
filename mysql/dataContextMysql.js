@@ -2,7 +2,7 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
@@ -37,7 +37,7 @@ class MysqlDataContext {
             let sqlStr = "UPDATE " + obj.toString() + " SET ";
             let qList = [];
             for (var key in obj) {
-                if (this.isNotObjectOrFunction(obj[key]) && key != "id") {
+                if (this.isAvailableValue(obj[key]) && key != "id") {
                     if (obj[key] == undefined || obj[key] == null || obj[key] == "")
                         continue;
                     if (isNaN(obj[key])) {
@@ -145,14 +145,17 @@ class MysqlDataContext {
         });
     }
     propertyFormat(obj) {
-        let propertyNameList = [];
-        let propertyValueList = [];
+        const propertyNameList = [];
+        const propertyValueList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key])) {
-                if (obj[key] == undefined || obj[key] == null)
+            if (this.isAvailableValue(obj[key])) {
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
                     continue;
                 propertyNameList.push(key);
-                if (isNaN(obj[key])) {
+                if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
+                    propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
+                }
+                else if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
                 }
                 else if (obj[key] instanceof Date) {
@@ -165,10 +168,10 @@ class MysqlDataContext {
         }
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
-    isNotObjectOrFunction(value) {
-        if (value instanceof Date)
-            return true;
-        return typeof (value) != "object" && typeof (value) != "function" && value != "undefine" && value != null;
+    isAvailableValue(value) {
+        if (value == null || value == undefined)
+            return false;
+        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }
     dateFormat(d, fmt) {
         let o = {

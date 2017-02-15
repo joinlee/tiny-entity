@@ -73,7 +73,8 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         else {
             r = await this.ctx.Query([x => true], this.toString());
         }
-
+        //将this.sqlTemp置为空
+        this.sqlTemp = [];
         let result = (this.cloneList(r) as T[]);
         if (this.queryParam) {
             if (this.queryParam.OrderByFiledName) {
