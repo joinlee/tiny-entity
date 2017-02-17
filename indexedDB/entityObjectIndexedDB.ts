@@ -1,4 +1,4 @@
-import { QueryActionType,IndexedDBDataContext } from './dataContextIndexedDB';
+import { QueryActionType, IndexedDBDataContext } from './dataContextIndexedDB';
 import { EntityObject } from "../entityObject";
 import { IEntityObject, IDataContext, IQueryObject } from '../tinyDB';
 
@@ -37,8 +37,14 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
     OrderBy(qFn: (x: T) => void): IQueryObject<T> { return this; }
     OrderByDesc(qFn: (x: T) => void): IQueryObject<T> { return this; }
     Select(qFn: (x: T) => void): IQueryObject<T> { return this; }
-    Take(count: number): IQueryObject<T> { return this; }
-    Skip(count: number): IQueryObject<T> { return this; }
+    Take(count: number): IQueryObject<T> {
+        this.ctx.AddTakeCount(count);
+        return this;
+    }
+    Skip(count: number): IQueryObject<T> {
+        this.ctx.AddSkipCount(count);
+        return this;
+    }
     Max(qFn: (x: T) => void): Promise<number> { return null; }
     Min(qFn: (x: T) => void): Promise<number> { return null; }
     First(qFn?: (entityObject: T) => boolean,

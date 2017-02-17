@@ -6,6 +6,8 @@ export class IndexedDBDataContext implements IDataContext {
     private tableDefines;
     private dbName: string;
     private dbVersion: number = 0;
+    private takeCount;
+    private skipCount;
 
     constructor(dbName: string, dbVersion: number, tableDefines: ITableDefine[]) {
         this.dbName = dbName;
@@ -115,6 +117,14 @@ export class IndexedDBDataContext implements IDataContext {
             QueryFunction: queryFunction
         });
     }
+
+    AddTakeCount(count: number) {
+        this.takeCount = count;
+    }
+    AddSkipCount(count: number) {
+        this.skipCount = count;
+    }
+
     /**
      * 提交查询
      * @param  {any} queryCallback? 查询结果集回调函数
@@ -199,11 +209,28 @@ export class IndexedDBDataContext implements IDataContext {
                     this.db.GetIndexCursor(store.index("id"), (cursor: any) => {
                         if (cursor) {
                             if (ii.QueryFunction(cursor.value)) {
-                                resultAssemble.push(cursor.value);
+                                if (this.skipCount != null && this.skipCount != undefined && this.skipCount != 0) {
+                                    this.skipCount--;
+                                    cursor.continue();
+                                    return;
+                                }
+                                else {
+                                    resultAssemble.push(cursor.value);
+                                }
+                            }
+                            if (this.takeCount != null && this.takeCount != undefined) {
+                                if (resultAssemble.length >= this.takeCount) {
+                                    this.takeCount = null;
+                                    this.skipCount = null;
+                                    queryCallback && queryCallback(resultAssemble);
+                                    return;
+                                }
                             }
                             cursor.continue();
                         }
                         else {
+                            this.takeCount = null;
+                            this.skipCount = null;
                             queryCallback && queryCallback(resultAssemble);
                         }
                     });
