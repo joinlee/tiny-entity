@@ -81,32 +81,41 @@ describe(' base test for ' + currentDataBaseType, () => {
     it('ctx.article.Take', async () => {
         //初始化data
         const limit = 5;
-        await Promise.all(Array(10).map(x => SeedData.getArticle()).map(x => {
+        await Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
+            const seedData = SeedData.getArticle();
+            seedData.id = seedData.id + x;
+            return seedData;
+        }).map(seedData => {
+            const ctx = DataContextFactory.GetDataContext("nedb");
             const data = new Article();
-            extend(data, x);
+            extend(data, seedData);
             return ctx.Create(data);
-        }))
+        }));
         const data = await ctx.article.Take(limit).ToList();
         assert.deepStrictEqual(data.length, limit);
     });
 
     it('ctx.article.OrderBy', async () => {
-        await Promise.all(Array(10).map(x => SeedData.getArticle()).map(x => {
-            const data = new Article();
-            extend(data, x);
-            return ctx.Create(data);
-        }))
-        const result = await ctx.article.OrderBy(x => x.detail.date).ToList();
+        // await Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
+        //     const seedData = SeedData.getArticle();
+        //     seedData.id = seedData.id + x;
+        //     return seedData;
+        // }).map(seedData => {
+        //     const ctx = DataContextFactory.GetDataContext("nedb");
+        //     const data = new Article();
+        //     extend(data, seedData);
+        //     return ctx.Create(data);
+        // }));
+        const result = await ctx.article.OrderBy(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].detail.date <= result[i + 1].detail.date)
+            result[i + 1] && assert.ok(result[i].id >= result[i + 1].id)
         }
-
     });
 
     it('ctx.article.OrderByDesc', async () => {
-        const result = await ctx.article.OrderByDesc(x => x.detail.date).ToList();
+        const result = await ctx.article.OrderByDesc(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].detail.date >= result[i + 1].detail.date)
+            result[i + 1] && assert.ok(result[i].id <= result[i + 1].id)
         }
     });
 

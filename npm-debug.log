@@ -14,10 +14,10 @@
 10 verbose lifecycle tiny-entity@0.5.5~test:nedb: CWD: D:\MyProject\mlyknown\tiny-entity
 11 silly lifecycle tiny-entity@0.5.5~test:nedb: Args: [ '/d /s /c',
 11 silly lifecycle   'cross-env currentDataBaseType=nedb  istanbul cover node_modules/mocha/bin/_mocha -- -R spec' ]
-12 silly lifecycle tiny-entity@0.5.5~test:nedb: Returned: code: 3  signal: null
+12 silly lifecycle tiny-entity@0.5.5~test:nedb: Returned: code: 2  signal: null
 13 info lifecycle tiny-entity@0.5.5~test:nedb: Failed to exec test:nedb script
 14 verbose stack Error: tiny-entity@0.5.5 test:nedb: `cross-env currentDataBaseType=nedb  istanbul cover node_modules/mocha/bin/_mocha -- -R spec`
-14 verbose stack Exit status 3
+14 verbose stack Exit status 2
 14 verbose stack     at EventEmitter.<anonymous> (C:\Users\Administrator\AppData\Roaming\nvm\v6.2.2\node_modules\npm\lib\utils\lifecycle.js:245:16)
 14 verbose stack     at emitTwo (events.js:106:13)
 14 verbose stack     at EventEmitter.emit (events.js:191:7)
@@ -34,7 +34,7 @@
 20 error npm  v3.9.5
 21 error code ELIFECYCLE
 22 error tiny-entity@0.5.5 test:nedb: `cross-env currentDataBaseType=nedb  istanbul cover node_modules/mocha/bin/_mocha -- -R spec`
-22 error Exit status 3
+22 error Exit status 2
 23 error Failed at the tiny-entity@0.5.5 test:nedb script 'cross-env currentDataBaseType=nedb  istanbul cover node_modules/mocha/bin/_mocha -- -R spec'.
 23 error Make sure you have the latest version of node.js and npm installed.
 23 error If you do, this is most likely a problem with the tiny-entity package,

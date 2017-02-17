@@ -16,18 +16,24 @@ function extend(target, source) {
 }
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
-        debugger;
         try {
             const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
-            const seedData = seed_1.SeedData.getArticle();
-            const limit = 5;
-            yield Promise.all(Array(10).map(x => seed_1.SeedData.getArticle()).map(x => {
+            yield Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
+                const seedData = seed_1.SeedData.getArticle();
+                seedData.id = seedData.id + x;
+                return seedData;
+            }).map(seedData => {
+                const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
                 const data = new dataContext_1.Article();
-                extend(data, x);
+                extend(data, seedData);
                 return ctx.Create(data);
             }));
-            debugger;
-            const data = yield ctx.article.Take(limit).ToList();
+            const result = yield ctx.article.OrderBy(x => x.id).ToList();
+            for (let i = 0, l = result.length; i < l; i++) {
+                if (result[i + 1] && !(result[i].id >= result[i + 1].id)) {
+                    debugger;
+                }
+            }
         }
         catch (error) {
             console.log("error", error);

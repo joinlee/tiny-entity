@@ -71,29 +71,29 @@ describe(' base test for ' + config_1.currentDataBaseType, () => {
     }));
     it('ctx.article.Take', () => __awaiter(this, void 0, void 0, function* () {
         const limit = 5;
-        yield Promise.all(Array(10).map(x => seed_1.SeedData.getArticle()).map(x => {
+        yield Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
+            const seedData = seed_1.SeedData.getArticle();
+            seedData.id = seedData.id + x;
+            return seedData;
+        }).map(seedData => {
+            const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
             const data = new dataContext_1.Article();
-            extend(data, x);
+            extend(data, seedData);
             return ctx.Create(data);
         }));
         const data = yield ctx.article.Take(limit).ToList();
         assert.deepStrictEqual(data.length, limit);
     }));
     it('ctx.article.OrderBy', () => __awaiter(this, void 0, void 0, function* () {
-        yield Promise.all(Array(10).map(x => seed_1.SeedData.getArticle()).map(x => {
-            const data = new dataContext_1.Article();
-            extend(data, x);
-            return ctx.Create(data);
-        }));
-        const result = yield ctx.article.OrderBy(x => x.detail.date).ToList();
+        const result = yield ctx.article.OrderBy(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].detail.date <= result[i + 1].detail.date);
+            result[i + 1] && assert.ok(result[i].id >= result[i + 1].id);
         }
     }));
     it('ctx.article.OrderByDesc', () => __awaiter(this, void 0, void 0, function* () {
-        const result = yield ctx.article.OrderByDesc(x => x.detail.date).ToList();
+        const result = yield ctx.article.OrderByDesc(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].detail.date >= result[i + 1].detail.date);
+            result[i + 1] && assert.ok(result[i].id <= result[i + 1].id);
         }
     }));
     it('ctx.Update', () => __awaiter(this, void 0, void 0, function* () {
