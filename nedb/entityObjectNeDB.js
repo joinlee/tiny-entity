@@ -48,10 +48,12 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         });
     }
     Take(count) {
-        return null;
+        this.queryParam.TakeCount = count;
+        return this;
     }
     Skip(count) {
-        return null;
+        this.queryParam.SkipCount = count;
+        return this;
     }
     OrderBy(qFn) {
         this.queryParam.OrderByFiledName = this.getFeild(qFn);
@@ -95,6 +97,12 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                             return a[orderByFiled] - b[orderByFiled];
                         });
                     }
+                }
+                if (this.queryParam.TakeCount) {
+                    result = result.splice(0, this.queryParam.TakeCount);
+                }
+                if (this.queryParam.SkipCount) {
+                    result = result.splice(this.queryParam.SkipCount, result.length);
                 }
             }
             return result;

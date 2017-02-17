@@ -1,1 +1,1 @@
-export const currentDataBaseType = process.env.currentDataBaseType || "indexedDB";
+export const currentDataBaseType = process.env.currentDataBaseType || "nedb";

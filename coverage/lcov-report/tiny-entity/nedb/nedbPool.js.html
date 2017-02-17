@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">17.86% </span>
+        <span class="strong">78.57% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>5/28</span>
+        <span class='fraction'>22/28</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">0% </span>
+        <span class="strong">50% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/8</span>
+        <span class='fraction'>4/8</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">33.33% </span>
+        <span class="strong">100% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>1/3</span>
+        <span class='fraction'>3/3</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">18.52% </span>
+        <span class="strong">77.78% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>5/27</span>
+        <span class='fraction'>21/27</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class='status-line medium'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -104,29 +104,29 @@
 <span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">8×</span>
+<span class="cline-any cline-yes">7×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -135,15 +135,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -156,30 +156,30 @@ class NeDBPool {
     constructor() {
         this.list = [];
     }
-    GetDBConnection<span class="fstat-no" title="function not covered" >(tbName, config) {</span>
-<span class="cstat-no" title="statement not covered" >        let db = null;</span>
-<span class="cstat-no" title="statement not covered" >        let connStr = config.FilePath + tbName + ".db";</span>
-<span class="cstat-no" title="statement not covered" >        let item = this.list.find(x =&gt; <span class="cstat-no" title="statement not covered" >x.connStr == connStr)</span>;</span>
-<span class="cstat-no" title="statement not covered" >        return new Promise((resolve, reject) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            if (item) {</span>
-<span class="cstat-no" title="statement not covered" >                resolve(item.db);</span>
+    GetDBConnection(tbName, config) {
+        let db = null;
+        let connStr = config.FilePath + tbName + ".db";
+        let item = this.list.find(x =&gt; x.connStr == connStr);
+        return new Promise((resolve, reject) =&gt; {
+            if (item) {
+                resolve(item.db);
             }
             else {
-<span class="cstat-no" title="statement not covered" >                this.Open(connStr).then(db =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >                    this.list.push({ connStr: connStr, db: db });</span>
-<span class="cstat-no" title="statement not covered" >                    resolve(db);</span>
+                this.Open(connStr).then(db =&gt; {
+                    this.list.push({ connStr: connStr, db: db });
+                    resolve(db);
                 }).catch(err =&gt; { <span class="cstat-no" title="statement not covered" >reject(err); </span>});
             }
         });
     }
-    Open<span class="fstat-no" title="function not covered" >(connStr) {</span>
-<span class="cstat-no" title="statement not covered" >        return new Promise((resolve, reject) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >            let db = new Datastore({</span>
+    Open(connStr) {
+        return new Promise((resolve, reject) =&gt; {
+            let db = new Datastore({
                 filename: connStr,
                 inMemoryOnly: false,
                 autoload: true,
                 onload: (err) =&gt; {
-<span class="cstat-no" title="statement not covered" >                    if (err) {</span>
+                    <span class="missing-if-branch" title="if path not taken" >I</span>if (err) {
 <span class="cstat-no" title="statement not covered" >                        if (err.errorType == "uniqueViolated")</span>
 <span class="cstat-no" title="statement not covered" >                            reject(err);</span>
                         else {
@@ -188,15 +188,15 @@ class NeDBPool {
                         }
                     }
                     else {
-<span class="cstat-no" title="statement not covered" >                        db.ensureIndex({ fieldName: 'id', unique: true }, (err) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >                            if (err)</span>
+                        db.ensureIndex({ fieldName: 'id', unique: true }, (err) =&gt; {
+                            <span class="missing-if-branch" title="if path not taken" >I</span>if (err)
 <span class="cstat-no" title="statement not covered" >                                console.log("添加索引失败：", err);</span>
                         });
-<span class="cstat-no" title="statement not covered" >                        resolve(db);</span>
+                        resolve(db);
                     }
                 }
             });
-<span class="cstat-no" title="statement not covered" >            db.persistence.setAutocompactionInterval(120 * 60 * 1000);</span>
+            db.persistence.setAutocompactionInterval(120 * 60 * 1000);
         });
     }
 }
@@ -208,7 +208,7 @@ exports.NeDBPool = NeDBPool;
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Thu Feb 09 2017 11:32:13 GMT+0800 (中国标准时间)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Feb 17 2017 16:04:48 GMT+0800 (中国标准时间)
 </div>
 </div>
 <script src="../../prettify.js"></script>

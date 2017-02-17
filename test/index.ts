@@ -78,6 +78,38 @@ describe(' base test for ' + currentDataBaseType, () => {
         assert.deepStrictEqual(seedData, clearData(data[data.length - 1]));
     });
 
+    it('ctx.article.Take', async () => {
+        //初始化data
+        const limit = 5;
+        await Promise.all(Array(10).map(x => SeedData.getArticle()).map(x => {
+            const data = new Article();
+            extend(data, x);
+            return ctx.Create(data);
+        }))
+        const data = await ctx.article.Take(limit).ToList();
+        assert.deepStrictEqual(data.length, limit);
+    });
+
+    it('ctx.article.OrderBy', async () => {
+        await Promise.all(Array(10).map(x => SeedData.getArticle()).map(x => {
+            const data = new Article();
+            extend(data, x);
+            return ctx.Create(data);
+        }))
+        const result = await ctx.article.OrderBy(x => x.detail.date).ToList();
+        for (let i = 0, l = result.length; i < l; i++) {
+            result[i + 1] && assert.ok(result[i].detail.date <= result[i + 1].detail.date)
+        }
+
+    });
+
+    it('ctx.article.OrderByDesc', async () => {
+        const result = await ctx.article.OrderByDesc(x => x.detail.date).ToList();
+        for (let i = 0, l = result.length; i < l; i++) {
+            result[i + 1] && assert.ok(result[i].detail.date >= result[i + 1].detail.date)
+        }
+    });
+
     it('ctx.Update', async () => {
         function updateData(targetData) {
             targetData.description = "UpdatedDescription";

@@ -69,6 +69,33 @@ describe(' base test for ' + config_1.currentDataBaseType, () => {
         const data = yield ctx.article.Where(x => x.id == seedData.id, ["seedData.id"], [seedData.id]).ToList();
         assert.deepStrictEqual(seedData, clearData(data[data.length - 1]));
     }));
+    it('ctx.article.Take', () => __awaiter(this, void 0, void 0, function* () {
+        const limit = 5;
+        yield Promise.all(Array(10).map(x => seed_1.SeedData.getArticle()).map(x => {
+            const data = new dataContext_1.Article();
+            extend(data, x);
+            return ctx.Create(data);
+        }));
+        const data = yield ctx.article.Take(limit).ToList();
+        assert.deepStrictEqual(data.length, limit);
+    }));
+    it('ctx.article.OrderBy', () => __awaiter(this, void 0, void 0, function* () {
+        yield Promise.all(Array(10).map(x => seed_1.SeedData.getArticle()).map(x => {
+            const data = new dataContext_1.Article();
+            extend(data, x);
+            return ctx.Create(data);
+        }));
+        const result = yield ctx.article.OrderBy(x => x.detail.date).ToList();
+        for (let i = 0, l = result.length; i < l; i++) {
+            result[i + 1] && assert.ok(result[i].detail.date <= result[i + 1].detail.date);
+        }
+    }));
+    it('ctx.article.OrderByDesc', () => __awaiter(this, void 0, void 0, function* () {
+        const result = yield ctx.article.OrderByDesc(x => x.detail.date).ToList();
+        for (let i = 0, l = result.length; i < l; i++) {
+            result[i + 1] && assert.ok(result[i].detail.date >= result[i + 1].detail.date);
+        }
+    }));
     it('ctx.Update', () => __awaiter(this, void 0, void 0, function* () {
         function updateData(targetData) {
             targetData.description = "UpdatedDescription";
