@@ -208,15 +208,15 @@ export class IndexedDBDataContext implements IDataContext {
                     let resultAssemble = [];
                     this.db.GetIndexCursor(store.index("id"), (cursor: any) => {
                         if (cursor) {
-                            if (this.skipCount != null && this.skipCount != undefined) {
-                                if (this.skipCount != 0) {
+                            if (ii.QueryFunction(cursor.value)) {
+                                if (this.skipCount != null && this.skipCount != undefined && this.skipCount != 0) {
                                     this.skipCount--;
                                     cursor.continue();
                                     return;
                                 }
-                            }
-                            if (ii.QueryFunction(cursor.value)) {
-                                resultAssemble.push(cursor.value);
+                                else {
+                                    resultAssemble.push(cursor.value);
+                                }
                             }
                             if (this.takeCount != null && this.takeCount != undefined) {
                                 if (resultAssemble.length >= this.takeCount) {
