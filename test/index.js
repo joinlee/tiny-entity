@@ -48,6 +48,16 @@ describe(' base test for ' + config_1.currentDataBaseType, () => {
     before(() => __awaiter(this, void 0, void 0, function* () {
         ctx = dataContext_1.DataContextFactory.GetDataContext(config_1.currentDataBaseType);
         seedData = seed_1.SeedData.getArticle();
+        yield Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
+            const seedData = seed_1.SeedData.getArticle();
+            seedData.id = seedData.id + x;
+            return seedData;
+        }).map(seedData => {
+            const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
+            const data = new dataContext_1.Article();
+            extend(data, seedData);
+            return ctx.Create(data);
+        }));
     }));
     after(function () {
     });
@@ -70,30 +80,20 @@ describe(' base test for ' + config_1.currentDataBaseType, () => {
         assert.deepStrictEqual(seedData, clearData(data[data.length - 1]));
     }));
     it('ctx.article.Take', () => __awaiter(this, void 0, void 0, function* () {
-        const limit = 5;
-        yield Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
-            const seedData = seed_1.SeedData.getArticle();
-            seedData.id = seedData.id + x;
-            return seedData;
-        }).map(seedData => {
-            const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
-            const data = new dataContext_1.Article();
-            extend(data, seedData);
-            return ctx.Create(data);
-        }));
+        const limit = 2;
         const data = yield ctx.article.Take(limit).ToList();
         assert.deepStrictEqual(data.length, limit);
     }));
     it('ctx.article.OrderBy', () => __awaiter(this, void 0, void 0, function* () {
         const result = yield ctx.article.OrderBy(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].id >= result[i + 1].id);
+            result[i + 1] && assert.ok(result[i].id <= result[i + 1].id);
         }
     }));
     it('ctx.article.OrderByDesc', () => __awaiter(this, void 0, void 0, function* () {
         const result = yield ctx.article.OrderByDesc(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].id <= result[i + 1].id);
+            result[i + 1] && assert.ok(result[i].id >= result[i + 1].id);
         }
     }));
     it('ctx.Update', () => __awaiter(this, void 0, void 0, function* () {

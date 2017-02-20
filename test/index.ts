@@ -47,6 +47,17 @@ describe(' base test for ' + currentDataBaseType, () => {
         // 在本区块的所有测试用例之前执行
         ctx = DataContextFactory.GetDataContext(currentDataBaseType);
         seedData = SeedData.getArticle();
+
+        await Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
+            const seedData = SeedData.getArticle();
+            seedData.id = seedData.id + x;
+            return seedData;
+        }).map(seedData => {
+            const ctx = DataContextFactory.GetDataContext("nedb");
+            const data = new Article();
+            extend(data, seedData);
+            return ctx.Create(data);
+        }));
     });
 
     after(function () {
@@ -80,42 +91,22 @@ describe(' base test for ' + currentDataBaseType, () => {
 
     it('ctx.article.Take', async () => {
         //初始化data
-        const limit = 5;
-        await Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
-            const seedData = SeedData.getArticle();
-            seedData.id = seedData.id + x;
-            return seedData;
-        }).map(seedData => {
-            const ctx = DataContextFactory.GetDataContext("nedb");
-            const data = new Article();
-            extend(data, seedData);
-            return ctx.Create(data);
-        }));
+        const limit = 2;
         const data = await ctx.article.Take(limit).ToList();
         assert.deepStrictEqual(data.length, limit);
     });
 
     it('ctx.article.OrderBy', async () => {
-        // await Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
-        //     const seedData = SeedData.getArticle();
-        //     seedData.id = seedData.id + x;
-        //     return seedData;
-        // }).map(seedData => {
-        //     const ctx = DataContextFactory.GetDataContext("nedb");
-        //     const data = new Article();
-        //     extend(data, seedData);
-        //     return ctx.Create(data);
-        // }));
         const result = await ctx.article.OrderBy(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].id >= result[i + 1].id)
+            result[i + 1] && assert.ok(result[i].id <= result[i + 1].id)
         }
     });
 
     it('ctx.article.OrderByDesc', async () => {
         const result = await ctx.article.OrderByDesc(x => x.id).ToList();
         for (let i = 0, l = result.length; i < l; i++) {
-            result[i + 1] && assert.ok(result[i].id <= result[i + 1].id)
+            result[i + 1] && assert.ok(result[i].id >= result[i + 1].id)
         }
     });
 

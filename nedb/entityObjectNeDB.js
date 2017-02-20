@@ -97,12 +97,17 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                             return a[orderByFiled] - b[orderByFiled];
                         });
                     }
+                    ;
+                    this.queryParam.OrderByFiledName = null;
+                    this.queryParam.IsDesc = null;
                 }
                 if (this.queryParam.TakeCount) {
                     result = result.splice(0, this.queryParam.TakeCount);
+                    this.queryParam.TakeCount = null;
                 }
                 if (this.queryParam.SkipCount) {
                     result = result.splice(this.queryParam.SkipCount, result.length);
+                    this.queryParam.SkipCount = null;
                 }
             }
             return result;

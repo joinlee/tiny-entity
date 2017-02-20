@@ -7,7 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const seed_1 = require('./seed');
 const dataContext_1 = require('./dataContext');
 function extend(target, source) {
     for (const key in source) {
@@ -18,19 +17,9 @@ function start() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
-            yield Promise.all(Array(10).fill(0).map((_, i) => i + 1).map(x => {
-                const seedData = seed_1.SeedData.getArticle();
-                seedData.id = seedData.id + x;
-                return seedData;
-            }).map(seedData => {
-                const ctx = dataContext_1.DataContextFactory.GetDataContext("nedb");
-                const data = new dataContext_1.Article();
-                extend(data, seedData);
-                return ctx.Create(data);
-            }));
             const result = yield ctx.article.OrderBy(x => x.id).ToList();
             for (let i = 0, l = result.length; i < l; i++) {
-                if (result[i + 1] && !(result[i].id >= result[i + 1].id)) {
+                if (result[i + 1] && !(result[i].id <= result[i + 1].id)) {
                     debugger;
                 }
             }
