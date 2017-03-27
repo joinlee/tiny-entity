@@ -1,9 +1,0 @@
-coverage
-/db/
-/node_modules/
-node_modules
-.vscode
-data
-/coverage
-/data
-/test
