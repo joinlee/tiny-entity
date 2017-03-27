@@ -296,7 +296,7 @@ class IndexedDBDataContext {
     ;
     Commit() { }
     ;
-    Query(...args) { }
+    Query(args) { }
     ;
     RollBack() { }
     ;

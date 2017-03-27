@@ -370,7 +370,7 @@ export class IndexedDBDataContext implements IDataContext {
 
     BeginTranscation() { };
     Commit() { };
-    Query(...args) { };
+    Query(args?) { };
     RollBack() { };
 }
 
