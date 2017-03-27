@@ -1,6 +1,6 @@
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
-    constructor(ctx?: IDataContext) { }
+    constructor(ctx?: IDataContext) {  }
     id: string;
     toString(): string { return ""; }
 
