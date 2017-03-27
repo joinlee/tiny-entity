@@ -1,6 +1,6 @@
 "use strict";
-const index_1 = require('../index');
-const entityObject_1 = require('../../entityObject');
+const index_1 = require("../index");
+const entityObject_1 = require("../../entityObject");
 class Account extends entityObject_1.EntityObject {
     toString() { return "Account"; }
 }
