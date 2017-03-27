@@ -2,12 +2,12 @@
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator.throw(value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
-const dataContextNeDB_1 = require("./dataContextNeDB");
+const dataContextNeDB_1 = require('./dataContextNeDB');
 const entityObject_1 = require("../entityObject");
 class EntityObjectNeDB extends entityObject_1.EntityObject {
     constructor(ctx) {
@@ -48,10 +48,12 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         });
     }
     Take(count) {
-        return null;
+        this.queryParam.TakeCount = count;
+        return this;
     }
     Skip(count) {
-        return null;
+        this.queryParam.SkipCount = count;
+        return this;
     }
     OrderBy(qFn) {
         this.queryParam.OrderByFiledName = this.getFeild(qFn);
@@ -95,6 +97,17 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                             return a[orderByFiled] - b[orderByFiled];
                         });
                     }
+                    ;
+                    this.queryParam.OrderByFiledName = null;
+                    this.queryParam.IsDesc = null;
+                }
+                if (this.queryParam.TakeCount) {
+                    result = result.splice(0, this.queryParam.TakeCount);
+                    this.queryParam.TakeCount = null;
+                }
+                if (this.queryParam.SkipCount) {
+                    result = result.splice(this.queryParam.SkipCount, result.length);
+                    this.queryParam.SkipCount = null;
                 }
             }
             return result;

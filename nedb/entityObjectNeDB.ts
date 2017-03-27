@@ -43,10 +43,12 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         return this.clone(r, new Object() as T) as T;
     }
     Take(count: number): IQueryObject<T> {
-        return null;
+        this.queryParam.TakeCount = count;
+        return this;
     }
     Skip(count: number): IQueryObject<T> {
-        return null;
+        this.queryParam.SkipCount = count;
+        return this;
     }
     OrderBy(qFn: (x: T) => void): IQueryObject<T> {
         this.queryParam.OrderByFiledName = this.getFeild(qFn);
@@ -88,8 +90,17 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
                     result = result.sort((a, b) => {
                         return a[orderByFiled] - b[orderByFiled];
                     })
-                }
-
+                };
+                this.queryParam.OrderByFiledName = null;
+                this.queryParam.IsDesc = null;
+            }
+            if (this.queryParam.TakeCount) {
+                result = result.splice(0, this.queryParam.TakeCount);
+                this.queryParam.TakeCount = null;
+            }
+            if (this.queryParam.SkipCount) {
+                result = result.splice(this.queryParam.SkipCount, result.length);
+                this.queryParam.SkipCount = null;
             }
         }
         return result;
