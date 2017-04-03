@@ -1,3 +1,4 @@
+import { EntityCopier } from './../entityCopier';
 import { IEntityObject, IDataContext } from '../tinyDB';
 import sqlite = require("sqlite-sync");
 
@@ -27,17 +28,20 @@ export class SqliteDataContext implements IDataContext {
             this.querySentence.push(sqlStr);
         }
         else {
-            return this.onSubmit(sqlStr);
+            let r = this.onSubmit(sqlStr);
+            return EntityCopier.Decode(obj);
         }
     }
     /**
-     * @param  {IEntityObject} obj
+     * @param  {IEntityObject} obj      
      */
     Update(obj: IEntityObject) {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key]) && key != "Id") {
+            if (this.isAvailableValue(obj[key]) && key != "id") {
+                if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
                 if (isNaN(obj[key])) {
                     qList.push(key + "='" + obj[key] + "'");
                 }
@@ -50,13 +54,15 @@ export class SqliteDataContext implements IDataContext {
             }
         }
 
-        sqlStr += qList.join(',') + " WHERE id=" + obj.id + ";";
-
+        //todo:判断id的类型
+        sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
+        console.log("Update:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
         else {
-            return this.onSubmit(sqlStr);
+            let r = this.onSubmit(sqlStr);
+            return EntityCopier.Decode(obj);
         }
 
     }
@@ -65,6 +71,7 @@ export class SqliteDataContext implements IDataContext {
      */
     Delete(obj: IEntityObject) {
         let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id=" + obj.id + ";";
+        console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -101,24 +108,35 @@ export class SqliteDataContext implements IDataContext {
         return sqlite.run(sqlStr);
     }
 
-    RollBack(){}
+    RollBack() { }
 
     private onSubmit(sqlStr: string): any {
         return sqlite.run(sqlStr);
     }
     private propertyFormat(obj: IEntityObject): PropertyFormatResult {
-        let propertyNameList: string[] = [];
-        let propertyValueList = [];
+        const propertyNameList: string[] = [];
+        const propertyValueList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key])) {
+            //数组转换
+            if (this.isAvailableValue(obj[key])) {
+                if (obj[key] == null || obj[key] == undefined || obj[key] == "") continue;
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
                 propertyNameList.push(key);
-                if (isNaN(obj[key])) {
+                if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
+                    propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
+                } else if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
                 }
                 else if (obj[key] instanceof Date) {
                     propertyValueList.push("'" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
                 }
                 else {
+                    if (obj[key] === true) {
+                        obj[key] = 1;
+                    }
+                    else if (obj[key] === false) {
+                        obj[key] = 0;
+                    }
                     propertyValueList.push(obj[key]);
                 }
 
@@ -128,9 +146,10 @@ export class SqliteDataContext implements IDataContext {
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
 
-    private isNotObjectOrFunction(value): boolean {
-        if (value instanceof Date) return true;
-        return typeof (value) != "object" && typeof (value) != "function" && value != "undefine" && value != null;
+
+    private isAvailableValue(value): boolean {
+        if (value == null || value == undefined) return false;
+        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }
 
     private dateFormat(d: Date, fmt: string) {

@@ -1,4 +1,5 @@
 "use strict";
+const entityCopier_1 = require("./../entityCopier");
 const sqlite = require("sqlite-sync");
 class SqliteDataContext {
     constructor(dbName) {
@@ -17,14 +18,19 @@ class SqliteDataContext {
             this.querySentence.push(sqlStr);
         }
         else {
-            return this.onSubmit(sqlStr);
+            let r = this.onSubmit(sqlStr);
+            return entityCopier_1.EntityCopier.Decode(obj);
         }
     }
     Update(obj) {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key]) && key != "Id") {
+            if (this.isAvailableValue(obj[key]) && key != "id") {
+                if (obj[key] == undefined || obj[key] == null || obj[key] == "")
+                    continue;
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
+                    continue;
                 if (isNaN(obj[key])) {
                     qList.push(key + "='" + obj[key] + "'");
                 }
@@ -36,16 +42,19 @@ class SqliteDataContext {
                 }
             }
         }
-        sqlStr += qList.join(',') + " WHERE id=" + obj.id + ";";
+        sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
+        console.log("Update:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
         else {
-            return this.onSubmit(sqlStr);
+            let r = this.onSubmit(sqlStr);
+            return entityCopier_1.EntityCopier.Decode(obj);
         }
     }
     Delete(obj) {
         let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id=" + obj.id + ";";
+        console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -77,28 +86,41 @@ class SqliteDataContext {
         return sqlite.run(sqlStr);
     }
     propertyFormat(obj) {
-        let propertyNameList = [];
-        let propertyValueList = [];
+        const propertyNameList = [];
+        const propertyValueList = [];
         for (var key in obj) {
-            if (this.isNotObjectOrFunction(obj[key])) {
+            if (this.isAvailableValue(obj[key])) {
+                if (obj[key] == null || obj[key] == undefined || obj[key] == "")
+                    continue;
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
+                    continue;
                 propertyNameList.push(key);
-                if (isNaN(obj[key])) {
+                if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
+                    propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
+                }
+                else if (isNaN(obj[key])) {
                     propertyValueList.push("'" + obj[key] + "'");
                 }
                 else if (obj[key] instanceof Date) {
                     propertyValueList.push("'" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
                 }
                 else {
+                    if (obj[key] === true) {
+                        obj[key] = 1;
+                    }
+                    else if (obj[key] === false) {
+                        obj[key] = 0;
+                    }
                     propertyValueList.push(obj[key]);
                 }
             }
         }
         return { PropertyNameList: propertyNameList, PropertyValueList: propertyValueList };
     }
-    isNotObjectOrFunction(value) {
-        if (value instanceof Date)
-            return true;
-        return typeof (value) != "object" && typeof (value) != "function" && value != "undefine" && value != null;
+    isAvailableValue(value) {
+        if (value == null || value == undefined)
+            return false;
+        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
     }
     dateFormat(d, fmt) {
         let o = {

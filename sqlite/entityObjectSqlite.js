@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments)).next());
     });
 };
+const entityCopier_1 = require("./../entityCopier");
 const entityObject_1 = require("../entityObject");
 class EntityObjectSqlite extends entityObject_1.EntityObject {
     constructor(ctx) {
@@ -18,7 +19,6 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
         let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        console.log(sql);
         this.sqlTemp.push(sql);
         return this;
     }
@@ -61,7 +61,7 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
         sql = this.addQueryStence(sql) + ";";
         let row = this.ctx.Query(sql);
         return new Promise((resolve, reject) => {
-            resolve(this.clone(row && row['0'], new Object()));
+            resolve(this.clone(entityCopier_1.EntityCopier.Decode(row && row['0']), new Object()));
         });
     }
     Take(count) {
@@ -94,7 +94,12 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
             row = this.ctx.Query(sql);
         }
         return new Promise((resolve, reject) => {
-            resolve(this.cloneList(row));
+            if (row.error) {
+                reject(row);
+            }
+            else {
+                resolve(this.cloneList(row));
+            }
         });
     }
     Max(qFn) {
@@ -129,9 +134,9 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
                 throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
-                if (isNaN)
-                    v = "'" + paramsValue[i] + "'";
-                qFnS = qFnS.replace(new RegExp(paramsKey[i], "gm"), v);
+                if (isNaN(v))
+                    v = "= '" + paramsValue[i] + "'";
+                qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
             }
         }
         return qFnS;
@@ -155,7 +160,7 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
         let r = [];
         list.forEach(x => {
             if (x)
-                r.push(this.clone(x, new Object(), false));
+                r.push(this.clone(entityCopier_1.EntityCopier.Decode(x), new Object(), false));
         });
         return r;
     }
@@ -164,7 +169,7 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
             sql = sql.replace(/\*/g, this.queryParam.SelectFileds.join(','));
         }
         if (this.queryParam.OrderByFiledName) {
-            sql += " ORDERBY " + this.queryParam.OrderByFiledName;
+            sql += " ORDER BY " + this.queryParam.OrderByFiledName;
             if (this.queryParam.IsDesc)
                 sql += " DESC";
         }

@@ -1,3 +1,4 @@
+import { EntityCopier } from './../entityCopier';
 import { SqliteDataContext } from './dataContextSqlite';
 import { EntityObject } from '../entityObject';
 import { IEntityObject, IQueryObject } from '../tinyDB';
@@ -16,7 +17,6 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
     }
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
         let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        console.log(sql);
         this.sqlTemp.push(sql);
         return this;
     }
@@ -68,7 +68,7 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
 
         let row = this.ctx.Query(sql);
         return new Promise((resolve, reject) => {
-            resolve(this.clone(row && row['0'], new Object() as T));
+            resolve(this.clone(EntityCopier.Decode(row && row['0']), new Object() as T));
         });
     }
     Take(count: number): IQueryObject<T> {
@@ -101,7 +101,12 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
             row = this.ctx.Query(sql);
         }
         return new Promise((resolve, reject) => {
-            resolve(this.cloneList(row));
+            if (row.error) {
+                reject(row);
+            }
+            else {
+                resolve(this.cloneList(row));
+            }
         })
     }
     Max(qFn: (x: T) => void) {
@@ -138,8 +143,8 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
             if (paramsKey.length != paramsValue.length) throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
-                if (isNaN) v = "'" + paramsValue[i] + "'";
-                qFnS = qFnS.replace(new RegExp(paramsKey[i], "gm"), v);
+                if (isNaN(v)) v = "= '" + paramsValue[i] + "'";
+                qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
             }
         }
 
@@ -162,7 +167,7 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
     private cloneList(list: [any]): T[] {
         let r: T[] = [];
         list.forEach(x => {
-            if (x) r.push(this.clone(x, new Object() as T, false));
+            if (x) r.push(this.clone(EntityCopier.Decode(x), new Object() as T, false));
         });
 
         return r;
@@ -172,7 +177,7 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
             sql = sql.replace(/\*/g, this.queryParam.SelectFileds.join(','));
         }
         if (this.queryParam.OrderByFiledName) {
-            sql += " ORDERBY " + this.queryParam.OrderByFiledName;
+            sql += " ORDER BY " + this.queryParam.OrderByFiledName;
             if (this.queryParam.IsDesc) sql += " DESC";
         }
         if (this.queryParam.TakeCount && this.queryParam.SkipCount) {
