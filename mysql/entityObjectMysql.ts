@@ -33,18 +33,18 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             resolve(result > 0);
         });
     }
-    Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
+    async Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
         let sql = "";
         if (qFn) {
-            sql = "SELECT COUNT(id) FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
         }
         else {
-            sql = "SELECT COUNT(id) FROM " + this.toString();
+            sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
         }
 
         sql = this.addQueryStence(sql) + ";";
 
-        let r = this.ctx.Query(sql);
+        let r = await this.ctx.Query(sql);
         let result = r ? r[0]["COUNT(id)"] : 0;
 
         return new Promise<number>((resolve, reject) => {
@@ -72,10 +72,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         queryCallback?: (result: T) => void): Promise<T> {
         let sql: string;
         if (qFn) {
-            sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
         }
         else {
-            sql = "SELECT * FROM " + this.toString();
+            sql = "SELECT * FROM `" + this.toString() + "`";
         }
 
         this.Skip(0);
@@ -111,12 +111,12 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async ToList(queryCallback?: (result: T[]) => void) {
         let row;
         if (this.sqlTemp.length > 0) {
-            let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.sqlTemp.join(' && ');
+            let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' && ');
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         else {
-            let sql = "SELECT * FROM " + this.toString();
+            let sql = "SELECT * FROM `" + this.toString() + "`";
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
@@ -173,8 +173,13 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             if (paramsKey.length != paramsValue.length) throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
-                if (isNaN(v)) v = "'" + paramsValue[i] + "'";
-                qFnS = qFnS.replace(new RegExp(paramsKey[i], "gm"), v);
+                if (isNaN(v)) v = "= '" + paramsValue[i] + "'";
+                else v = "= " + paramsValue[i];
+
+                if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
+                    v = "= NULL";
+                }
+                qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
             }
         }
 
@@ -204,7 +209,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             sql = sql.replace(/\*/g, this.queryParam.SelectFileds.join(','));
         }
         if (this.queryParam.OrderByFiledName) {
-            sql += " ORDERBY " + this.queryParam.OrderByFiledName;
+            sql += " ORDER BY " + this.queryParam.OrderByFiledName;
             if (this.queryParam.IsDesc) sql += " DESC";
         }
         if ((this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) && (this.queryParam.SkipCount != null && this.queryParam.SkipCount != undefined)) {

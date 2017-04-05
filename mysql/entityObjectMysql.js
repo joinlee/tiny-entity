@@ -35,18 +35,20 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         });
     }
     Count(qFn, paramsKey, paramsValue, queryCallback) {
-        let sql = "";
-        if (qFn) {
-            sql = "SELECT COUNT(id) FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
-        }
-        else {
-            sql = "SELECT COUNT(id) FROM " + this.toString();
-        }
-        sql = this.addQueryStence(sql) + ";";
-        let r = this.ctx.Query(sql);
-        let result = r ? r[0]["COUNT(id)"] : 0;
-        return new Promise((resolve, reject) => {
-            resolve(result);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = "";
+            if (qFn) {
+                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            }
+            else {
+                sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
+            }
+            sql = this.addQueryStence(sql) + ";";
+            let r = yield this.ctx.Query(sql);
+            let result = r ? r[0]["COUNT(id)"] : 0;
+            return new Promise((resolve, reject) => {
+                resolve(result);
+            });
         });
     }
     Contains(feild, values) {
@@ -67,10 +69,10 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let sql;
             if (qFn) {
-                sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
             }
             else {
-                sql = "SELECT * FROM " + this.toString();
+                sql = "SELECT * FROM `" + this.toString() + "`";
             }
             this.Skip(0);
             this.Take(1);
@@ -107,12 +109,12 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let row;
             if (this.sqlTemp.length > 0) {
-                let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.sqlTemp.join(' && ');
+                let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' && ');
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
             else {
-                let sql = "SELECT * FROM " + this.toString();
+                let sql = "SELECT * FROM `" + this.toString() + "`";
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
@@ -168,8 +170,13 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
                 if (isNaN(v))
-                    v = "'" + paramsValue[i] + "'";
-                qFnS = qFnS.replace(new RegExp(paramsKey[i], "gm"), v);
+                    v = "= '" + paramsValue[i] + "'";
+                else
+                    v = "= " + paramsValue[i];
+                if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
+                    v = "= NULL";
+                }
+                qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
             }
         }
         return qFnS;
@@ -198,7 +205,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             sql = sql.replace(/\*/g, this.queryParam.SelectFileds.join(','));
         }
         if (this.queryParam.OrderByFiledName) {
-            sql += " ORDERBY " + this.queryParam.OrderByFiledName;
+            sql += " ORDER BY " + this.queryParam.OrderByFiledName;
             if (this.queryParam.IsDesc)
                 sql += " DESC";
         }

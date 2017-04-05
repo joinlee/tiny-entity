@@ -38,16 +38,20 @@ class MysqlDataContext {
             let qList = [];
             for (var key in obj) {
                 if (this.isAvailableValue(obj[key]) && key != "id") {
-                    if (obj[key] == undefined || obj[key] == null || obj[key] == "")
-                        continue;
-                    if (isNaN(obj[key])) {
-                        qList.push(key + "='" + obj[key] + "'");
+                    if (obj[key] == undefined || obj[key] == null || obj[key] == "") {
+                        qList.push("`" + key + "`=NULL");
+                    }
+                    else if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
+                        qList.push("`" + key + "`='" + JSON.stringify(obj[key]) + "'");
+                    }
+                    else if (isNaN(obj[key])) {
+                        qList.push("`" + key + "`='" + obj[key] + "'");
                     }
                     else if (obj[key] instanceof Date) {
-                        qList.push(key + "='" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
+                        qList.push("`" + key + "`='" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
                     }
                     else {
-                        qList.push(key + "=" + obj[key]);
+                        qList.push("`" + key + "`=" + obj[key]);
                     }
                 }
             }
@@ -151,7 +155,9 @@ class MysqlDataContext {
             if (this.isAvailableValue(obj[key])) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
                     continue;
-                propertyNameList.push(key);
+                if (obj[key] == undefined || obj[key] == null || obj[key] == "")
+                    continue;
+                propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
                 }
