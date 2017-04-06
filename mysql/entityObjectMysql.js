@@ -174,7 +174,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                 else
                     v = "= " + paramsValue[i];
                 if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
-                    v = "= NULL";
+                    v = "IS NULL";
                 }
                 qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
             }
