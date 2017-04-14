@@ -86,21 +86,29 @@ class MysqlDataContext {
             mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
                 if (err) {
                     conn.release();
+                    console.log("getConnection , hhhhhhhhhhhhhhhhh", err);
                     reject(err);
                 }
                 conn.beginTransaction(err => {
                     if (err) {
                         conn.release();
+                        console.log("beginTransaction , hhhhhhhhhhhhhhhhh", err);
                         reject(err);
                     }
                 });
-                for (let sql of this.querySentence) {
-                    let r = yield this.TrasnQuery(conn, sql);
+                try {
+                    for (let sql of this.querySentence) {
+                        let r = yield this.TrasnQuery(conn, sql);
+                    }
+                }
+                catch (error) {
+                    reject(error);
                 }
                 conn.commit(err => {
                     if (err)
                         conn.rollback(() => {
                             conn.release();
+                            console.log("commit , hhhhhhhhhhhhhhhhh", err);
                             reject(err);
                         });
                     this.querySentence = [];
@@ -116,6 +124,7 @@ class MysqlDataContext {
             return new Promise((resolve, reject) => {
                 conn.query(sql, (err, result) => {
                     if (err) {
+                        console.log("TrasnQuery , hhhhhhhhhhhhhhhhh", err, sql);
                         conn.rollback(() => { reject(err); });
                     }
                     else {
@@ -177,7 +186,7 @@ class MysqlDataContext {
     isAvailableValue(value) {
         if (value == null || value == undefined)
             return false;
-        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number";
+        return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number" || typeof (value) == "boolean";
     }
     dateFormat(d, fmt) {
         let o = {

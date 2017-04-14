@@ -1,6 +1,4 @@
-# tiny-entity
-数据库的ORM 映射底层
+# tiny-entity 
+v 0.6.3
 
-1.indexedDB
-2.nedb
-3.sqlite
+1. 修复mysql 底层boolean update 的bug
