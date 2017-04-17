@@ -19,7 +19,7 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         return this;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
-        return null;
+        return this;
     }
     async Any(qFn: (entityObject: T) => boolean,
         paramsKey?: string[],

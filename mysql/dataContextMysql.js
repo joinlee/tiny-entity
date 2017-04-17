@@ -86,13 +86,11 @@ class MysqlDataContext {
             mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
                 if (err) {
                     conn.release();
-                    console.log("getConnection , hhhhhhhhhhhhhhhhh", err);
                     reject(err);
                 }
                 conn.beginTransaction(err => {
                     if (err) {
                         conn.release();
-                        console.log("beginTransaction , hhhhhhhhhhhhhhhhh", err);
                         reject(err);
                     }
                 });
@@ -100,22 +98,24 @@ class MysqlDataContext {
                     for (let sql of this.querySentence) {
                         let r = yield this.TrasnQuery(conn, sql);
                     }
+                    conn.commit(err => {
+                        if (err)
+                            conn.rollback(() => {
+                                conn.release();
+                                reject(err);
+                            });
+                        this.querySentence = [];
+                        this.transactionOn = false;
+                        conn.release();
+                        resolve(true);
+                    });
                 }
                 catch (error) {
-                    reject(error);
-                }
-                conn.commit(err => {
-                    if (err)
-                        conn.rollback(() => {
-                            conn.release();
-                            console.log("commit , hhhhhhhhhhhhhhhhh", err);
-                            reject(err);
-                        });
                     this.querySentence = [];
                     this.transactionOn = false;
                     conn.release();
-                    resolve(true);
-                });
+                    reject(error);
+                }
             }));
         });
     }

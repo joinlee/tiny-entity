@@ -1,4 +1,4 @@
 # tiny-entity 
-v 0.6.3
+v 0.6.4
 
-1. 修复mysql 底层boolean update 的bug
+1. nedb 实现select方法

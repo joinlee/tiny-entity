@@ -22,7 +22,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         return this;
     }
     Select(qFn) {
-        return null;
+        return this;
     }
     Any(qFn, paramsKey, paramsValue, queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {

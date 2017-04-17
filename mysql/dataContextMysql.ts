@@ -97,13 +97,11 @@ export class MysqlDataContext implements IDataContext {
             mysqlPool.getConnection(async (err, conn) => {
                 if (err) {
                     conn.release();
-                    console.log("getConnection , hhhhhhhhhhhhhhhhh", err);
                     reject(err);
                 }
                 conn.beginTransaction(err => {
                     if (err) {
                         conn.release();
-                        console.log("beginTransaction , hhhhhhhhhhhhhhhhh", err);
                         reject(err);
                     }
                 });
@@ -111,21 +109,22 @@ export class MysqlDataContext implements IDataContext {
                     for (let sql of this.querySentence) {
                         let r = await this.TrasnQuery(conn, sql);
                     }
-                } catch (error) {
-                    reject(error);
-                }
-
-                conn.commit(err => {
-                    if (err) conn.rollback(() => {
+                    conn.commit(err => {
+                        if (err) conn.rollback(() => {
+                            conn.release();
+                            reject(err);
+                        });
+                        this.querySentence = [];
+                        this.transactionOn = false;
                         conn.release();
-                        console.log("commit , hhhhhhhhhhhhhhhhh", err);
-                        reject(err);
+                        resolve(true);
                     });
+                } catch (error) {
                     this.querySentence = [];
                     this.transactionOn = false;
                     conn.release();
-                    resolve(true);
-                });
+                    reject(error);
+                }
             });
         });
     }
