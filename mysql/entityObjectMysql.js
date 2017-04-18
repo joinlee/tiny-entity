@@ -160,7 +160,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         let p = this.getParameterNames(qFn)[0];
         qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p + ".", "gm"), "");
+        qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
         qFnS = qFnS.replace(/\&\&/g, "AND");
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");
