@@ -44,7 +44,7 @@ class MysqlDataContext {
                     else if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                         qList.push("`" + key + "`='" + JSON.stringify(obj[key]) + "'");
                     }
-                    else if (isNaN(obj[key])) {
+                    else if (isNaN(obj[key]) || typeof (obj[key]) == "string") {
                         qList.push("`" + key + "`='" + obj[key] + "'");
                     }
                     else if (obj[key] instanceof Date) {
