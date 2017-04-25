@@ -209,7 +209,9 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             if (this.queryParam.IsDesc)
                 sql += " DESC";
         }
-        if ((this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) && (this.queryParam.SkipCount != null && this.queryParam.SkipCount != undefined)) {
+        if (this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) {
+            if (this.queryParam.SkipCount == null && this.queryParam.SkipCount == undefined)
+                this.queryParam.SkipCount = 0;
             sql += " LIMIT " + this.queryParam.SkipCount + "," + this.queryParam.TakeCount;
         }
         this.clearQueryParams();
