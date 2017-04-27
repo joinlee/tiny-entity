@@ -2,6 +2,9 @@ import { MysqlDataContext } from "../index";
 import { Order, Employee } from "./model";
 import { EntityCopier } from "../../entityCopier";
 import { Transaction } from '../../transcation';
+
+
+
 class Guid {
     static GetGuid(): string {
         var s = [];
@@ -137,9 +140,13 @@ async function Test2() {
 async function Test3() {
     try {
         let ctx = new TestDataContext();
-        let r = await ctx.Order.First(x => x.id == "c98ad2a9afed42dd8299fb4983734316");
-        console.log(r);
+        // let r = await ctx.Order.First(x => x.id == "c98ad2a9afed42dd8299fb4983734316");
+        // console.log(r);
 
+        let xx = "2222";
+        let r = await ctx.Order.Where(x => x.orderNo.IndexOf(xx), ["xx"], [xx]).ToList();
+        //let r = await ctx.Order.Where(x => x.orderNo == xx, ["xx"], [xx]).ToList();
+        console.log(r);
     } catch (error) {
 
     }

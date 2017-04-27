@@ -1,5 +1,8 @@
-import { MysqlDataContext } from "../index";
+import { MysqlDataContext, EntityObjectMysql } from "../index";
 import { EntityObject } from "../../entityObject";
+import { EntityObjectNeDB } from "../../index";
+
+
 
 export class Employee extends EntityObject<Employee> {
     constructor(args?) {
@@ -134,7 +137,7 @@ class Modifier extends EntityObject<Modifier> {
     options: [any];
     toString() { return "Modifier"; }
 }
-export class Order extends EntityObject<Order> {
+export class Order extends EntityObjectNeDB<Order> {
     constructor(args?) {
         super(args);
     }

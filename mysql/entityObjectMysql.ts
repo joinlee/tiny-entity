@@ -146,7 +146,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 
     private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
 
-        let qFnS = qFn.toString();
+        let qFnS: string = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
         qFnS = qFnS.replace(/if/g, "");
@@ -165,6 +165,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
         qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
+
+        let indexOfFlag = qFnS.indexOf(".IndexOf") > -1;
+        qFnS = qFnS.replace(new RegExp("\\.IndexOf", "gm"), " LIKE ");
+        
         qFnS = qFnS.replace(/\&\&/g, "AND");
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");
@@ -173,13 +177,19 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             if (paramsKey.length != paramsValue.length) throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
-                if (isNaN(v)) v = "= '" + paramsValue[i] + "'";
-                else v = "= " + paramsValue[i];
-
-                if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
-                    v = "IS NULL";
+                if (indexOfFlag) {
+                    v = "LIKE '%" + paramsValue[i] + "%'";
+                    qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
                 }
-                qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
+                else {
+                    if (isNaN(v)) v = "= '" + paramsValue[i] + "'";
+                    else v = "= " + paramsValue[i];
+
+                    if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
+                        v = "IS NULL";
+                    }
+                    qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
+                } 
             }
         }
 
