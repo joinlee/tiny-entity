@@ -36,10 +36,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
         let sql = "";
         if (qFn) {
-            sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            sql = "SELECT COUNT(id) FROM `" + this.toString().toLowerCase() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
         }
         else {
-            sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
+            sql = "SELECT COUNT(id) FROM `" + this.toString().toLowerCase() + "`";
         }
 
         sql = this.addQueryStence(sql) + ";";
@@ -72,10 +72,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         queryCallback?: (result: T) => void): Promise<T> {
         let sql: string;
         if (qFn) {
-            sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            sql = "SELECT * FROM `" + this.toString().toLowerCase() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
         }
         else {
-            sql = "SELECT * FROM `" + this.toString() + "`";
+            sql = "SELECT * FROM `" + this.toString().toLowerCase() + "`";
         }
 
         this.Skip(0);
@@ -111,12 +111,12 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async ToList(queryCallback?: (result: T[]) => void) {
         let row;
         if (this.sqlTemp.length > 0) {
-            let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' && ');
+            let sql = "SELECT * FROM `" + this.toString().toLowerCase() + "` WHERE " + this.sqlTemp.join(' && ');
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         else {
-            let sql = "SELECT * FROM `" + this.toString() + "`";
+            let sql = "SELECT * FROM `" + this.toString().toLowerCase() + "`";
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
