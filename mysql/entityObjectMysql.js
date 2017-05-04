@@ -109,7 +109,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let row;
             if (this.sqlTemp.length > 0) {
-                let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' && ');
+                let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' AND ');
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
@@ -178,6 +178,9 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                 }
                 qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
             }
+        }
+        else {
+            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
         }
         return qFnS;
     }
