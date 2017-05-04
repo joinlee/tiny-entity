@@ -1,5 +1,6 @@
 "use strict";
 const entityObject_1 = require("../../entityObject");
+const index_1 = require("../../index");
 class Employee extends entityObject_1.EntityObject {
     constructor(args) {
         super(args);
@@ -54,7 +55,7 @@ class Unit extends entityObject_1.EntityObject {
 class Modifier extends entityObject_1.EntityObject {
     toString() { return "Modifier"; }
 }
-class Order extends entityObject_1.EntityObject {
+class Order extends index_1.EntityObjectNeDB {
     constructor(args) {
         super(args);
         this.id = null;

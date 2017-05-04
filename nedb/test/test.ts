@@ -192,24 +192,32 @@ async function openDBTest() {
 async function updateAndCreateDataTest() {
     let ctx = new TestDemoDataContext();
 
-    let u = new User();
-    u.mobile = "15908101316";
-    u.email = "lp@qq.com";
-    u.name = "牛魔王22222";
-    u.password = "202cb962ac59075b964b07152d234b70";
-    u.id = "22222222222222222222222";
+    // let u = new User();
+    // u.mobile = "15908101316";
+    // u.email = "lp@qq.com";
+    // u.name = "牛魔王22222";
+    // u.password = "202cb962ac59075b964b07152d234b70";
+    // u.id = "22222222222222222222222";
 
-    let t = await ctx.Update(u);
+    // let t = await ctx.Update(u);
 
-    console.log("test finsh");
+    // console.log("test finsh");
 
-    let count = await ctx.User.Count();
-    console.log("result count ", count);
+    // let count = await ctx.User.Count();
+    // console.log("result count ", count);
 
-    let f = await ctx.User.First(x => x.id == "22222222222222222222222");
-    console.log(f.name);
+    // let f = await ctx.User.First(x => x.id == "22222222222222222222222");
+    // console.log(f.name);
+
+    let d = await ctx.User.Where(x => x.name.IndexOf("王")).ToList();
+    console.log(d);
+
+    // let x = "abc";
+    // let r = "abc".IndexOf("b");
+    // console.log(r);
+    // console.log(Object.getOwnPropertyNames(String.prototype));
+    // console.log("%s: %s".format('key', 'val'));
 }
-
 
 updateAndCreateDataTest();
 

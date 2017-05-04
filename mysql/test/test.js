@@ -151,7 +151,8 @@ function Test3() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let ctx = new TestDataContext();
-            let r = yield ctx.Order.First(x => x.id == "c98ad2a9afed42dd8299fb4983734316");
+            let xx = "2222";
+            let r = yield ctx.Order.Where(x => x.orderNo.IndexOf(xx), ["xx"], [xx]).ToList();
             console.log(r);
         }
         catch (error) {

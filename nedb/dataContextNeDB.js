@@ -10,6 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const Datastore = require("nedb");
 var dbconfig;
 const nedbPool_1 = require("./nedbPool");
+String.prototype.IndexOf = function (str) {
+    return this.indexOf(str) > -1;
+};
 class NeDBDataContext {
     constructor(config) {
         this.transList = [];

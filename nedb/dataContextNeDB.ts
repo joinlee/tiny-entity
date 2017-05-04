@@ -4,6 +4,10 @@ import { IEntityObject, IDataContext } from '../tinyDB';
 var dbconfig;
 import { NeDBPool } from './nedbPool';
 
+String.prototype.IndexOf = function (str: string) {
+    return this.indexOf(str) > -1;
+}
+
 export class NeDBDataContext implements IDataContext {
     private nedb: Datastore;
     private config: ContextConfig;
