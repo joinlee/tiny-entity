@@ -16,7 +16,7 @@ export class MysqlDataContext implements IDataContext {
      * @param  {IEntityObject} obj
      */
     async Create(obj: IEntityObject) {
-        let sqlStr = "INSERT INTO " + obj.toString();
+        let sqlStr = "INSERT INTO " + obj.toString().toLowerCase();
         let pt = this.propertyFormat(obj);
 
         sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
@@ -34,11 +34,11 @@ export class MysqlDataContext implements IDataContext {
      * @param  {IEntityObject} obj
      */
     async Update(obj: IEntityObject) {
-        let sqlStr = "UPDATE " + obj.toString() + " SET ";
+        let sqlStr = "UPDATE " + obj.toString().toLowerCase() + " SET ";
         let qList = [];
         for (var key in obj) {
             if (this.isAvailableValue(obj[key]) && key != "id") {
-                if (obj[key] == undefined || obj[key] == null || obj[key] == "") {
+                if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                     qList.push("`" + key + "`=NULL");
                 }
                 else if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
@@ -72,7 +72,7 @@ export class MysqlDataContext implements IDataContext {
      * @param  {IEntityObject} obj
      */
     Delete(obj: IEntityObject) {
-        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
+        let sqlStr = "DELETE FROM " + obj.toString().toLowerCase() + " WHERE id='" + obj.id + "';";
         console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
@@ -175,7 +175,7 @@ export class MysqlDataContext implements IDataContext {
             //数组转换
             if (this.isAvailableValue(obj[key])) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
-                if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
+                if (obj[key] == undefined || obj[key] == null || obj[key] === "") continue;
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
