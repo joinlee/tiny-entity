@@ -111,7 +111,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async ToList(queryCallback?: (result: T[]) => void) {
         let row;
         if (this.sqlTemp.length > 0) {
-            let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' && ');
+            let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' AND ');
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
@@ -145,7 +145,6 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     }
 
     private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
-
         let qFnS: string = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
@@ -191,6 +190,9 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                     qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
                 } 
             }
+        }
+        else {
+            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
         }
 
         return qFnS;
