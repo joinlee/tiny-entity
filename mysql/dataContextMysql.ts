@@ -162,7 +162,14 @@ export class MysqlDataContext implements IDataContext {
                 }
                 conn.query(sqlStr, (err, args) => {
                     conn.release();
-                    if (err) reject(err);
+                    if (err) {
+                        if (err.errno == 1062) {
+                            reject("重复的主键id");
+                        }
+                        else {
+                            reject(err);
+                        }
+                    }
                     else resolve(args);
                 });
             });
