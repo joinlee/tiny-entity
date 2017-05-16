@@ -149,14 +149,8 @@ class MysqlDataContext {
                 }
                 conn.query(sqlStr, (err, args) => {
                     conn.release();
-                    if (err) {
-                        if (err.errno == 1062) {
-                            reject("重复的主键id");
-                        }
-                        else {
-                            reject(err);
-                        }
-                    }
+                    if (err)
+                        reject(err);
                     else
                         resolve(args);
                 });
