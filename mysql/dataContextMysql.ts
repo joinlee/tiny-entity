@@ -196,7 +196,6 @@ export class MysqlDataContext implements IDataContext {
     }
 
     private isAvailableValue(value): boolean {
-        if (value == null || value == undefined) return false;
         return typeof (value) == "object" || typeof (value) == "string" || typeof (value) == "number" || typeof (value) == "boolean";
     }
 
