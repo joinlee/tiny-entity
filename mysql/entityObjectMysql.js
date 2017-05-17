@@ -176,7 +176,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                     qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
                 }
                 else {
-                    let opchar = qFnS[qFnS.indexOf(paramsKey[i]) - 2];
+                    let opchar = qFnS[qFnS.lastIndexOf(paramsKey[i]) - 2];
                     if (isNaN(v))
                         v = opchar + " '" + paramsValue[i] + "'";
                     else
