@@ -38,7 +38,7 @@ export class MysqlDataContext implements IDataContext {
         let qList = [];
         for (var key in obj) {
             if (this.isAvailableValue(obj[key]) && key != "id") {
-                if (obj[key] == undefined || obj[key] == null || obj[key] == "") {
+                if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                     qList.push("`" + key + "`=NULL");
                 }
                 else if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
@@ -175,7 +175,7 @@ export class MysqlDataContext implements IDataContext {
             //数组转换
             if (this.isAvailableValue(obj[key])) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx") continue;
-                if (obj[key] == undefined || obj[key] == null || obj[key] == "") continue;
+                if (obj[key] == undefined || obj[key] == null || obj[key] === "") continue;
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");

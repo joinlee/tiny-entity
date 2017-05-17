@@ -38,7 +38,7 @@ class MysqlDataContext {
             let qList = [];
             for (var key in obj) {
                 if (this.isAvailableValue(obj[key]) && key != "id") {
-                    if (obj[key] == undefined || obj[key] == null || obj[key] == "") {
+                    if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                         qList.push("`" + key + "`=NULL");
                     }
                     else if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
@@ -164,7 +164,7 @@ class MysqlDataContext {
             if (this.isAvailableValue(obj[key])) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
                     continue;
-                if (obj[key] == undefined || obj[key] == null || obj[key] == "")
+                if (obj[key] == undefined || obj[key] == null || obj[key] === "")
                     continue;
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {

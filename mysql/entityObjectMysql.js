@@ -176,19 +176,17 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                     qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
                 }
                 else {
+                    let opchar = qFnS[qFnS.indexOf(paramsKey[i]) - 2];
                     if (isNaN(v))
-                        v = "= '" + paramsValue[i] + "'";
+                        v = opchar + " '" + paramsValue[i] + "'";
                     else
-                        v = "= " + paramsValue[i];
+                        v = opchar + " " + paramsValue[i];
                     if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
                         v = "IS NULL";
                     }
-                    qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
+                    qFnS = qFnS.replace(new RegExp(opchar + " " + paramsKey[i], "gm"), v);
                 }
             }
-        }
-        else {
-            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
         }
         return qFnS;
     }
