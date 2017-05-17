@@ -167,7 +167,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 
         let indexOfFlag = qFnS.indexOf(".IndexOf") > -1;
         qFnS = qFnS.replace(new RegExp("\\.IndexOf", "gm"), " LIKE ");
-        
+
         qFnS = qFnS.replace(/\&\&/g, "AND");
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");
@@ -181,20 +181,17 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                     qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
                 }
                 else {
-                    if (isNaN(v)) v = "= '" + paramsValue[i] + "'";
-                    else v = "= " + paramsValue[i];
+                    let opchar = qFnS[qFnS.indexOf(paramsKey[i]) - 2];
+                    if (isNaN(v)) v = opchar + " '" + paramsValue[i] + "'";
+                    else v = opchar + " " + paramsValue[i];
 
                     if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
                         v = "IS NULL";
                     }
-                    qFnS = qFnS.replace(new RegExp("= " + paramsKey[i], "gm"), v);
-                } 
+                    qFnS = qFnS.replace(new RegExp(opchar + " " + paramsKey[i], "gm"), v);
+                }
             }
         }
-        else {
-            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
-        }
-
         return qFnS;
     }
     clone(source: any, destination: T, isDeep?: boolean): T {
