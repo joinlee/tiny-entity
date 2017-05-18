@@ -188,6 +188,9 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                 }
             }
         }
+        else {
+            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
+        }
         return qFnS;
     }
     clone(source, destination, isDeep) {

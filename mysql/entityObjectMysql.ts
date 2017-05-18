@@ -192,6 +192,9 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                 }
             }
         }
+        else {
+            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
+        }
         return qFnS;
     }
     clone(source: any, destination: T, isDeep?: boolean): T {
