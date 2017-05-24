@@ -7,7 +7,9 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
     toString(): string { return ""; }
 
     private ctx: IDataContext;
-    private sqlTemp = [];
+    private sqlTemp: { qFn: any[]; queryMode?: QueryMode; inq?: any } = <any>{
+        qFn: []
+    };
     private queryParam: QueryParams = new Object() as QueryParams;
     constructor(ctx?: IDataContext) {
         super(ctx);
@@ -15,7 +17,7 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
     }
 
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
-        this.sqlTemp.push(qFn);
+        this.sqlTemp.qFn.push(qFn);
         return this;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
@@ -69,14 +71,16 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
     }
     async ToList(queryCallback?: (result: T[]) => void) {
         let r: [any];
-        if (this.sqlTemp.length > 0) {
-            r = await this.ctx.Query(this.sqlTemp as any, this.toString());
+        if (this.sqlTemp.qFn.length > 0) {
+            r = await this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
         }
         else {
             r = await this.ctx.Query([x => true], this.toString());
         }
         //将this.sqlTemp置为空
-        this.sqlTemp = [];
+        this.sqlTemp = {
+            qFn: []
+        }
         let result = (this.cloneList(r) as T[]);
         if (this.queryParam) {
             if (this.queryParam.OrderByFiledName) {
@@ -122,7 +126,11 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
             feildName: this.getFeild(feild),
             value: values
         };
-        return this.ctx.Query(null, this.toString(), QueryMode.Contains, null, inq);
+        this.sqlTemp.qFn = null;
+        this.sqlTemp.queryMode = QueryMode.Contains;
+        this.sqlTemp.inq = inq;
+        return this;
+        //return this.ctx.Query(null, this.toString(), QueryMode.Contains, null, inq);
     }
 
 

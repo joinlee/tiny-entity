@@ -12,13 +12,15 @@ const entityObject_1 = require("../entityObject");
 class EntityObjectNeDB extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
-        this.sqlTemp = [];
+        this.sqlTemp = {
+            qFn: []
+        };
         this.queryParam = new Object();
         this.ctx = ctx;
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        this.sqlTemp.push(qFn);
+        this.sqlTemp.qFn.push(qFn);
         return this;
     }
     Select(qFn) {
@@ -76,13 +78,15 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
     ToList(queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {
             let r;
-            if (this.sqlTemp.length > 0) {
-                r = yield this.ctx.Query(this.sqlTemp, this.toString());
+            if (this.sqlTemp.qFn.length > 0) {
+                r = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
             }
             else {
                 r = yield this.ctx.Query([x => true], this.toString());
             }
-            this.sqlTemp = [];
+            this.sqlTemp = {
+                qFn: []
+            };
             let result = this.cloneList(r);
             if (this.queryParam) {
                 if (this.queryParam.OrderByFiledName) {
@@ -138,7 +142,10 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             feildName: this.getFeild(feild),
             value: values
         };
-        return this.ctx.Query(null, this.toString(), dataContextNeDB_1.QueryMode.Contains, null, inq);
+        this.sqlTemp.qFn = null;
+        this.sqlTemp.queryMode = dataContextNeDB_1.QueryMode.Contains;
+        this.sqlTemp.inq = inq;
+        return this;
     }
     clone(source, destination, isDeep) {
         if (!source)
