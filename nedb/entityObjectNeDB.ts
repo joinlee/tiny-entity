@@ -101,20 +101,20 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
             if (this.queryParam.TakeCount) {
                 result = result.splice(0, this.queryParam.TakeCount);
                 this.queryParam.TakeCount = null;
-            }      
+            }
         }
         return result;
     }
-    async Max(qFn: (x: T) => void) {
+    async Max(qFn: (x: T) => void): Promise<number> {
         let feild = this.getFeild(qFn);
         let r = await this.OrderByDesc(qFn).ToList();
-        if (r && r.length > 0) return r[0];
+        if (r && r.length > 0) return <any>r[0];
         else return null;
     }
-    async Min(qFn: (x: T) => void) {
+    async Min(qFn: (x: T) => void): Promise<number> {
         let feild = this.getFeild(qFn);
         let r = await this.OrderBy(qFn).ToList();
-        if (r && r.length > 0) return r[0];
+        if (r && r.length > 0) return <any>r[0];
         else return null;
     }
     Contains(feild: (x: T) => void, values: string[]) {
