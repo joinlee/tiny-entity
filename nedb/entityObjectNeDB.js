@@ -142,7 +142,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             feildName: this.getFeild(feild),
             value: values
         };
-        this.sqlTemp.qFn = null;
+        this.sqlTemp.qFn = [() => true];
         this.sqlTemp.queryMode = dataContextNeDB_1.QueryMode.Contains;
         this.sqlTemp.inq = inq;
         return this;

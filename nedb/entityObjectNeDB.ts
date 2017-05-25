@@ -126,7 +126,7 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
             feildName: this.getFeild(feild),
             value: values
         };
-        this.sqlTemp.qFn = null;
+        this.sqlTemp.qFn = [() => true];
         this.sqlTemp.queryMode = QueryMode.Contains;
         this.sqlTemp.inq = inq;
         return this;
