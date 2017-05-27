@@ -10,7 +10,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     toString(): string { return ""; }
     private ctx: IDataContext;
     private sqlTemp = [];
-    private jionSql = "";
+    private joinParms = {
+        joinSql: "",
+        joinSelectFeild: "",
+        joinTableName: ""
+    };
     private queryParam: QueryParams = new Object() as QueryParams;
     constructor(ctx?: IDataContext) {
         super(ctx);
@@ -21,11 +25,30 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         return this;
     }
     Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
-        let jionTableName = entity.toString();
+        let joinTableName = entity.toString().toLocaleLowerCase();
         let fileds = this.formateCode(qFn);
-        let sql = "LEFT JOIN `" + jionTableName + "` ON " + this.toString() + ".id = " + jionTableName + "." + fileds;
-        this.jionSql = sql;
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + fileds;
+        this.joinParms.joinSql = sql;
+        this.joinParms.joinTableName = joinTableName;
+        this.joinParms.joinSelectFeild = this.GetSelectFeildList(entity).join(",");
+
         return this;
+    }
+    private GetSelectFeildList(entity) {
+        let tableName = entity.toString().toLocaleLowerCase();
+        let feildList = [];
+        for (let key in entity) {
+            if (
+                typeof (key) != "object"
+                && typeof (key) != "function"
+                && key != "sqlTemp"
+                && key != "queryParam"
+                && key != "ctx"
+                && key != "joinParms"
+            )
+                feildList.push(tableName + ".`" + key + "` AS " + tableName + "_" + key);
+        }
+        return feildList;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
         let fileds = this.formateCode(qFn);
@@ -118,26 +141,56 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     }
     async ToList(queryCallback?: (result: T[]) => void) {
         let row;
+        let queryFeilds = "*";
+        if (this.joinParms.joinSql) {
+            let wfs = this.GetSelectFeildList(this).join(",");
+            queryFeilds = wfs + "," + this.joinParms.joinSelectFeild;
+        }
         if (this.sqlTemp.length > 0) {
-            let sql = "SELECT * FROM `" + this.toString() + "` ";
-            if (this.jionSql) {
-                sql += this.jionSql + " ";
+            let sql = "SELECT " + queryFeilds + " FROM `" + this.toString() + "` ";
+            if (this.joinParms.joinSql) {
+                sql += this.joinParms.joinSql + " ";
             }
             sql += "WHERE " + this.sqlTemp.join(' AND ');
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         else {
-            let sql = "SELECT * FROM `" + this.toString() + "` ";
-            if (this.jionSql) {
-                sql += this.jionSql + " ";
+            let sql = "SELECT " + queryFeilds + " FROM `" + this.toString() + "` ";
+            if (this.joinParms.joinSql) {
+                sql += this.joinParms.joinSql + " ";
             }
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         this.sqlTemp = [];
-        if (row[0])
-            return this.cloneList(row);
+        if (row[0]) {
+            if (this.joinParms) {
+                let newRows = [];
+                for (let rowItem of row) {
+                    let newRow = {};
+                    for (let feild in rowItem) {
+                        let s = feild.split("_");
+                        newRow[s[0]] || (newRow[s[0]] = {
+                            toString: function () { return s[0]; }
+                        });
+                        newRow[s[0]][s[1]] = rowItem[feild];
+                    }
+
+                    newRows.push(newRow);
+                }
+                this.joinParms = {
+                    joinSelectFeild: "",
+                    joinSql: "",
+                    joinTableName: ""
+                }
+
+                return this.cloneList(<any>newRows);
+            }
+            else {
+                return this.cloneList(row);
+            }
+        }
         else return [];
     }
     Max(qFn: (x: T) => void): Promise<number> {
