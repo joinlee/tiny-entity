@@ -21,7 +21,7 @@ export class MysqlDataContext implements IDataContext {
 
         sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
 
-        console.log(sqlStr);
+        // console.log(sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -58,7 +58,7 @@ export class MysqlDataContext implements IDataContext {
 
         //todo:判断id的类型
         sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
-        console.log("Update:", sqlStr);
+        // console.log("Update:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -73,7 +73,7 @@ export class MysqlDataContext implements IDataContext {
      */
     Delete(obj: IEntityObject) {
         let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
-        console.log("DELETE:", sqlStr);
+        // console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -155,7 +155,7 @@ export class MysqlDataContext implements IDataContext {
     private onSubmit(sqlStr: string) {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
-                console.log("mysql onSubmits error:", err);
+                // console.log("mysql onSubmits error:", err);
                 if (err) {
                     conn.release();
                     reject(err);

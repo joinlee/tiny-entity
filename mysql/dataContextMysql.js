@@ -22,7 +22,6 @@ class MysqlDataContext {
             let sqlStr = "INSERT INTO " + obj.toString();
             let pt = this.propertyFormat(obj);
             sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
-            console.log(sqlStr);
             if (this.transactionOn) {
                 this.querySentence.push(sqlStr);
             }
@@ -56,7 +55,6 @@ class MysqlDataContext {
                 }
             }
             sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
-            console.log("Update:", sqlStr);
             if (this.transactionOn) {
                 this.querySentence.push(sqlStr);
             }
@@ -68,7 +66,6 @@ class MysqlDataContext {
     }
     Delete(obj) {
         let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
-        console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -142,7 +139,6 @@ class MysqlDataContext {
     onSubmit(sqlStr) {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
-                console.log("mysql onSubmits error:", err);
                 if (err) {
                     conn.release();
                     reject(err);
