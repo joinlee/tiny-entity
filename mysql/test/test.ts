@@ -1,9 +1,7 @@
 import { MysqlDataContext } from "../index";
-import { Order, Employee } from "./model";
+import { Order, Employee, Table, TableParty } from './model';
 import { EntityCopier } from "../../entityCopier";
 import { Transaction } from '../../transcation';
-
-
 
 class Guid {
     static GetGuid(): string {
@@ -24,20 +22,26 @@ class Guid {
 class TestDataContext extends MysqlDataContext {
     private employee: Employee;
     private order: Order;
+    private table: Table;
+    private tableParty: TableParty;
     constructor() {
         super({
             connectionLimit: 50,
-            host: 'localhost',
+            host: '172.16.254.127',
             user: 'root',
             password: 'onetwo',
             database: 'fbs_db'
         });
         this.employee = new Employee(this);
         this.order = new Order(this);
+        this.table = new Table(this);
+        this.tableParty = new TableParty(this);
     }
 
     get Employee() { return this.employee; }
     get Order() { return this.order; }
+    get Table() { return this.table; }
+    get TableParty() { return this.tableParty; }
 }
 
 
@@ -143,10 +147,16 @@ async function Test3() {
         // let r = await ctx.Order.First(x => x.id == "c98ad2a9afed42dd8299fb4983734316");
         // console.log(r);
 
-        let xx = "2222";
-        let r = await ctx.Order.Where(x => x.orderNo.IndexOf(xx), ["xx"], [xx]).ToList();
-        //let r = await ctx.Order.Where(x => x.orderNo == xx, ["xx"], [xx]).ToList();
-        console.log(r);
+        // let xx = "2222";
+        // let r = await ctx.Order.Where(x => x.orderNo.IndexOf(xx), ["xx"], [xx]).ToList();
+        // //let r = await ctx.Order.Where(x => x.orderNo == xx, ["xx"], [xx]).ToList();
+        // console.log(r);
+
+        console.time("ddddddd");
+        let jr = await ctx.Table.Join<TableParty>(ctx.TableParty, x => x.tableId).Where(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728").ToList();
+        console.log(jr[0]);
+        console.timeEnd("ddddddd");
+
     } catch (error) {
 
     }

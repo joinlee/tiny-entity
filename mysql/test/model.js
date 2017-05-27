@@ -1,6 +1,7 @@
 "use strict";
+const index_1 = require("../index");
 const entityObject_1 = require("../../entityObject");
-const index_1 = require("../../index");
+const index_2 = require("../../index");
 class Employee extends entityObject_1.EntityObject {
     constructor(args) {
         super(args);
@@ -17,7 +18,17 @@ class Employee extends entityObject_1.EntityObject {
     toString() { return "Employee"; }
 }
 exports.Employee = Employee;
-class Table extends entityObject_1.EntityObject {
+class Table extends index_1.EntityObjectMysql {
+    constructor() {
+        super(...arguments);
+        this.id = null;
+        this.name = null;
+        this.capacity = null;
+        this.zone = null;
+        this.storeId = null;
+        this.showOrder = null;
+        this.status = null;
+    }
     toString() { return "DeskTable"; }
 }
 exports.Table = Table;
@@ -34,9 +45,18 @@ class TableGroup extends entityObject_1.EntityObject {
     toString() { return "TableGroup"; }
 }
 exports.TableGroup = TableGroup;
-class TableParty extends entityObject_1.EntityObject {
+class TableParty extends index_1.EntityObjectMysql {
     constructor(args) {
         super(args);
+        this.id = null;
+        this.storeId = null;
+        this.tableId = null;
+        this.tableName = null;
+        this.tableGroupId = null;
+        this.openedTime = null;
+        this.closedTime = null;
+        this.status = null;
+        this.orderId = null;
         this.valid = true;
     }
     toString() { return "TableParty"; }
@@ -55,7 +75,7 @@ class Unit extends entityObject_1.EntityObject {
 class Modifier extends entityObject_1.EntityObject {
     toString() { return "Modifier"; }
 }
-class Order extends index_1.EntityObjectNeDB {
+class Order extends index_2.EntityObjectNeDB {
     constructor(args) {
         super(args);
         this.id = null;

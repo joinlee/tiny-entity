@@ -13,12 +13,20 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
         this.sqlTemp = [];
+        this.jionSql = "";
         this.queryParam = new Object();
         this.ctx = ctx;
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        this.sqlTemp.push("(" + this.formateCode(qFn, paramsKey, paramsValue) + ")");
+        this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+        return this;
+    }
+    Join(entity, qFn) {
+        let jionTableName = entity.toString();
+        let fileds = this.formateCode(qFn);
+        let sql = "LEFT JOIN `" + jionTableName + "` ON " + this.toString() + ".id = " + jionTableName + "." + fileds;
+        this.jionSql = sql;
         return this;
     }
     Select(qFn) {
@@ -38,7 +46,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = "";
             if (qFn) {
-                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
             }
             else {
                 sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
@@ -69,7 +77,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let sql;
             if (qFn) {
-                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
             }
             else {
                 sql = "SELECT * FROM `" + this.toString() + "`";
@@ -109,12 +117,19 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let row;
             if (this.sqlTemp.length > 0) {
-                let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' AND ');
+                let sql = "SELECT * FROM `" + this.toString() + "` ";
+                if (this.jionSql) {
+                    sql += this.jionSql + " ";
+                }
+                sql += "WHERE " + this.sqlTemp.join(' AND ');
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
             else {
-                let sql = "SELECT * FROM `" + this.toString() + "`";
+                let sql = "SELECT * FROM `" + this.toString() + "` ";
+                if (this.jionSql) {
+                    sql += this.jionSql + " ";
+                }
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
@@ -142,7 +157,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         const result = code.slice(code.indexOf('(') + 1, code.indexOf(')') == -1 ? code.length : code.indexOf(')')).match(/([^\s,]+)/g);
         return result === null ? [] : result;
     }
-    formateCode(qFn, paramsKey, paramsValue) {
+    formateCode(qFn, tableName, paramsKey, paramsValue) {
         let qFnS = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
@@ -160,7 +175,10 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         let p = this.getParameterNames(qFn)[0];
         qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
+        if (tableName)
+            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), tableName + ".");
+        else
+            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
         let indexOfFlag = qFnS.indexOf(".IndexOf") > -1;
         qFnS = qFnS.replace(new RegExp("\\.IndexOf", "gm"), " LIKE ");
         qFnS = qFnS.replace(/\&\&/g, "AND");
@@ -189,7 +207,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             }
         }
         else {
-            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
+            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
         }
         return qFnS;
     }

@@ -38,16 +38,20 @@ class TestDataContext extends index_1.MysqlDataContext {
     constructor() {
         super({
             connectionLimit: 50,
-            host: 'localhost',
+            host: '172.16.254.127',
             user: 'root',
             password: 'onetwo',
             database: 'fbs_db'
         });
         this.employee = new model_1.Employee(this);
         this.order = new model_1.Order(this);
+        this.table = new model_1.Table(this);
+        this.tableParty = new model_1.TableParty(this);
     }
     get Employee() { return this.employee; }
     get Order() { return this.order; }
+    get Table() { return this.table; }
+    get TableParty() { return this.tableParty; }
 }
 function Test1() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -151,9 +155,10 @@ function Test3() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let ctx = new TestDataContext();
-            let xx = "2222";
-            let r = yield ctx.Order.Where(x => x.orderNo.IndexOf(xx), ["xx"], [xx]).ToList();
-            console.log(r);
+            console.time("ddddddd");
+            let jr = yield ctx.Table.Join(ctx.TableParty, x => x.tableId).Where(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728").ToList();
+            console.log(jr[0]);
+            console.timeEnd("ddddddd");
         }
         catch (error) {
         }

@@ -148,7 +148,7 @@ export class MysqlDataContext implements IDataContext {
      * @param  {string} sqlStr
      */
     Query(sqlStr: string) {
-        console.log(sqlStr);
+        //console.log(sqlStr);
         return this.onSubmit(sqlStr);
     }
 

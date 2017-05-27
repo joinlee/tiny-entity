@@ -133,7 +133,6 @@ class MysqlDataContext {
     }
     RollBack() { }
     Query(sqlStr) {
-        console.log(sqlStr);
         return this.onSubmit(sqlStr);
     }
     onSubmit(sqlStr) {

@@ -20,19 +20,20 @@ export class Employee extends EntityObject<Employee> {
     toString(): string { return "Employee"; }
 }
 
-export class Table extends EntityObject<Table>{
+export class Table extends EntityObjectMysql<Table>{
+    id: string = null;
     // 台桌名
-    name: string;
+    name: string = null;
     //座位数
-    capacity: number;
+    capacity: number = null;
     //分区
-    zone: any;
+    zone: any = null;
     //店铺id
-    storeId: string | number;
+    storeId: string | number = null;
     //排序字段
-    showOrder;
+    showOrder = null;
     //当前台桌状态 free空闲 / opening 使用中 / reserved 预留 / settled 已结算未关台
-    status: string;
+    status: string = null;
 
     toString(): string { return "DeskTable"; }
 }
@@ -58,25 +59,26 @@ export class TableGroup extends EntityObject<TableGroup> {
 /**
  * TableParty 台桌服务记录
  */
-export class TableParty extends EntityObject<TableParty>{
+export class TableParty extends EntityObjectMysql<TableParty>{
     constructor(args?) {
         super(args);
     }
+    id: string = null;
     //店铺id
-    storeId: string | number;
+    storeId: string | number = null;
     //台桌ID
-    tableId: string | number;
-    tableName: string;
+    tableId: string | number = null;
+    tableName: string = null;
     //加入合并台桌id。null表示独立台桌
-    tableGroupId: string;
+    tableGroupId: string = null;
     //开台时间
-    openedTime: Date | string;
+    openedTime: Date | string = null;
     //关台时间
-    closedTime: Date | string;
+    closedTime: Date | string = null;
     // opening 使用中 closed 台桌已经关闭停止服务  settled: 已经结算状态
-    status: string;
+    status: string = null;
     //订单号
-    orderId: string | number;
+    orderId: string | number = null;
     //是否有效台桌使用。例如未就餐的台桌服务为无效台桌服务。开始默认为 true
     valid: boolean = true;
     toString(): string { return "TableParty"; }

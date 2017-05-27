@@ -10,13 +10,21 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     toString(): string { return ""; }
     private ctx: IDataContext;
     private sqlTemp = [];
+    private jionSql = "";
     private queryParam: QueryParams = new Object() as QueryParams;
     constructor(ctx?: IDataContext) {
         super(ctx);
         this.ctx = ctx;
     }
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
-        this.sqlTemp.push("(" + this.formateCode(qFn, paramsKey, paramsValue) + ")");
+        this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+        return this;
+    }
+    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
+        let jionTableName = entity.toString();
+        let fileds = this.formateCode(qFn);
+        let sql = "LEFT JOIN `" + jionTableName + "` ON " + this.toString() + ".id = " + jionTableName + "." + fileds;
+        this.jionSql = sql;
         return this;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
@@ -36,7 +44,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number> {
         let sql = "";
         if (qFn) {
-            sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
         }
         else {
             sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
@@ -72,7 +80,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         queryCallback?: (result: T) => void): Promise<T> {
         let sql: string;
         if (qFn) {
-            sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
+            sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
         }
         else {
             sql = "SELECT * FROM `" + this.toString() + "`";
@@ -111,12 +119,19 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async ToList(queryCallback?: (result: T[]) => void) {
         let row;
         if (this.sqlTemp.length > 0) {
-            let sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.sqlTemp.join(' AND ');
+            let sql = "SELECT * FROM `" + this.toString() + "` ";
+            if (this.jionSql) {
+                sql += this.jionSql + " ";
+            }
+            sql += "WHERE " + this.sqlTemp.join(' AND ');
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         else {
-            let sql = "SELECT * FROM `" + this.toString() + "`";
+            let sql = "SELECT * FROM `" + this.toString() + "` ";
+            if (this.jionSql) {
+                sql += this.jionSql + " ";
+            }
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
@@ -144,7 +159,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         return result === null ? [] : result;
     }
 
-    private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
+    private formateCode(qFn, tableName?: string, paramsKey?: string[], paramsValue?: any[]): string {
         let qFnS: string = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
@@ -163,7 +178,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         let p: string = this.getParameterNames(qFn)[0];
         qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
+        if (tableName)
+            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), tableName + ".");
+        else
+            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
 
         let indexOfFlag = qFnS.indexOf(".IndexOf") > -1;
         qFnS = qFnS.replace(new RegExp("\\.IndexOf", "gm"), " LIKE ");
@@ -193,7 +211,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             }
         }
         else {
-            qFnS = qFnS.toLocaleLowerCase().replace(new RegExp("= null", "gm"), "IS NULL");
+            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
         }
         return qFnS;
     }
