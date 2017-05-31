@@ -13,11 +13,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
         this.sqlTemp = [];
-        this.joinParms = {
-            joinSql: "",
-            joinSelectFeild: "",
-            joinTableName: ""
-        };
+        this.joinParms = [];
         this.queryParam = new Object();
         this.ctx = ctx;
     }
@@ -28,14 +24,16 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     }
     Join(entity, qFn) {
         let joinTableName = entity.toString().toLocaleLowerCase();
-        let fileds = this.formateCode(qFn);
-        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + fileds;
-        this.joinParms.joinSql = sql;
-        this.joinParms.joinTableName = joinTableName;
-        this.joinParms.joinSelectFeild = this.GetSelectFeildList(entity).join(",");
+        let feild = this.formateCode(qFn);
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + feild;
+        this.joinParms.push({
+            joinSql: sql,
+            joinSelectFeild: this.GetSelectFieldList(entity).join(","),
+            joinTableName: joinTableName
+        });
         return this;
     }
-    GetSelectFeildList(entity) {
+    GetSelectFieldList(entity) {
         let tableName = entity.toString().toLocaleLowerCase();
         let feildList = [];
         for (let key in entity) {
@@ -96,6 +94,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     First(qFn, paramsKey, paramsValue, queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql;
+            let queryFields = this.GetFinalQueryFields();
             if (qFn) {
                 sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
             }
@@ -124,43 +123,56 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn) {
-        var sql = this.formateCode(qFn);
+    OrderBy(qFn, entity) {
+        let tableName = this.toString();
+        if (entity)
+            tableName = entity.toString();
+        var sql = this.formateCode(qFn, tableName);
         this.queryParam.OrderByFiledName = sql;
         return this;
     }
-    OrderByDesc(qFn) {
+    OrderByDesc(qFn, entity) {
         this.queryParam.IsDesc = true;
-        return this.OrderBy(qFn);
+        return this.OrderBy(qFn, entity);
+    }
+    GetFinalQueryFields() {
+        let feilds = "*";
+        if (this.joinParms && this.joinParms.length > 0) {
+            let wfs = this.GetSelectFieldList(this).join(",");
+            for (let joinSelectFeild of this.joinParms) {
+                feilds = wfs + "," + joinSelectFeild.joinSelectFeild;
+            }
+        }
+        return feilds;
     }
     ToList(queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {
             let row;
-            let queryFeilds = "*";
-            if (this.joinParms.joinSql) {
-                let wfs = this.GetSelectFeildList(this).join(",");
-                queryFeilds = wfs + "," + this.joinParms.joinSelectFeild;
-            }
+            let queryFields = this.GetFinalQueryFields();
             if (this.sqlTemp.length > 0) {
-                let sql = "SELECT " + queryFeilds + " FROM `" + this.toString() + "` ";
-                if (this.joinParms.joinSql) {
-                    sql += this.joinParms.joinSql + " ";
+                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+                if (this.joinParms && this.joinParms.length > 0) {
+                    for (let joinItem of this.joinParms) {
+                        sql += joinItem.joinSql + " ";
+                    }
                 }
                 sql += "WHERE " + this.sqlTemp.join(' AND ');
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
             else {
-                let sql = "SELECT " + queryFeilds + " FROM `" + this.toString() + "` ";
-                if (this.joinParms.joinSql) {
-                    sql += this.joinParms.joinSql + " ";
+                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+                if (this.joinParms && this.joinParms.length > 0) {
+                    for (let joinItem of this.joinParms) {
+                        sql += joinItem.joinSql + " ";
+                    }
                 }
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
             this.sqlTemp = [];
             if (row[0]) {
-                if (this.joinParms) {
+                if (this.joinParms && this.joinParms.length > 0) {
                     let newRows = [];
                     for (let rowItem of row) {
                         let newRow = {};
@@ -173,11 +185,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                         }
                         newRows.push(newRow);
                     }
-                    this.joinParms = {
-                        joinSelectFeild: "",
-                        joinSql: "",
-                        joinTableName: ""
-                    };
+                    this.joinParms = [];
                     return this.cloneList(newRows);
                 }
                 else {

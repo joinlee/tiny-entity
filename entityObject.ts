@@ -1,6 +1,6 @@
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
-    constructor(ctx?: IDataContext) {  }
+    constructor(ctx?: IDataContext) { }
     id: string;
     toString(): string { return ""; }
 
@@ -23,6 +23,16 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @returns IQueryObject 查询对象
      */
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
+    /**
+     * 左外连接查询
+     * 
+     * @template K 
+     * @param {K} entity 
+     * @param {(x: K) => void} qFn 
+     * 
+     * @memberOf IQueryObject
+     */
+    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) { return this; }
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数

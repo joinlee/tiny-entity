@@ -23,6 +23,16 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         this.sqlTemp.qFn.push(qFn);
         return this;
     }
+    Join(entity, qFn) {
+        this.joinParams || (this.joinParams = []);
+        let feild = this.formateCode(qFn);
+        let joinTableName = entity.toString();
+        this.joinParams.push({
+            joinTableName: joinTableName,
+            joinSelectFeild: feild
+        });
+        return this;
+    }
     Select(qFn) {
         return this;
     }
@@ -57,13 +67,14 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn) {
+    OrderBy(qFn, entity) {
         this.queryParam.OrderByFiledName = this.getFeild(qFn);
+        this.queryParam.OrderByTableName = entity.toString();
         return this;
     }
-    OrderByDesc(qFn) {
+    OrderByDesc(qFn, entity) {
         this.queryParam.IsDesc = true;
-        this.OrderBy(qFn);
+        this.OrderBy(qFn, entity);
         return this;
     }
     Sum(qFn) {
@@ -79,10 +90,22 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let r;
             if (this.sqlTemp.qFn.length > 0) {
-                r = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
+                if (this.HasJoin()) {
+                    let mainResultList = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
+                    r = yield this.GenerateJoinResult(mainResultList);
+                }
+                else {
+                    r = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
+                }
             }
             else {
-                r = yield this.ctx.Query([x => true], this.toString());
+                if (this.HasJoin()) {
+                    let mainResultList = yield this.ctx.Query([x => true], this.toString());
+                    r = yield this.GenerateJoinResult(mainResultList);
+                }
+                else {
+                    r = yield this.ctx.Query([x => true], this.toString());
+                }
             }
             this.sqlTemp = {
                 qFn: []
@@ -91,14 +114,26 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             if (this.queryParam) {
                 if (this.queryParam.OrderByFiledName) {
                     let orderByFiled = this.queryParam.OrderByFiledName;
+                    let orderByTableName = this.queryParam.OrderByTableName;
+                    let hasJoin = this.HasJoin();
                     if (this.queryParam.IsDesc) {
                         result = result.sort((a, b) => {
-                            return b[orderByFiled] - a[orderByFiled];
+                            if (hasJoin) {
+                                return b[orderByTableName][orderByFiled] - a[orderByTableName][orderByFiled];
+                            }
+                            else {
+                                return b[orderByFiled] - a[orderByFiled];
+                            }
                         });
                     }
                     else {
                         result = result.sort((a, b) => {
-                            return a[orderByFiled] - b[orderByFiled];
+                            if (hasJoin) {
+                                return a[orderByTableName][orderByFiled] - b[orderByTableName][orderByFiled];
+                            }
+                            else {
+                                return a[orderByFiled] - b[orderByFiled];
+                            }
                         });
                     }
                     ;
@@ -114,8 +149,37 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                     this.queryParam.TakeCount = null;
                 }
             }
+            this.joinParams = null;
             return result;
         });
+    }
+    GenerateJoinResult(mainResultList) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let newRows = [];
+            for (let joinParamsItem of this.joinParams) {
+                for (let mrItem of mainResultList) {
+                    let leftResultResult = yield this.ctx.Query((x) => { return x[joinParamsItem.joinSelectFeild] == mrItem.id; }, joinParamsItem.joinTableName);
+                    for (let lrItem of leftResultResult) {
+                        let newRowItem = {};
+                        let currentTableName = this.toString().toLocaleLowerCase();
+                        newRowItem[currentTableName] || (newRowItem[currentTableName] = {
+                            toString: function () { return currentTableName; }
+                        });
+                        newRowItem[currentTableName] = mrItem;
+                        let joinTableName = joinParamsItem.joinTableName.toLocaleLowerCase();
+                        newRowItem[joinTableName] || (newRowItem[joinTableName] = {
+                            toString: function () { return joinParamsItem.joinTableName; }
+                        });
+                        newRowItem[joinTableName] = lrItem;
+                        newRows.push(newRowItem);
+                    }
+                }
+            }
+            return newRows;
+        });
+    }
+    HasJoin() {
+        return this.joinParams && this.joinParams.length > 0;
     }
     Max(qFn) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -166,7 +230,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         });
         return r;
     }
-    formateCode(qFn, paramsKey, paramsValue) {
+    formateCode(qFn) {
         let qFnS = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
@@ -179,24 +243,24 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         qFnS = qFnS.replace(/\(/g, "");
         qFnS = qFnS.replace(/\)/g, "");
         qFnS = qFnS.replace(/\;/g, "");
+        qFnS = qFnS.replace(/=>/g, "");
         qFnS = qFnS.trim();
-        let p = qFnS[0];
-        qFnS = qFnS.substring(1, qFnS.length);
+        let p = this.getParameterNames(qFn)[0];
+        qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p, "gm"), this.toString());
-        qFnS = qFnS.replace(/\&\&/g, "AND");
-        qFnS = qFnS.replace(/\|\|/g, "OR");
-        if (paramsKey && paramsValue) {
-            if (paramsKey.length != paramsValue.length)
-                throw 'paramsKey,paramsValue 参数异常';
-            for (let i = 0; i < paramsKey.length; i++) {
-                let v = paramsValue[i];
-                if (isNaN)
-                    v = "'" + paramsValue[i] + "'";
-                qFnS = qFnS.replace(new RegExp(paramsKey[i], "gm"), v);
-            }
-        }
+        qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
         return qFnS;
+    }
+    getParameterNames(fn) {
+        const COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+        const DEFAULT_PARAMS = /=[^,]+/mg;
+        const FAT_ARROWS = /=>.*$/mg;
+        const code = fn.toString()
+            .replace(COMMENTS, '')
+            .replace(FAT_ARROWS, '')
+            .replace(DEFAULT_PARAMS, '');
+        const result = code.slice(code.indexOf('(') + 1, code.indexOf(')') == -1 ? code.length : code.indexOf(')')).match(/([^\s,]+)/g);
+        return result === null ? [] : result;
     }
     getFeild(qFn) {
         let qFns = this.formateCode(qFn);

@@ -20,6 +20,9 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
         this.sqlTemp.push(sql);
         return this;
     }
+    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void){
+        return this;
+    }
     Select(qFn: (x: T) => void): IQueryObject<T> {
         let filed = this.formateCode(qFn);
         this.queryParam.SelectFileds = filed.split("AND");

@@ -10,11 +10,9 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     toString(): string { return ""; }
     private ctx: IDataContext;
     private sqlTemp = [];
-    private joinParms = {
-        joinSql: "",
-        joinSelectFeild: "",
-        joinTableName: ""
-    };
+    private joinParms: {
+        joinSql: string; joinSelectFeild: string; joinTableName: string;
+    }[] = [];
     private queryParam: QueryParams = new Object() as QueryParams;
     constructor(ctx?: IDataContext) {
         super(ctx);
@@ -26,15 +24,18 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     }
     Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
         let joinTableName = entity.toString().toLocaleLowerCase();
-        let fileds = this.formateCode(qFn);
-        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + fileds;
-        this.joinParms.joinSql = sql;
-        this.joinParms.joinTableName = joinTableName;
-        this.joinParms.joinSelectFeild = this.GetSelectFeildList(entity).join(",");
+        let feild = this.formateCode(qFn);
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + feild;
+
+        this.joinParms.push({
+            joinSql: sql,
+            joinSelectFeild: this.GetSelectFieldList(entity).join(","),
+            joinTableName: joinTableName
+        });
 
         return this;
     }
-    private GetSelectFeildList(entity) {
+    private GetSelectFieldList(entity) {
         let tableName = entity.toString().toLocaleLowerCase();
         let feildList = [];
         for (let key in entity) {
@@ -102,6 +103,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         paramsValue?: any[],
         queryCallback?: (result: T) => void): Promise<T> {
         let sql: string;
+        let queryFields = this.GetFinalQueryFields();
         if (qFn) {
             sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
         }
@@ -130,42 +132,54 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn: (x: T) => void): IQueryObject<T> {
-        var sql = this.formateCode(qFn);
+    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
+        let tableName = this.toString();
+        if (entity) tableName = entity.toString();
+        var sql = this.formateCode(qFn, tableName);
         this.queryParam.OrderByFiledName = sql;
         return this;
     }
-    OrderByDesc(qFn: (x: T) => void): IQueryObject<T> {
+    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
         this.queryParam.IsDesc = true;
-        return this.OrderBy(qFn);
+        return this.OrderBy(qFn, entity);
     }
-    async ToList(queryCallback?: (result: T[]) => void) {
-        let row;
-        let queryFeilds = "*";
-        if (this.joinParms.joinSql) {
-            let wfs = this.GetSelectFeildList(this).join(",");
-            queryFeilds = wfs + "," + this.joinParms.joinSelectFeild;
+    private GetFinalQueryFields() {
+        let feilds = "*";
+        if (this.joinParms && this.joinParms.length > 0) {
+            let wfs = this.GetSelectFieldList(this).join(",");
+            for (let joinSelectFeild of this.joinParms) {
+                feilds = wfs + "," + joinSelectFeild.joinSelectFeild;
+            }
         }
+        return feilds;
+    }
+    async ToList<T>(queryCallback?: (result: T[]) => void) {
+        let row;
+        let queryFields = this.GetFinalQueryFields();
         if (this.sqlTemp.length > 0) {
-            let sql = "SELECT " + queryFeilds + " FROM `" + this.toString() + "` ";
-            if (this.joinParms.joinSql) {
-                sql += this.joinParms.joinSql + " ";
+            let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+            if (this.joinParms && this.joinParms.length > 0) {
+                for (let joinItem of this.joinParms) {
+                    sql += joinItem.joinSql + " ";
+                }
             }
             sql += "WHERE " + this.sqlTemp.join(' AND ');
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         else {
-            let sql = "SELECT " + queryFeilds + " FROM `" + this.toString() + "` ";
-            if (this.joinParms.joinSql) {
-                sql += this.joinParms.joinSql + " ";
+            let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+            if (this.joinParms && this.joinParms.length > 0) {
+                for (let joinItem of this.joinParms) {
+                    sql += joinItem.joinSql + " ";
+                }
             }
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
         this.sqlTemp = [];
         if (row[0]) {
-            if (this.joinParms) {
+            if (this.joinParms && this.joinParms.length > 0) {
                 let newRows = [];
                 for (let rowItem of row) {
                     let newRow = {};
@@ -179,11 +193,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 
                     newRows.push(newRow);
                 }
-                this.joinParms = {
-                    joinSelectFeild: "",
-                    joinSql: "",
-                    joinTableName: ""
-                }
+                this.joinParms = [];
 
                 return this.cloneList(<any>newRows);
             }

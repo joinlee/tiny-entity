@@ -11,6 +11,7 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         qFn: []
     };
     private queryParam: QueryParams = new Object() as QueryParams;
+    private joinParams: any[];
     constructor(ctx?: IDataContext) {
         super(ctx);
         this.ctx = ctx;
@@ -18,6 +19,16 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
 
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
         this.sqlTemp.qFn.push(qFn);
+        return this;
+    }
+    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
+        this.joinParams || (this.joinParams = []);
+        let feild = this.formateCode(qFn);
+        let joinTableName = entity.toString()
+        this.joinParams.push({
+            joinTableName: joinTableName,
+            joinSelectFeild: feild
+        });
         return this;
     }
     Select(qFn: (x: T) => void): IQueryObject<T> {
@@ -52,13 +63,14 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn: (x: T) => void): IQueryObject<T> {
+    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
         this.queryParam.OrderByFiledName = this.getFeild(qFn);
+        this.queryParam.OrderByTableName = entity.toString();
         return this;
     }
-    OrderByDesc(qFn: (x: T) => void): IQueryObject<T> {
+    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
         this.queryParam.IsDesc = true;
-        this.OrderBy(qFn);
+        this.OrderBy(qFn, entity);
         return this;
     }
     async Sum(qFn: (x: T) => void) {
@@ -70,29 +82,54 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         return result;
     }
     async ToList(queryCallback?: (result: T[]) => void) {
-        let r: [any];
+        let r: any[];
         if (this.sqlTemp.qFn.length > 0) {
-            r = await this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
+            if (this.HasJoin()) {
+                let mainResultList = await this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
+                r = await this.GenerateJoinResult(mainResultList);
+            }
+            else {
+                r = await this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
+            }
         }
         else {
-            r = await this.ctx.Query([x => true], this.toString());
+            if (this.HasJoin()) {
+                let mainResultList = await this.ctx.Query([x => true], this.toString());
+                r = await this.GenerateJoinResult(mainResultList);
+            }
+            else {
+                r = await this.ctx.Query([x => true], this.toString());
+            }
         }
         //将this.sqlTemp置为空
         this.sqlTemp = {
             qFn: []
         }
+
         let result = (this.cloneList(r) as T[]);
         if (this.queryParam) {
             if (this.queryParam.OrderByFiledName) {
                 let orderByFiled = this.queryParam.OrderByFiledName;
+                let orderByTableName = this.queryParam.OrderByTableName;
+                let hasJoin = this.HasJoin();
                 if (this.queryParam.IsDesc) {
                     result = result.sort((a, b) => {
-                        return b[orderByFiled] - a[orderByFiled];
+                        if (hasJoin) {
+                            return b[orderByTableName][orderByFiled] - a[orderByTableName][orderByFiled];
+                        }
+                        else {
+                            return b[orderByFiled] - a[orderByFiled];
+                        }
                     })
                 }
                 else {
                     result = result.sort((a, b) => {
-                        return a[orderByFiled] - b[orderByFiled];
+                        if (hasJoin) {
+                            return a[orderByTableName][orderByFiled] - b[orderByTableName][orderByFiled];
+                        }
+                        else {
+                            return a[orderByFiled] - b[orderByFiled];
+                        }
                     })
                 };
                 this.queryParam.OrderByFiledName = null;
@@ -107,8 +144,40 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
                 this.queryParam.TakeCount = null;
             }
         }
+
+        this.joinParams = null;
         return result;
     }
+    private async GenerateJoinResult(mainResultList) {
+        let newRows = [];
+        for (let joinParamsItem of this.joinParams) {
+            for (let mrItem of mainResultList) {
+                let leftResultResult = await this.ctx.Query((x) => { return x[joinParamsItem.joinSelectFeild] == mrItem.id }, joinParamsItem.joinTableName);
+                for (let lrItem of leftResultResult) {
+                    let newRowItem = {};
+                    let currentTableName = this.toString().toLocaleLowerCase();
+                    newRowItem[currentTableName] || (newRowItem[currentTableName] = {
+                        toString: function () { return currentTableName; }
+                    });
+                    newRowItem[currentTableName] = mrItem;
+
+                    let joinTableName = joinParamsItem.joinTableName.toLocaleLowerCase();
+                    newRowItem[joinTableName] || (newRowItem[joinTableName] = {
+                        toString: function () { return joinParamsItem.joinTableName; }
+                    });
+                    newRowItem[joinTableName] = lrItem;
+
+                    newRows.push(newRowItem);
+                }
+            }
+        }
+
+        return newRows;
+    }
+    private HasJoin() {
+        return this.joinParams && this.joinParams.length > 0;
+    }
+
     async Max(qFn: (x: T) => void): Promise<number> {
         let feild = this.getFeild(qFn);
         let r = await this.OrderByDesc(qFn).ToList();
@@ -153,9 +222,8 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
 
         return r;
     }
-    private formateCode(qFn, paramsKey?: string[], paramsValue?: any[]): string {
-        let qFnS = qFn.toString();
-
+    private formateCode(qFn): string {
+        let qFnS: string = qFn.toString();
         qFnS = qFnS.replace(/function/g, "");
         qFnS = qFnS.replace(/return/g, "");
         qFnS = qFnS.replace(/if/g, "");
@@ -167,26 +235,29 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         qFnS = qFnS.replace(/\(/g, "");
         qFnS = qFnS.replace(/\)/g, "");
         qFnS = qFnS.replace(/\;/g, "");
+        qFnS = qFnS.replace(/=>/g, "");
         qFnS = qFnS.trim();
-        let p: string = qFnS[0];
-
-        qFnS = qFnS.substring(1, qFnS.length);
+        //p是参数
+        let p: string = this.getParameterNames(qFn)[0];
+        qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
-        qFnS = qFnS.replace(new RegExp(p, "gm"), this.toString());
-        qFnS = qFnS.replace(/\&\&/g, "AND");
-        qFnS = qFnS.replace(/\|\|/g, "OR");
+        qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
 
-        if (paramsKey && paramsValue) {
-            if (paramsKey.length != paramsValue.length) throw 'paramsKey,paramsValue 参数异常';
-            for (let i = 0; i < paramsKey.length; i++) {
-                let v = paramsValue[i];
-                if (isNaN) v = "'" + paramsValue[i] + "'";
-                qFnS = qFnS.replace(new RegExp(paramsKey[i], "gm"), v);
-            }
-        }
 
         return qFnS;
     }
+    private getParameterNames(fn) {
+        const COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+        const DEFAULT_PARAMS = /=[^,]+/mg;
+        const FAT_ARROWS = /=>.*$/mg;
+        const code = fn.toString()
+            .replace(COMMENTS, '')
+            .replace(FAT_ARROWS, '')
+            .replace(DEFAULT_PARAMS, '');
+        const result = code.slice(code.indexOf('(') + 1, code.indexOf(')') == -1 ? code.length : code.indexOf(')')).match(/([^\s,]+)/g);
+        return result === null ? [] : result;
+    }
+
     private getFeild(qFn): string {
         let qFns = this.formateCode(qFn);
         qFns = qFns.replace(/=>/g, "");
@@ -200,6 +271,7 @@ interface QueryParams {
     TakeCount: number;
     SkipCount: number;
     OrderByFiledName: string;
+    OrderByTableName: string;
     IsDesc: boolean;
     SelectFileds: string[];
 }

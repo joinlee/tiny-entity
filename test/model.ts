@@ -1,7 +1,5 @@
-import { MysqlDataContext, EntityObjectMysql } from "../index";
-import { EntityObject } from "../../entityObject";
-import { EntityObjectNeDB } from "../../index";
-
+import { EntityObjectFactory } from './config';
+let EntityObject = EntityObjectFactory.GetEntityObjectType();
 
 
 export class Employee extends EntityObject<Employee> {
@@ -20,7 +18,7 @@ export class Employee extends EntityObject<Employee> {
     toString(): string { return "Employee"; }
 }
 
-export class Table extends EntityObjectMysql<Table>{
+export class Table extends EntityObject<Table>{
     id: string = null;
     // 台桌名
     name: string = null;
@@ -59,7 +57,7 @@ export class TableGroup extends EntityObject<TableGroup> {
 /**
  * TableParty 台桌服务记录
  */
-export class TableParty extends EntityObjectMysql<TableParty>{
+export class TableParty extends EntityObject<TableParty>{
     constructor(args?) {
         super(args);
     }
@@ -72,9 +70,9 @@ export class TableParty extends EntityObjectMysql<TableParty>{
     //加入合并台桌id。null表示独立台桌
     tableGroupId: string = null;
     //开台时间
-    openedTime: Date | string = null;
+    openedTime: number;
     //关台时间
-    closedTime: Date | string = null;
+    closedTime: number;
     // opening 使用中 closed 台桌已经关闭停止服务  settled: 已经结算状态
     status: string = null;
     //订单号
@@ -139,7 +137,7 @@ class Modifier extends EntityObject<Modifier> {
     options: [any];
     toString() { return "Modifier"; }
 }
-export class Order extends EntityObjectNeDB<Order> {
+export class Order extends EntityObject<Order> {
     constructor(args?) {
         super(args);
     }

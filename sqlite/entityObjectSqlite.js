@@ -22,6 +22,9 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
         this.sqlTemp.push(sql);
         return this;
     }
+    Join(entity, qFn) {
+        return this;
+    }
     Select(qFn) {
         let filed = this.formateCode(qFn);
         this.queryParam.SelectFileds = filed.split("AND");
