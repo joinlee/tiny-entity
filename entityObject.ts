@@ -22,17 +22,17 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {any[]} paramsValue? 参数值列表
      * @returns IQueryObject 查询对象
      */
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) { return this; }
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
     /**
      * 左外连接查询
      * 
      * @template K 
-     * @param {K} entity 
      * @param {(x: K) => void} qFn 
+     * @param {K} entity 
      * 
      * @memberOf IQueryObject
      */
-    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) { return this; }
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K): IQueryObject<T> { return this; }
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数
@@ -59,7 +59,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(result:T[])=>void} queryCallback? 结果集回调函数
      * @returns T[]
      */
-    ToList<T>(queryCallback?: (result: T[]) => void): Promise<T[]> { return null; }
+    ToList(queryCallback?: (result: T[]) => void): Promise<T[]> { return null; }
     /**
      * 获取查询结果集中的结果条数
      * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
@@ -74,19 +74,20 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    OrderBy<T>(qFn: (x: T) => void, entity?: T) { return this; }
+    OrderBy(qFn: (x: T) => any, entity?: IEntityObject): IQueryObject<T> { return this; }
     /**
      * 查询排序，倒序
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    OrderByDesc<T>(qFn: (x: T) => void, entity?: T) { return this; }
+    OrderByDesc(qFn: (x: T) => any, entity?: IEntityObject): IQueryObject<T> { return this; }
+    GroupBy(qFn: (x: T) => void): IQueryObject<T> { return this; }
     /**
      * 设置需要查询的字段
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    Select(qFn: (x: T) => void) { return this; }
+    Select(qFn: (x: T) => void): IQueryObject<T> { return this; }
     /**
      * 获取的结果条数
      * @param  {number} count 获取的数目
@@ -98,8 +99,8 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {number} count 跳过查询的数目
      * @returns IQueryObject 查询对象
      */
-    Skip(count: number) { return this; }
+    Skip(count: number): IQueryObject<T> { return this; }
     Max(qFn: (x: T) => void): Promise<number> { return null; }
     Min(qFn: (x: T) => void): Promise<number> { return null; }
-    Contains(feild: (x: T) => void, values: any[]){ return this; }
+    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T> { return this; }
 }

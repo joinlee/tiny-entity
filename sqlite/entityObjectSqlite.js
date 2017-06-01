@@ -25,7 +25,7 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
         this.sqlTemp.push(sql);
         return this;
     }
-    Join(entity, qFn) {
+    Join(qFn, entity) {
         return this;
     }
     Select(qFn) {

@@ -110,23 +110,42 @@ describe("ToList", () => {
             await ctx.Create(tableParty);
         }
     })
-    it("左外连接查询", async () => {
+    it("左外连接查询,主表单个数据", async () => {
         let ctx = DataContextFactory.GetDataContext();
         let jr = await ctx.Table
-            .Join<TableParty>(ctx.TableParty, x => x.tableId)
+            .Join(x => x.tableId, ctx.TableParty)
             .Where(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728")
-            .OrderByDesc<TableParty>(x => x.openedTime, ctx.TableParty)
+            .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .Take(1)
             .ToList<{ desktable: Table; tableparty: TableParty }>();
         assert.notEqual(jr, null);
         assert.equal(jr.length, 1);
         assert.equal(jr[0].desktable.id, "a66fcbd29d2b4ac683c57520bfca5728");
-        assert.equal(jr[0].tableparty.tableId, "a66fcbd29d2b4ac683c57520bfca5728");
+
+        if (jr[0].tableparty) {
+            assert.equal(jr[0].tableparty.tableId, "a66fcbd29d2b4ac683c57520bfca5728");
+        }
+        else {
+            //左表没有数据的情况
+            assert.equal(jr[0].tableparty, null);
+        }
+
+    })
+
+    it("左外连接查询,主表多个数据", async () => {
+        let ctx = DataContextFactory.GetDataContext();
+        let jr = await ctx.Table
+            .Join(x => x.tableId, ctx.TableParty)
+            .OrderByDesc(x => x.openedTime, ctx.TableParty)
+            .GroupBy(x => x.name)
+            .ToList<{ desktable: Table; tableparty: TableParty }>();
+        assert.notEqual(jr, null);
+        assert.equal(jr.length, 158);
     })
 
     it("不加任何条件查询", async () => {
         let ctx = DataContextFactory.GetDataContext();
-        let r = await ctx.Table.ToList<Table>();
+        let r = await ctx.Table.ToList();
         assert.notEqual(r, null);
         assert.equal(r.length > 0, true);
         assert.notEqual(r[0].id, null);
@@ -135,7 +154,7 @@ describe("ToList", () => {
     it("条件查询", async () => {
         let ctx = DataContextFactory.GetDataContext();
         let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
-        let r = await ctx.Table.Where(x => x.id == tableId, ["tableId"], [tableId]).ToList<Table>();
+        let r = await ctx.Table.Where(x => x.id == tableId, ["tableId"], [tableId]).ToList();
         assert.notEqual(r, null);
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, "a66fcbd29d2b4ac683c57520bfca5728");

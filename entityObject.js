@@ -4,13 +4,14 @@ class EntityObject {
     toString() { return ""; }
     clone(source, destination, isDeep) { return null; }
     Where(qFn, paramsKey, paramsValue) { return this; }
-    Join(entity, qFn) { return this; }
+    Join(qFn, entity) { return this; }
     Any(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     ToList(queryCallback) { return null; }
     Count(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     OrderBy(qFn, entity) { return this; }
     OrderByDesc(qFn, entity) { return this; }
+    GroupBy(qFn) { return this; }
     Select(qFn) { return this; }
     Take(count) { return this; }
     Skip(count) { return this; }

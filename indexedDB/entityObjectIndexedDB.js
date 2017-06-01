@@ -77,7 +77,7 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
         return r;
     }
     Join(entity, qFn) {
-        return null;
+        return this;
     }
     Contains(feild, values) {
         return this;

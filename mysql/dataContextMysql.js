@@ -157,7 +157,7 @@ class MysqlDataContext {
         const propertyValueList = [];
         for (var key in obj) {
             if (this.isAvailableValue(obj[key])) {
-                if (key == "sqlTemp" || key == "queryParam" || key == "ctx")
+                if (key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms")
                     continue;
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "")
                     continue;

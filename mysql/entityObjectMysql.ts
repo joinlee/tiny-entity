@@ -22,10 +22,14 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
-    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K) {
         let joinTableName = entity.toString().toLocaleLowerCase();
         let feild = this.formateCode(qFn);
-        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + feild;
+        let mainTableName = this.toString();
+        if (this.joinParms && this.joinParms.length > 1) {
+            mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
+        }
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + mainTableName + ".id = " + joinTableName + "." + feild;
 
         this.joinParms.push({
             joinSql: sql,
@@ -136,12 +140,17 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         let tableName = this.toString();
         if (entity) tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
-        this.queryParam.OrderByFiledName = sql;
+        this.queryParam.OrderByFeildName = sql;
         return this;
     }
     OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K) {
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn, entity);
+    }
+    GroupBy(qFn: (x: T) => void) {
+        let fileds = this.formateCode(qFn, this.toString());
+        this.queryParam.GroupByFeildName = fileds;
+        return this;
     }
     private GetFinalQueryFields() {
         let feilds = "*";
@@ -188,7 +197,12 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                         newRow[s[0]] || (newRow[s[0]] = {
                             toString: function () { return s[0]; }
                         });
-                        newRow[s[0]][s[1]] = rowItem[feild];
+                        if (rowItem[s[0] + "_id"] == null) {
+                            newRow[s[0]] = null;
+                            break;
+                        }
+                        else
+                            newRow[s[0]][s[1]] = rowItem[feild];
                     }
 
                     newRows.push(newRow);
@@ -284,6 +298,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         destination = JSON.parse(JSON.stringify(source));
         delete (destination as any).sqlTemp;
         delete (destination as any).queryParam;
+        delete (destination as any).joinParms;
         delete (destination as any)._id;
         delete (destination as any).ctx;
         destination.toString = this.toString;
@@ -301,8 +316,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         if (this.queryParam.SelectFileds && this.queryParam.SelectFileds.length > 0) {
             sql = sql.replace(/\*/g, this.queryParam.SelectFileds.join(','));
         }
-        if (this.queryParam.OrderByFiledName) {
-            sql += " ORDER BY " + this.queryParam.OrderByFiledName;
+        if (this.queryParam.GroupByFeildName) {
+            sql += " GROUP BY " + this.queryParam.GroupByFeildName;
+        }
+        if (this.queryParam.OrderByFeildName) {
+            sql += " ORDER BY " + this.queryParam.OrderByFeildName;
             if (this.queryParam.IsDesc) sql += " DESC";
         }
         if (this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) {
@@ -320,7 +338,8 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 interface QueryParams {
     TakeCount: number;
     SkipCount: number;
-    OrderByFiledName: string;
+    OrderByFeildName: string;
     IsDesc: boolean;
     SelectFileds: string[];
+    GroupByFeildName: string;
 }

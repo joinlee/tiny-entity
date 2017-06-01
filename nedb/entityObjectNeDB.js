@@ -23,13 +23,18 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         this.sqlTemp.qFn.push(qFn);
         return this;
     }
-    Join(entity, qFn) {
+    Join(qFn, entity) {
         this.joinParams || (this.joinParams = []);
         let feild = this.formateCode(qFn);
         let joinTableName = entity.toString();
+        let mainTableName = this.toString();
+        if (this.joinParams.length > 1) {
+            mainTableName = this.joinParams[this.joinParams.length - 1].joinTableName;
+        }
         this.joinParams.push({
             joinTableName: joinTableName,
-            joinSelectFeild: feild
+            joinSelectFeild: feild,
+            mainTableName: mainTableName
         });
         return this;
     }
@@ -68,13 +73,17 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         return this;
     }
     OrderBy(qFn, entity) {
-        this.queryParam.OrderByFiledName = this.getFeild(qFn);
+        this.queryParam.OrderByFeildName = this.getFeild(qFn);
         this.queryParam.OrderByTableName = entity.toString();
         return this;
     }
     OrderByDesc(qFn, entity) {
         this.queryParam.IsDesc = true;
         this.OrderBy(qFn, entity);
+        return this;
+    }
+    GroupBy(qFn) {
+        this.queryParam.GroupByFeildName = this.getFeild(qFn);
         return this;
     }
     Sum(qFn) {
@@ -92,7 +101,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             if (this.sqlTemp.qFn.length > 0) {
                 if (this.HasJoin()) {
                     let mainResultList = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
-                    r = yield this.GenerateJoinResult(mainResultList);
+                    r = yield this.GenerateJoinResult(mainResultList, []);
                 }
                 else {
                     r = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
@@ -112,10 +121,10 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             };
             let result = this.cloneList(r);
             if (this.queryParam) {
-                if (this.queryParam.OrderByFiledName) {
-                    let orderByFiled = this.queryParam.OrderByFiledName;
+                let hasJoin = this.HasJoin();
+                if (this.queryParam.OrderByFeildName) {
+                    let orderByFiled = this.queryParam.OrderByFeildName;
                     let orderByTableName = this.queryParam.OrderByTableName;
-                    let hasJoin = this.HasJoin();
                     if (this.queryParam.IsDesc) {
                         result = result.sort((a, b) => {
                             if (hasJoin) {
@@ -137,8 +146,21 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                         });
                     }
                     ;
-                    this.queryParam.OrderByFiledName = null;
+                    this.queryParam.OrderByFeildName = null;
                     this.queryParam.IsDesc = null;
+                }
+                if (this.queryParam.GroupByFeildName) {
+                    let temp_r = [];
+                    result.map(x => {
+                        if (hasJoin) {
+                            let key = x[this.toString().toLocaleLowerCase()][this.queryParam.GroupByFeildName];
+                            let has = temp_r.find(x => x.key == key);
+                            if (!has) {
+                                temp_r.push({ key: key, value: x });
+                            }
+                        }
+                    });
+                    result = temp_r.map(x => x.value);
                 }
                 if (this.queryParam.SkipCount) {
                     result = result.splice(this.queryParam.SkipCount, result.length);
@@ -148,17 +170,38 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                     result = result.splice(0, this.queryParam.TakeCount);
                     this.queryParam.TakeCount = null;
                 }
+                this.queryParam = null;
             }
             this.joinParams = null;
             return result;
         });
     }
-    GenerateJoinResult(mainResultList) {
+    GenerateJoinResult(mainResultList, newRows, joinParsamsIndex) {
         return __awaiter(this, void 0, void 0, function* () {
-            let newRows = [];
-            for (let joinParamsItem of this.joinParams) {
-                for (let mrItem of mainResultList) {
-                    let leftResultResult = yield this.ctx.Query((x) => { return x[joinParamsItem.joinSelectFeild] == mrItem.id; }, joinParamsItem.joinTableName);
+            if (joinParsamsIndex == null || joinParsamsIndex == undefined)
+                joinParsamsIndex = 0;
+            if (joinParsamsIndex >= this.joinParams.length)
+                return null;
+            let joinParamsItem = this.joinParams[joinParsamsIndex];
+            let newJoinParamsIndex = joinParsamsIndex++;
+            for (let mrItem of mainResultList) {
+                let leftResultResult = yield this.ctx.Query((x) => { return x[joinParamsItem.joinSelectFeild] == mrItem.id; }, joinParamsItem.joinTableName);
+                let r = yield this.GenerateJoinResult(leftResultResult, newRows, newJoinParamsIndex);
+                if (leftResultResult.length == 0) {
+                    let newRowItem = {};
+                    let currentTableName = joinParamsItem.mainTableName.toLocaleLowerCase();
+                    newRowItem[currentTableName] || (newRowItem[currentTableName] = {
+                        toString: function () { return currentTableName; }
+                    });
+                    newRowItem[currentTableName] = mrItem;
+                    let joinTableName = joinParamsItem.joinTableName.toLocaleLowerCase();
+                    newRowItem[joinTableName] || (newRowItem[joinTableName] = {
+                        toString: function () { return joinParamsItem.joinTableName; }
+                    });
+                    newRowItem[joinTableName] = null;
+                    newRows.push(newRowItem);
+                }
+                else {
                     for (let lrItem of leftResultResult) {
                         let newRowItem = {};
                         let currentTableName = this.toString().toLocaleLowerCase();

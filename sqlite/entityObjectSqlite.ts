@@ -23,7 +23,7 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
         this.sqlTemp.push(sql);
         return this;
     }
-    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K) {
         return this;
     }
     Select(qFn: (x: T) => void) {

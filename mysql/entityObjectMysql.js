@@ -22,10 +22,14 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
-    Join(entity, qFn) {
+    Join(qFn, entity) {
         let joinTableName = entity.toString().toLocaleLowerCase();
         let feild = this.formateCode(qFn);
-        let sql = "LEFT JOIN `" + joinTableName + "` ON " + this.toString() + ".id = " + joinTableName + "." + feild;
+        let mainTableName = this.toString();
+        if (this.joinParms && this.joinParms.length > 1) {
+            mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
+        }
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + mainTableName + ".id = " + joinTableName + "." + feild;
         this.joinParms.push({
             joinSql: sql,
             joinSelectFeild: this.GetSelectFieldList(entity).join(","),
@@ -128,12 +132,17 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         if (entity)
             tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
-        this.queryParam.OrderByFiledName = sql;
+        this.queryParam.OrderByFeildName = sql;
         return this;
     }
     OrderByDesc(qFn, entity) {
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn, entity);
+    }
+    GroupBy(qFn) {
+        let fileds = this.formateCode(qFn, this.toString());
+        this.queryParam.GroupByFeildName = fileds;
+        return this;
     }
     GetFinalQueryFields() {
         let feilds = "*";
@@ -181,7 +190,12 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                             newRow[s[0]] || (newRow[s[0]] = {
                                 toString: function () { return s[0]; }
                             });
-                            newRow[s[0]][s[1]] = rowItem[feild];
+                            if (rowItem[s[0] + "_id"] == null) {
+                                newRow[s[0]] = null;
+                                break;
+                            }
+                            else
+                                newRow[s[0]][s[1]] = rowItem[feild];
                         }
                         newRows.push(newRow);
                     }
@@ -273,6 +287,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         destination = JSON.parse(JSON.stringify(source));
         delete destination.sqlTemp;
         delete destination.queryParam;
+        delete destination.joinParms;
         delete destination._id;
         delete destination.ctx;
         destination.toString = this.toString;
@@ -290,8 +305,11 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         if (this.queryParam.SelectFileds && this.queryParam.SelectFileds.length > 0) {
             sql = sql.replace(/\*/g, this.queryParam.SelectFileds.join(','));
         }
-        if (this.queryParam.OrderByFiledName) {
-            sql += " ORDER BY " + this.queryParam.OrderByFiledName;
+        if (this.queryParam.GroupByFeildName) {
+            sql += " GROUP BY " + this.queryParam.GroupByFeildName;
+        }
+        if (this.queryParam.OrderByFeildName) {
+            sql += " ORDER BY " + this.queryParam.OrderByFeildName;
             if (this.queryParam.IsDesc)
                 sql += " DESC";
         }

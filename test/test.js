@@ -87,10 +87,10 @@ describe("ToList", () => {
             yield ctx.Create(tableParty);
         }
     }));
-    it("左外连接查询", () => __awaiter(this, void 0, void 0, function* () {
+    it("左外连接查询,主表单个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
         let jr = yield ctx.Table
-            .Join(ctx.TableParty, x => x.tableId)
+            .Join(x => x.tableId, ctx.TableParty)
             .Where(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728")
             .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .Take(1)
@@ -98,7 +98,22 @@ describe("ToList", () => {
         assert.notEqual(jr, null);
         assert.equal(jr.length, 1);
         assert.equal(jr[0].desktable.id, "a66fcbd29d2b4ac683c57520bfca5728");
-        assert.equal(jr[0].tableparty.tableId, "a66fcbd29d2b4ac683c57520bfca5728");
+        if (jr[0].tableparty) {
+            assert.equal(jr[0].tableparty.tableId, "a66fcbd29d2b4ac683c57520bfca5728");
+        }
+        else {
+            assert.equal(jr[0].tableparty, null);
+        }
+    }));
+    it("左外连接查询,主表多个数据", () => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        let jr = yield ctx.Table
+            .Join(x => x.tableId, ctx.TableParty)
+            .OrderByDesc(x => x.openedTime, ctx.TableParty)
+            .GroupBy(x => x.name)
+            .ToList();
+        assert.notEqual(jr, null);
+        assert.equal(jr.length, 158);
     }));
     it("不加任何条件查询", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();

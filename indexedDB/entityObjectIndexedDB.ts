@@ -95,7 +95,7 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
         return r;
     }
     Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
-        return null;
+        return this;
     }
     Contains(feild: (x: T) => void, values: any[]) {
         return this;

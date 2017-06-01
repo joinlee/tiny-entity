@@ -143,12 +143,12 @@ export interface IQueryObject<T> {
      * 左外连接查询
      * 
      * @template K 
-     * @param {K} entity 
      * @param {(x: K) => void} qFn 
+     * @param {K} entity 
      * 
      * @memberOf IQueryObject
      */
-    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void);
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K): IQueryObject<T>;
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数
@@ -171,11 +171,19 @@ export interface IQueryObject<T> {
         paramsValue?: any[],
         queryCallback?: (result: T) => void): Promise<T>;
     /**
+     * 执行查询条件,查询结果集
+     * 
+     * @returns {Promise<T[]>} 
+     * 
+     * @memberOf IQueryObject
+     */
+    ToList(): Promise<T[]>;
+    /**
      *  执行查询条件。
      * @param  {(result:T[])=>void} queryCallback? 结果集回调函数
      * @returns T[]
      */
-    ToList<T>(queryCallback?: (result: T[]) => void): Promise<T[]>;
+    ToList<TResult>(queryCallback?: (result: TResult[]) => void): Promise<TResult[]>;
     /**
      * 获取查询结果集中的结果条数
      * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
@@ -190,13 +198,16 @@ export interface IQueryObject<T> {
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    OrderBy<T>(qFn: (x: T) => void, entity?: T): IQueryObject<T>;
+    OrderBy(qFn: (x: T) => void): IQueryObject<T>;
+    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T>;
     /**
      * 查询排序，倒序
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    OrderByDesc<T>(qFn: (x: T) => void, entity?: T): IQueryObject<T>;
+    OrderByDesc(qFn: (x: T) => void): IQueryObject<T>;
+    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T>;
+    GroupBy(qFn: (x: T) => void): IQueryObject<T>;
     /**
      * 设置需要查询的字段
      * @param  {(x:T)=>void} qFn 查询条件函数
