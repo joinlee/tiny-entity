@@ -14,7 +14,7 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
     }
     toString(): string { return ""; }
 
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
         this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.Select, qFn);
         return this;
     }
@@ -34,14 +34,14 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
             });
         });
     }
-    OrderBy(qFn: (x: T) => void): IQueryObject<T> { return this; }
-    OrderByDesc(qFn: (x: T) => void): IQueryObject<T> { return this; }
-    Select(qFn: (x: T) => void): IQueryObject<T> { return this; }
-    Take(count: number): IQueryObject<T> {
+    OrderBy<T>(qFn: (x: T) => void, entity?: T) { return this; }
+    OrderByDesc<T>(qFn: (x: T) => void, entity?: T) { return this; }
+    Select(qFn: (x: T) => void) { return this; }
+    Take(count: number) {
         this.ctx.AddTakeCount(count);
         return this;
     }
-    Skip(count: number): IQueryObject<T> {
+    Skip(count: number) {
         this.ctx.AddSkipCount(count);
         return this;
     }
@@ -93,5 +93,11 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
         });
 
         return r;
+    }
+    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
+        return null;
+    }
+    Contains(feild: (x: T) => void, values: any[]) {
+        return this;
     }
 }

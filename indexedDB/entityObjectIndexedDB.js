@@ -29,8 +29,8 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
             });
         });
     }
-    OrderBy(qFn) { return this; }
-    OrderByDesc(qFn) { return this; }
+    OrderBy(qFn, entity) { return this; }
+    OrderByDesc(qFn, entity) { return this; }
     Select(qFn) { return this; }
     Take(count) {
         this.ctx.AddTakeCount(count);
@@ -75,6 +75,12 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
                 r.push(this.clone(x, new Object(), false));
         });
         return r;
+    }
+    Join(entity, qFn) {
+        return null;
+    }
+    Contains(feild, values) {
+        return this;
     }
 }
 exports.EntityObjectIndexedDB = EntityObjectIndexedDB;

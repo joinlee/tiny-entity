@@ -6,6 +6,9 @@ import { IEntityObject, IQueryObject } from '../tinyDB';
  * EntityObject
  */
 class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
+    Contains(feild: (x: T) => void, values: any[]) {
+        return this;
+    }
     id: string;
     toString(): string { return ""; }
     private ctx: SqliteDataContext;
@@ -15,15 +18,15 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
         super(ctx);
         this.ctx = ctx;
     }
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
         let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);
         this.sqlTemp.push(sql);
         return this;
     }
-    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void){
+    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
         return this;
     }
-    Select(qFn: (x: T) => void): IQueryObject<T> {
+    Select(qFn: (x: T) => void) {
         let filed = this.formateCode(qFn);
         this.queryParam.SelectFileds = filed.split("AND");
         return this;
@@ -74,20 +77,20 @@ class EntityObjectSqlite<T extends IEntityObject> extends EntityObject<T>{
             resolve(this.clone(EntityCopier.Decode(row && row['0']), new Object() as T));
         });
     }
-    Take(count: number): IQueryObject<T> {
+    Take(count: number) {
         this.queryParam.TakeCount = count;
         return this;
     }
-    Skip(count: number): IQueryObject<T> {
+    Skip(count: number) {
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn: (x: T) => void): IQueryObject<T> {
+    OrderBy(qFn: (x: T) => void) {
         var sql = this.formateCode(qFn);
         this.queryParam.OrderByFiledName = sql;
         return this;
     }
-    OrderByDesc(qFn: (x: T) => void): IQueryObject<T> {
+    OrderByDesc(qFn: (x: T) => void) {
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn);
     }

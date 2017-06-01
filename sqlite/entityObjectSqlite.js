@@ -16,6 +16,9 @@ class EntityObjectSqlite extends entityObject_1.EntityObject {
         this.queryParam = new Object();
         this.ctx = ctx;
     }
+    Contains(feild, values) {
+        return this;
+    }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
         let sql = "SELECT * FROM " + this.toString() + " WHERE " + this.formateCode(qFn, paramsKey, paramsValue);

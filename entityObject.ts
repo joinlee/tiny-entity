@@ -22,7 +22,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {any[]} paramsValue? 参数值列表
      * @returns IQueryObject 查询对象
      */
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) { return this; }
     /**
      * 左外连接查询
      * 
@@ -59,9 +59,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(result:T[])=>void} queryCallback? 结果集回调函数
      * @returns T[]
      */
-    ToList(queryCallback?: (result: T[]) => void): Promise<T[]> {
-        return null;
-    }
+    ToList<T>(queryCallback?: (result: T[]) => void): Promise<T[]> { return null; }
     /**
      * 获取查询结果集中的结果条数
      * @param  {(entityObject:T)=>boolean} qFn? 查询条件函数
@@ -76,32 +74,32 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    OrderBy(qFn: (x: T) => void): IQueryObject<T> { return this; }
+    OrderBy<T>(qFn: (x: T) => void, entity?: T) { return this; }
     /**
      * 查询排序，倒序
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    OrderByDesc(qFn: (x: T) => void): IQueryObject<T> { return this; }
+    OrderByDesc<T>(qFn: (x: T) => void, entity?: T) { return this; }
     /**
      * 设置需要查询的字段
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
      */
-    Select(qFn: (x: T) => void): IQueryObject<T> { return this; }
+    Select(qFn: (x: T) => void) { return this; }
     /**
      * 获取的结果条数
      * @param  {number} count 获取的数目
      * @returns IQueryObject 查询对象
      */
-    Take(count: number): IQueryObject<T> { return this; }
+    Take(count: number) { return this; }
     /**
      * 跳过的结果条数
      * @param  {number} count 跳过查询的数目
      * @returns IQueryObject 查询对象
      */
-    Skip(count: number): IQueryObject<T> { return this; }
+    Skip(count: number) { return this; }
     Max(qFn: (x: T) => void): Promise<number> { return null; }
     Min(qFn: (x: T) => void): Promise<number> { return null; }
-    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T> { return null; }
+    Contains(feild: (x: T) => void, values: any[]){ return this; }
 }

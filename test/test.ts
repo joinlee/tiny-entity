@@ -126,7 +126,7 @@ describe("ToList", () => {
 
     it("不加任何条件查询", async () => {
         let ctx = DataContextFactory.GetDataContext();
-        let r = await ctx.Table.ToList();
+        let r = await ctx.Table.ToList<Table>();
         assert.notEqual(r, null);
         assert.equal(r.length > 0, true);
         assert.notEqual(r[0].id, null);

@@ -18,7 +18,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         super(ctx);
         this.ctx = ctx;
     }
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
         this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
@@ -51,7 +51,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         }
         return feildList;
     }
-    Select(qFn: (x: T) => void): IQueryObject<T> {
+    Select(qFn: (x: T) => void) {
         let fileds = this.formateCode(qFn);
         this.queryParam.SelectFileds = fileds.split("AND");
         return this;
@@ -124,22 +124,22 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             return this.clone(EntityCopier.Decode(obj), new Object() as T);
         else return null;
     }
-    Take(count: number): IQueryObject<T> {
+    Take(count: number) {
         this.queryParam.TakeCount = count;
         return this;
     }
-    Skip(count: number): IQueryObject<T> {
+    Skip(count: number) {
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
+    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K) {
         let tableName = this.toString();
         if (entity) tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
         this.queryParam.OrderByFiledName = sql;
         return this;
     }
-    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
+    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K) {
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn, entity);
     }

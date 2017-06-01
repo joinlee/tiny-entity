@@ -17,7 +17,7 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         this.ctx = ctx;
     }
 
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> {
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
         this.sqlTemp.qFn.push(qFn);
         return this;
     }
@@ -31,7 +31,7 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         });
         return this;
     }
-    Select(qFn: (x: T) => void): IQueryObject<T> {
+    Select(qFn: (x: T) => void) {
         return this;
     }
     async Any(qFn: (entityObject: T) => boolean,
@@ -55,20 +55,20 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         let r: T = await this.ctx.Query([qFn], this.toString(), QueryMode.First);
         return this.clone(r, new Object() as T) as T;
     }
-    Take(count: number): IQueryObject<T> {
+    Take(count: number) {
         this.queryParam.TakeCount = count;
         return this;
     }
-    Skip(count: number): IQueryObject<T> {
+    Skip(count: number) {
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
+    OrderBy<T>(qFn: (x: T) => void, entity?: T) {
         this.queryParam.OrderByFiledName = this.getFeild(qFn);
         this.queryParam.OrderByTableName = entity.toString();
         return this;
     }
-    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K): IQueryObject<T> {
+    OrderByDesc<T>(qFn: (x: T) => void, entity?: T) {
         this.queryParam.IsDesc = true;
         this.OrderBy(qFn, entity);
         return this;
