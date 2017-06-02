@@ -22,6 +22,7 @@ class EntityCopier {
         delete s.sqlTemp;
         delete s.ctx;
         delete s.queryParam;
+        delete s.joinParams;
         for (let key in s) {
             try {
                 let d = JSON.parse(s[key]);

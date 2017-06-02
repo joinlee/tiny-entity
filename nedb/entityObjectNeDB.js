@@ -23,18 +23,21 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         this.sqlTemp.qFn.push(qFn);
         return this;
     }
-    Join(qFn, entity) {
+    Join(qFn, entity, mainFeild) {
         this.joinParams || (this.joinParams = []);
         let feild = this.formateCode(qFn);
         let joinTableName = entity.toString();
         let mainTableName = this.toString();
-        if (this.joinParams.length > 1) {
+        if (this.joinParams.length > 0) {
             mainTableName = this.joinParams[this.joinParams.length - 1].joinTableName;
         }
+        if (mainFeild == null || mainFeild == undefined)
+            mainFeild = "id";
         this.joinParams.push({
             joinTableName: joinTableName,
             joinSelectFeild: feild,
-            mainTableName: mainTableName
+            mainTableName: mainTableName,
+            mainFeild: mainFeild
         });
         return this;
     }
@@ -101,7 +104,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             if (this.sqlTemp.qFn.length > 0) {
                 if (this.HasJoin()) {
                     let mainResultList = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
-                    r = yield this.GenerateJoinResult(mainResultList, []);
+                    r = yield this.GenerateJoinResults(mainResultList);
                 }
                 else {
                     r = yield this.ctx.Query(this.sqlTemp.qFn, this.toString(), this.sqlTemp.queryMode, null, this.sqlTemp.inq);
@@ -110,7 +113,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             else {
                 if (this.HasJoin()) {
                     let mainResultList = yield this.ctx.Query([x => true], this.toString());
-                    r = yield this.GenerateJoinResult(mainResultList);
+                    r = yield this.GenerateJoinResults(mainResultList);
                 }
                 else {
                     r = yield this.ctx.Query([x => true], this.toString());
@@ -176,50 +179,60 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
             return result;
         });
     }
-    GenerateJoinResult(mainResultList, newRows, joinParsamsIndex) {
+    GenerateJoinResults(mainResultList, joinParsamsIndex) {
         return __awaiter(this, void 0, void 0, function* () {
             if (joinParsamsIndex == null || joinParsamsIndex == undefined)
                 joinParsamsIndex = 0;
-            if (joinParsamsIndex >= this.joinParams.length)
-                return null;
             let joinParamsItem = this.joinParams[joinParsamsIndex];
-            let newJoinParamsIndex = joinParsamsIndex++;
+            let newJoinParamsIndex = joinParsamsIndex + 1;
+            let mainTableName = joinParamsItem.mainTableName;
+            let newRows = [];
             for (let mrItem of mainResultList) {
-                let leftResultResult = yield this.ctx.Query((x) => { return x[joinParamsItem.joinSelectFeild] == mrItem.id; }, joinParamsItem.joinTableName);
-                let r = yield this.GenerateJoinResult(leftResultResult, newRows, newJoinParamsIndex);
+                let mrItem_e;
+                if (joinParsamsIndex == 0)
+                    mrItem_e = mrItem[joinParamsItem.mainFeild];
+                else {
+                    mainTableName = null;
+                    mrItem_e = mrItem[this.joinParams[joinParsamsIndex - 1].joinTableName.toLocaleLowerCase()][joinParamsItem.mainFeild];
+                }
+                let leftResultResult = yield this.ctx.Query([(x) => {
+                        return x[joinParamsItem.joinSelectFeild] == mrItem_e;
+                    }], joinParamsItem.joinTableName);
                 if (leftResultResult.length == 0) {
-                    let newRowItem = {};
-                    let currentTableName = joinParamsItem.mainTableName.toLocaleLowerCase();
-                    newRowItem[currentTableName] || (newRowItem[currentTableName] = {
-                        toString: function () { return currentTableName; }
-                    });
-                    newRowItem[currentTableName] = mrItem;
-                    let joinTableName = joinParamsItem.joinTableName.toLocaleLowerCase();
-                    newRowItem[joinTableName] || (newRowItem[joinTableName] = {
-                        toString: function () { return joinParamsItem.joinTableName; }
-                    });
-                    newRowItem[joinTableName] = null;
-                    newRows.push(newRowItem);
+                    newRows.push(this.GenerateNewRowItem(mainTableName, joinParamsItem.joinTableName, mrItem, null));
                 }
                 else {
                     for (let lrItem of leftResultResult) {
-                        let newRowItem = {};
-                        let currentTableName = this.toString().toLocaleLowerCase();
-                        newRowItem[currentTableName] || (newRowItem[currentTableName] = {
-                            toString: function () { return currentTableName; }
-                        });
-                        newRowItem[currentTableName] = mrItem;
-                        let joinTableName = joinParamsItem.joinTableName.toLocaleLowerCase();
-                        newRowItem[joinTableName] || (newRowItem[joinTableName] = {
-                            toString: function () { return joinParamsItem.joinTableName; }
-                        });
-                        newRowItem[joinTableName] = lrItem;
-                        newRows.push(newRowItem);
+                        newRows.push(this.GenerateNewRowItem(mainTableName, joinParamsItem.joinTableName, mrItem, lrItem));
                     }
                 }
             }
-            return newRows;
+            if (joinParsamsIndex >= this.joinParams.length - 1) {
+                return newRows;
+            }
+            else {
+                return yield this.GenerateJoinResults(newRows, newJoinParamsIndex);
+            }
         });
+    }
+    GenerateNewRowItem(mainTableName, joinTableName, mainItem, joinItem) {
+        let newRowItem = {};
+        if (mainTableName == null) {
+            newRowItem = mainItem;
+        }
+        else {
+            let currentTableName = mainTableName.toLocaleLowerCase();
+            newRowItem[currentTableName] || (newRowItem[currentTableName] = {
+                toString: function () { return currentTableName; }
+            });
+            newRowItem[currentTableName] = mainItem;
+        }
+        joinTableName = joinTableName.toLocaleLowerCase();
+        newRowItem[joinTableName] || (newRowItem[joinTableName] = {
+            toString: function () { return joinTableName; }
+        });
+        newRowItem[joinTableName] = joinItem;
+        return newRowItem;
     }
     HasJoin() {
         return this.joinParams && this.joinParams.length > 0;

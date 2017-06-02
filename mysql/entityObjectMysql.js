@@ -22,14 +22,16 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
-    Join(qFn, entity) {
+    Join(qFn, entity, mainFeild) {
         let joinTableName = entity.toString().toLocaleLowerCase();
         let feild = this.formateCode(qFn);
         let mainTableName = this.toString();
-        if (this.joinParms && this.joinParms.length > 1) {
+        if (this.joinParms && this.joinParms.length > 0) {
             mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
         }
-        let sql = "LEFT JOIN `" + joinTableName + "` ON " + mainTableName + ".id = " + joinTableName + "." + feild;
+        if (mainFeild == null || mainFeild == undefined)
+            mainFeild = "id";
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + mainTableName + "." + mainFeild + " = " + joinTableName + "." + feild;
         this.joinParms.push({
             joinSql: sql,
             joinSelectFeild: this.GetSelectFieldList(entity).join(","),
@@ -148,8 +150,9 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         let feilds = "*";
         if (this.joinParms && this.joinParms.length > 0) {
             let wfs = this.GetSelectFieldList(this).join(",");
+            feilds = wfs;
             for (let joinSelectFeild of this.joinParms) {
-                feilds = wfs + "," + joinSelectFeild.joinSelectFeild;
+                feilds += ("," + joinSelectFeild.joinSelectFeild);
             }
         }
         return feilds;
@@ -194,8 +197,13 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                                 newRow[s[0]] = null;
                                 break;
                             }
-                            else
+                            else {
                                 newRow[s[0]][s[1]] = rowItem[feild];
+                            }
+                        }
+                        for (let objItem in newRow) {
+                            if (newRow[objItem] != null)
+                                newRow[objItem] = entityCopier_1.EntityCopier.Decode(newRow[objItem]);
                         }
                         newRows.push(newRow);
                     }

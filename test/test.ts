@@ -2,7 +2,7 @@ import { webconfig } from './config';
 import { MysqlDataContext } from './../mysql/dataContextMysql';
 import { NeDBDataContext } from './../nedb/dataContextNeDB';
 import { Table, TableZone, TableGroup, TableParty, Inventory } from './model';
-import { Employee } from "./model";
+import { Employee, Order } from "./model";
 import { IDataContext } from "../index";
 import * as assert from "assert";
 
@@ -13,6 +13,7 @@ interface FBSDataContextBase extends IDataContext {
     TableZone: TableZone;
     TableParty: TableParty;
     Inventory: Inventory;
+    Order: Order;
 }
 class FBSDataContextNeDB extends NeDBDataContext implements FBSDataContextBase {
     private employee: Employee;
@@ -21,6 +22,7 @@ class FBSDataContextNeDB extends NeDBDataContext implements FBSDataContextBase {
     private tableZone: TableZone;
     private tableParty: TableParty;
     private inventory: Inventory;
+    private order: Order;
 
     constructor() {
         super({ FilePath: webconfig.dataRootDir + "/", DBName: "", IsMulitTabel: true });
@@ -31,6 +33,7 @@ class FBSDataContextNeDB extends NeDBDataContext implements FBSDataContextBase {
         this.tableZone = new TableZone(this);
         this.tableParty = new TableParty(this);
         this.inventory = new Inventory(this);
+        this.order = new Order(this);
     }
 
     get Employee() { return this.employee; }
@@ -39,6 +42,7 @@ class FBSDataContextNeDB extends NeDBDataContext implements FBSDataContextBase {
     get TableZone() { return this.tableZone; }
     get TableParty() { return this.tableParty; }
     get Inventory() { return this.inventory; }
+    get Order() { return this.order; }
 
 }
 class FBSDataContextMysql extends MysqlDataContext implements FBSDataContextBase {
@@ -48,6 +52,7 @@ class FBSDataContextMysql extends MysqlDataContext implements FBSDataContextBase
     private tableZone: TableZone;
     private tableParty: TableParty;
     private inventory: Inventory;
+    private order: Order;
 
     constructor() {
         super(webconfig.mysqlConnOption);
@@ -58,6 +63,7 @@ class FBSDataContextMysql extends MysqlDataContext implements FBSDataContextBase
         this.tableZone = new TableZone(this);
         this.tableParty = new TableParty(this);
         this.inventory = new Inventory(this);
+        this.order = new Order(this);
     }
 
     get Employee() { return this.employee; }
@@ -66,6 +72,7 @@ class FBSDataContextMysql extends MysqlDataContext implements FBSDataContextBase
     get TableZone() { return this.tableZone; }
     get TableParty() { return this.tableParty; }
     get Inventory() { return this.inventory; }
+    get Order() { return this.order; }
 }
 class DataContextFactory {
     static GetDataContext(): FBSDataContextBase {
@@ -89,48 +96,71 @@ class Guid {
     }
 }
 
+console.log("当前数据库配置：", webconfig.dbType);
 describe("ToList", () => {
+    let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
     before(async () => {
         // 在本区块的所有测试用例之前执行
         let ctx = DataContextFactory.GetDataContext();
-        let has = await ctx.Table.Any(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728");
-        if (!has) {
+        let hasTable = await ctx.Table.Any(x => x.id == tableId, ["tableId"], [tableId]);
+        let hasTableParty = await ctx.TableParty.Any(x => x.tableId == tableId, ["tableId"], [tableId]);
+
+        if (!hasTable) {
             let table = new Table();
-            table.id = "a66fcbd29d2b4ac683c57520bfca5728";
+            table.id = tableId;
             table.name = "测试台桌1";
             table.status = "opening";
 
+            await ctx.Create(table);
+        }
+
+        if (!hasTableParty) {
+            let order = new Order();
+            order.id = Guid.GetGuid();
+
             let tableParty = new TableParty();
             tableParty.id = Guid.GetGuid();
-            tableParty.tableId = table.id;
+            tableParty.tableId = tableId;
             tableParty.openedTime = new Date().getTime();
             tableParty.status = "opening";
+            tableParty.orderId = order.id;
 
-            await ctx.Create(table);
             await ctx.Create(tableParty);
+            await ctx.Create(order);
         }
     })
     it("左外连接查询,主表单个数据", async () => {
         let ctx = DataContextFactory.GetDataContext();
         let jr = await ctx.Table
             .Join(x => x.tableId, ctx.TableParty)
-            .Where(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728")
+            .Join<Order>(x => x.id, ctx.Order, "orderId")
+            .Where(x => x.id == tableId, ["tableId"], [tableId])
             .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .Take(1)
-            .ToList<{ desktable: Table; tableparty: TableParty }>();
-        assert.notEqual(jr, null);
-        assert.equal(jr.length, 1);
-        assert.equal(jr[0].desktable.id, "a66fcbd29d2b4ac683c57520bfca5728");
-
-        if (jr[0].tableparty) {
-            assert.equal(jr[0].tableparty.tableId, "a66fcbd29d2b4ac683c57520bfca5728");
-        }
-        else {
-            //左表没有数据的情况
-            assert.equal(jr[0].tableparty, null);
-        }
-
+            .ToList<{ desktable: Table; tableparty: TableParty; orders: Order }>();
+        assert.notEqual(jr, null, "查询结果为空");
+        assert.equal(jr.length, 1, "查询条数不为1");
+        assert.equal(jr[0].desktable.id, tableId, "desktable.id != tableId");
+        assert.notEqual(jr[0].tableparty, null, "tableparty is null");
+        assert.notEqual(jr[0].orders, null, "orders is null");
+        assert.equal(jr[0].tableparty.tableId, tableId, "tableparty.tableId != tableId");
+        assert.equal(jr[0].tableparty.orderId == jr[0].orders.id, true, "tableparty.orderId != orders.id");
     })
+
+    it("左外连接，左表无数据", async () => {
+        //清空左表
+        let ctx = DataContextFactory.GetDataContext();
+        let tablePartyList = await ctx.TableParty.Where(x => x.tableId == tableId, ["tableId"], [tableId]).ToList();
+        for (let item of tablePartyList) {
+            await ctx.Delete(item);
+        }
+
+        // 左外连接查询
+        let r = await ctx.Table.Join<TableParty>(x => x.tableId, ctx.TableParty).ToList<{ desktable: Table; tableparty: TableParty; }>();
+        assert.equal(r.length >= 1, true);
+        assert.notEqual(r[0].desktable, null);
+        assert.equal(r[0].tableparty, null);
+    });
 
     it("左外连接查询,主表多个数据", async () => {
         let ctx = DataContextFactory.GetDataContext();
@@ -140,7 +170,7 @@ describe("ToList", () => {
             .GroupBy(x => x.name)
             .ToList<{ desktable: Table; tableparty: TableParty }>();
         assert.notEqual(jr, null);
-        assert.equal(jr.length, 158);
+        assert.equal(jr.length >= 1, true);
     })
 
     it("不加任何条件查询", async () => {
@@ -153,10 +183,9 @@ describe("ToList", () => {
 
     it("条件查询", async () => {
         let ctx = DataContextFactory.GetDataContext();
-        let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
         let r = await ctx.Table.Where(x => x.id == tableId, ["tableId"], [tableId]).ToList();
         assert.notEqual(r, null);
         assert.equal(r.length == 1, true);
-        assert.equal(r[0].id, "a66fcbd29d2b4ac683c57520bfca5728");
+        assert.equal(r[0].id, tableId);
     })
 });

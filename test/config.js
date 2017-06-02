@@ -1,6 +1,6 @@
 "use strict";
 exports.webconfig = {
-    dbType: "mysql",
+    dbType: "nedb",
     mysqlConnOption: {
         connectionLimit: 50,
         host: '172.16.254.127',

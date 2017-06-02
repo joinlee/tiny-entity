@@ -22,6 +22,7 @@ class FBSDataContextNeDB extends dataContextNeDB_1.NeDBDataContext {
         this.tableZone = new model_1.TableZone(this);
         this.tableParty = new model_1.TableParty(this);
         this.inventory = new model_1.Inventory(this);
+        this.order = new model_2.Order(this);
     }
     get Employee() { return this.employee; }
     get Table() { return this.table; }
@@ -29,6 +30,7 @@ class FBSDataContextNeDB extends dataContextNeDB_1.NeDBDataContext {
     get TableZone() { return this.tableZone; }
     get TableParty() { return this.tableParty; }
     get Inventory() { return this.inventory; }
+    get Order() { return this.order; }
 }
 class FBSDataContextMysql extends dataContextMysql_1.MysqlDataContext {
     constructor() {
@@ -39,6 +41,7 @@ class FBSDataContextMysql extends dataContextMysql_1.MysqlDataContext {
         this.tableZone = new model_1.TableZone(this);
         this.tableParty = new model_1.TableParty(this);
         this.inventory = new model_1.Inventory(this);
+        this.order = new model_2.Order(this);
     }
     get Employee() { return this.employee; }
     get Table() { return this.table; }
@@ -46,6 +49,7 @@ class FBSDataContextMysql extends dataContextMysql_1.MysqlDataContext {
     get TableZone() { return this.tableZone; }
     get TableParty() { return this.tableParty; }
     get Inventory() { return this.inventory; }
+    get Order() { return this.order; }
 }
 class DataContextFactory {
     static GetDataContext() {
@@ -69,41 +73,60 @@ class Guid {
         return uuid;
     }
 }
+console.log("当前数据库配置：", config_1.webconfig.dbType);
 describe("ToList", () => {
+    let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
     before(() => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
-        let has = yield ctx.Table.Any(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728");
-        if (!has) {
+        let hasTable = yield ctx.Table.Any(x => x.id == tableId, ["tableId"], [tableId]);
+        let hasTableParty = yield ctx.TableParty.Any(x => x.tableId == tableId, ["tableId"], [tableId]);
+        if (!hasTable) {
             let table = new model_1.Table();
-            table.id = "a66fcbd29d2b4ac683c57520bfca5728";
+            table.id = tableId;
             table.name = "测试台桌1";
             table.status = "opening";
+            yield ctx.Create(table);
+        }
+        if (!hasTableParty) {
+            let order = new model_2.Order();
+            order.id = Guid.GetGuid();
             let tableParty = new model_1.TableParty();
             tableParty.id = Guid.GetGuid();
-            tableParty.tableId = table.id;
+            tableParty.tableId = tableId;
             tableParty.openedTime = new Date().getTime();
             tableParty.status = "opening";
-            yield ctx.Create(table);
+            tableParty.orderId = order.id;
             yield ctx.Create(tableParty);
+            yield ctx.Create(order);
         }
     }));
     it("左外连接查询,主表单个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
         let jr = yield ctx.Table
             .Join(x => x.tableId, ctx.TableParty)
-            .Where(x => x.id == "a66fcbd29d2b4ac683c57520bfca5728")
+            .Join(x => x.id, ctx.Order, "orderId")
+            .Where(x => x.id == tableId, ["tableId"], [tableId])
             .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .Take(1)
             .ToList();
-        assert.notEqual(jr, null);
-        assert.equal(jr.length, 1);
-        assert.equal(jr[0].desktable.id, "a66fcbd29d2b4ac683c57520bfca5728");
-        if (jr[0].tableparty) {
-            assert.equal(jr[0].tableparty.tableId, "a66fcbd29d2b4ac683c57520bfca5728");
+        assert.notEqual(jr, null, "查询结果为空");
+        assert.equal(jr.length, 1, "查询条数不为1");
+        assert.equal(jr[0].desktable.id, tableId, "desktable.id != tableId");
+        assert.notEqual(jr[0].tableparty, null, "tableparty is null");
+        assert.notEqual(jr[0].orders, null, "orders is null");
+        assert.equal(jr[0].tableparty.tableId, tableId, "tableparty.tableId != tableId");
+        assert.equal(jr[0].tableparty.orderId == jr[0].orders.id, true, "tableparty.orderId != orders.id");
+    }));
+    it("左外连接，左表无数据", () => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        let tablePartyList = yield ctx.TableParty.Where(x => x.tableId == tableId, ["tableId"], [tableId]).ToList();
+        for (let item of tablePartyList) {
+            yield ctx.Delete(item);
         }
-        else {
-            assert.equal(jr[0].tableparty, null);
-        }
+        let r = yield ctx.Table.Join(x => x.tableId, ctx.TableParty).ToList();
+        assert.equal(r.length >= 1, true);
+        assert.notEqual(r[0].desktable, null);
+        assert.equal(r[0].tableparty, null);
     }));
     it("左外连接查询,主表多个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
@@ -113,7 +136,7 @@ describe("ToList", () => {
             .GroupBy(x => x.name)
             .ToList();
         assert.notEqual(jr, null);
-        assert.equal(jr.length, 158);
+        assert.equal(jr.length >= 1, true);
     }));
     it("不加任何条件查询", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
@@ -124,11 +147,10 @@ describe("ToList", () => {
     }));
     it("条件查询", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
-        let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
         let r = yield ctx.Table.Where(x => x.id == tableId, ["tableId"], [tableId]).ToList();
         assert.notEqual(r, null);
         assert.equal(r.length == 1, true);
-        assert.equal(r[0].id, "a66fcbd29d2b4ac683c57520bfca5728");
+        assert.equal(r[0].id, tableId);
     }));
 });
 //# sourceMappingURL=test.js.map

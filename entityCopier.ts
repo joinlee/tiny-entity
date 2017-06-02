@@ -22,6 +22,7 @@ export class EntityCopier {
         delete (<any>s).sqlTemp;
         delete (<any>s).ctx;
         delete (<any>s).queryParam;
+        delete (<any>s).joinParams;
 
         for (let key in s) {
             try {

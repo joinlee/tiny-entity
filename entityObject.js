@@ -4,7 +4,7 @@ class EntityObject {
     toString() { return ""; }
     clone(source, destination, isDeep) { return null; }
     Where(qFn, paramsKey, paramsValue) { return this; }
-    Join(qFn, entity) { return this; }
+    Join(qFn, entity, mainFeild) { return this; }
     Any(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     ToList(queryCallback) { return null; }
