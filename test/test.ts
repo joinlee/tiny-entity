@@ -188,4 +188,14 @@ describe("ToList", () => {
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
     })
+
+    it("Join + Contains", async () => {
+        let ctx = DataContextFactory.GetDataContext();
+        let tablePartyIds = [
+            "1111",
+            "2222"
+        ];
+
+        //let r  = await ctx.
+    })
 });

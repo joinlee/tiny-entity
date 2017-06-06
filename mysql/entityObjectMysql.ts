@@ -90,6 +90,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     }
     Contains(feild: (x: T) => void, values: any[]) {
         let filed = this.formateCode(feild);
+        filed = this.toString() + "." + filed;
         if (values && values.length > 0) {
             let sql = "";
             if (isNaN(values[0])) {
@@ -98,7 +99,6 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                 }
             }
             sql = filed + " IN (" + values.join(",") + ")";
-
             this.sqlTemp.push("(" + sql + ")");
             return this;
         }

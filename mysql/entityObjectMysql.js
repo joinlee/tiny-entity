@@ -85,6 +85,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     }
     Contains(feild, values) {
         let filed = this.formateCode(feild);
+        filed = this.toString() + "." + filed;
         if (values && values.length > 0) {
             let sql = "";
             if (isNaN(values[0])) {

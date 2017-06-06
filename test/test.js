@@ -152,5 +152,12 @@ describe("ToList", () => {
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
     }));
+    it("Join + Contains", () => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        let tablePartyIds = [
+            "1111",
+            "2222"
+        ];
+    }));
 });
 //# sourceMappingURL=test.js.map

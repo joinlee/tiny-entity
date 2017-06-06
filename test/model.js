@@ -109,6 +109,7 @@ class Order extends EntityObject {
         this.terminalName = null;
         this.total = null;
         this.sourceid = null;
+        this.master = null;
         this.processStatus = null;
         this.extended = null;
     }
