@@ -223,7 +223,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                 return this.cloneList(row);
             }
         }
-        else return [];
+        else {
+            this.joinParms = [];
+            return [];
+        }
     }
     Max(qFn: (x: T) => void): Promise<number> {
         return null;

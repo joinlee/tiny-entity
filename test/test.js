@@ -152,12 +152,11 @@ describe("ToList", () => {
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
     }));
-    it("Join + Contains", () => __awaiter(this, void 0, void 0, function* () {
+    it("join + contains", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
-        let tablePartyIds = [
-            "1111",
-            "2222"
-        ];
+        let tbpIds = ["0dec72a0cd11439fb04c4f4385bb1c2a", "0faafe3cd8254c9a91e2f936c9743dda"];
+        let r = yield ctx.TableParty.Contains(x => x.id, tbpIds).Join(x => x.id, ctx.Table, "tableId").ToList();
+        assert.ok("");
     }));
 });
 //# sourceMappingURL=test.js.map

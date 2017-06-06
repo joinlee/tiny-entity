@@ -215,8 +215,10 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                     return this.cloneList(row);
                 }
             }
-            else
+            else {
+                this.joinParms = [];
                 return [];
+            }
         });
     }
     Max(qFn) {
