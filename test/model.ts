@@ -175,6 +175,7 @@ export class Order extends EntityObject<Order> {
     terminalName: string = null;
     total: number = null;
     sourceid: string = null;
+    master: string = null;
     processStatus: ProcessStatus = null;
     extended: OrderExtended = null;
     toString() { return "Orders"; }
