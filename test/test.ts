@@ -188,4 +188,13 @@ describe("ToList", () => {
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
     })
+
+    it("join + contains", async () => {
+        let ctx = DataContextFactory.GetDataContext();
+        let tbpIds = ["0dec72a0cd11439fb04c4f4385bb1c2a", "0faafe3cd8254c9a91e2f936c9743dda"];
+
+        let r = await ctx.TableParty.Contains(x => x.id, tbpIds).Join<Table>(x => x.id, ctx.Table, "tableId").ToList<{ tableparty: TableParty; desktable: Table; }>();
+
+        assert.ok("");
+    })
 });
