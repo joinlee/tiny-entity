@@ -170,6 +170,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                     }
                 }
                 sql += "WHERE " + this.sqlTemp.join(' AND ');
+                0;
                 sql = this.addQueryStence(sql) + ";";
                 row = yield this.ctx.Query(sql);
             }
@@ -209,7 +210,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                         newRows.push(newRow);
                     }
                     this.joinParms = [];
-                    return this.cloneList(newRows);
+                    return newRows;
                 }
                 else {
                     return this.cloneList(row);

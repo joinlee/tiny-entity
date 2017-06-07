@@ -130,13 +130,15 @@ describe("ToList", () => {
     }));
     it("左外连接查询,主表多个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
-        let jr = yield ctx.Table
+        let r = yield ctx.Table
             .Join(x => x.tableId, ctx.TableParty)
             .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .GroupBy(x => x.name)
             .ToList();
-        assert.notEqual(jr, null);
-        assert.equal(jr.length >= 1, true);
+        assert.notEqual(r, null);
+        assert.equal(r.length >= 1, true);
+        let table = new model_1.Table();
+        assert.equal(r[0].desktable.toString(), table.toString().toLocaleLowerCase(), r[0].desktable.toString() + " toString() must be " + table.toString());
     }));
     it("不加任何条件查询", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
@@ -152,11 +154,44 @@ describe("ToList", () => {
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
     }));
-    it("join + contains", () => __awaiter(this, void 0, void 0, function* () {
+});
+describe("join + contains + where", () => {
+    let table = new model_1.Table();
+    table.id = "0a5f27da06804a8f984ac012d58f8356";
+    table.status = "closed";
+    let tbp_demo1 = new model_1.TableParty();
+    tbp_demo1.id = '0dec72a0cd11439fb04c4f4385bb1c2a';
+    tbp_demo1.tableId = table.id;
+    tbp_demo1.status = "closed";
+    let tbp_demo2 = new model_1.TableParty();
+    tbp_demo2.id = '0faafe3cd8254c9a91e2f936c9743dda';
+    tbp_demo2.tableId = table.id;
+    tbp_demo2.status = "closed";
+    before(() => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        yield ctx.Create(table);
+        yield ctx.Create(tbp_demo1);
+        yield ctx.Create(tbp_demo2);
+    }));
+    it("join + contains + where", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
         let tbpIds = ["0dec72a0cd11439fb04c4f4385bb1c2a", "0faafe3cd8254c9a91e2f936c9743dda"];
-        let r = yield ctx.TableParty.Contains(x => x.id, tbpIds).Join(x => x.id, ctx.Table, "tableId").ToList();
-        assert.ok("");
+        let r = yield ctx.TableParty
+            .Contains(x => x.id, tbpIds)
+            .Join(x => x.id, ctx.Table, "tableId")
+            .Where(x => x.status == "closed")
+            .ToList();
+        assert.equal(r.length, 2, "r.length must be 2");
+        assert.equal(r[0].desktable.id, table.id, "table.id must be " + table.id);
+        assert.equal(r[0].desktable.toString(), table.toString().toLocaleLowerCase(), r[0].desktable.toString().toLocaleLowerCase() + " toString() must be " + table.toString());
+        assert.equal(r[0].tableparty.toString(), tbp_demo1.toString().toLocaleLowerCase(), r[0].tableparty.toString() + " toString() must be " + tbp_demo1.toString());
+        assert.equal(r[0].desktable.joinParams == undefined, true, "joinParams must be null");
+    }));
+    after(() => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        yield ctx.Delete(table);
+        yield ctx.Delete(tbp_demo1);
+        yield ctx.Delete(tbp_demo2);
     }));
 });
 //# sourceMappingURL=test.js.map

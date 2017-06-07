@@ -164,13 +164,15 @@ describe("ToList", () => {
 
     it("左外连接查询,主表多个数据", async () => {
         let ctx = DataContextFactory.GetDataContext();
-        let jr = await ctx.Table
+        let r = await ctx.Table
             .Join(x => x.tableId, ctx.TableParty)
             .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .GroupBy(x => x.name)
             .ToList<{ desktable: Table; tableparty: TableParty }>();
-        assert.notEqual(jr, null);
-        assert.equal(jr.length >= 1, true);
+        assert.notEqual(r, null);
+        assert.equal(r.length >= 1, true);
+        let table = new Table();
+        assert.equal(r[0].desktable.toString(), table.toString().toLocaleLowerCase(), r[0].desktable.toString() + " toString() must be " + table.toString());
     })
 
     it("不加任何条件查询", async () => {
@@ -187,14 +189,54 @@ describe("ToList", () => {
         assert.notEqual(r, null);
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
-    })
 
-    it("join + contains", async () => {
+    })
+});
+
+describe("join + contains + where", () => {
+    let table = new Table();
+    table.id = "0a5f27da06804a8f984ac012d58f8356";
+    table.status = "closed";
+
+    let tbp_demo1 = new TableParty();
+    tbp_demo1.id = '0dec72a0cd11439fb04c4f4385bb1c2a';
+    tbp_demo1.tableId = table.id;
+    tbp_demo1.status = "closed";
+
+    let tbp_demo2 = new TableParty();
+    tbp_demo2.id = '0faafe3cd8254c9a91e2f936c9743dda';
+    tbp_demo2.tableId = table.id;
+    tbp_demo2.status = "closed";
+
+    before(async () => {
+        let ctx = DataContextFactory.GetDataContext();
+
+        await ctx.Create(table);
+        await ctx.Create(tbp_demo1);
+        await ctx.Create(tbp_demo2);
+    })
+    it("join + contains + where", async () => {
         let ctx = DataContextFactory.GetDataContext();
         let tbpIds = ["0dec72a0cd11439fb04c4f4385bb1c2a", "0faafe3cd8254c9a91e2f936c9743dda"];
 
-        let r = await ctx.TableParty.Contains(x => x.id, tbpIds).Join<Table>(x => x.id, ctx.Table, "tableId").ToList<{ tableparty: TableParty; desktable: Table; }>();
+        let r = await ctx.TableParty
+            .Contains(x => x.id, tbpIds)
+            .Join<Table>(x => x.id, ctx.Table, "tableId")
+            .Where(x => x.status == "closed")
+            .ToList<{ tableparty: TableParty; desktable: Table; }>();
 
-        assert.ok("");
+        assert.equal(r.length, 2, "r.length must be 2");
+        assert.equal(r[0].desktable.id, table.id, "table.id must be " + table.id);
+        assert.equal(r[0].desktable.toString(), table.toString().toLocaleLowerCase(), r[0].desktable.toString().toLocaleLowerCase() + " toString() must be " + table.toString());
+        assert.equal(r[0].tableparty.toString(), tbp_demo1.toString().toLocaleLowerCase(), r[0].tableparty.toString() + " toString() must be " + tbp_demo1.toString());
+        assert.equal((<any>r[0].desktable).joinParams == undefined, true, "joinParams must be null");
     })
-});
+
+    after(async () => {
+        let ctx = DataContextFactory.GetDataContext();
+        // clean data;
+        await ctx.Delete(table);
+        await ctx.Delete(tbp_demo1);
+        await ctx.Delete(tbp_demo2);
+    })
+})

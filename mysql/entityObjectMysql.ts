@@ -174,7 +174,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                     sql += joinItem.joinSql + " ";
                 }
             }
-            sql += "WHERE " + this.sqlTemp.join(' AND ');
+            sql += "WHERE " + this.sqlTemp.join(' AND '); 0
             sql = this.addQueryStence(sql) + ";";
             row = await this.ctx.Query(sql);
         }
@@ -217,7 +217,8 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                 }
                 this.joinParms = [];
 
-                return this.cloneList(<any>newRows);
+                return newRows;
+                //return this.cloneList(<any>newRows);
             }
             else {
                 return this.cloneList(row);
