@@ -26,12 +26,12 @@ export class EntityObjectNeDB<T extends IEntityObject> extends EntityObject<T>{
         this.sqlTemp.qFn.push(qFn);
         return this;
     }
-    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string) {
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean) {
         this.joinParams || (this.joinParams = []);
         let feild = this.formateCode(qFn);
         let joinTableName = entity.toString();
         let mainTableName = this.toString();
-        if (this.joinParams.length > 0) {
+        if (this.joinParams.length > 0 && !isMainTable) {
             mainTableName = this.joinParams[this.joinParams.length - 1].joinTableName;
         }
         if (mainFeild == null || mainFeild == undefined) mainFeild = "id";

@@ -32,7 +32,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * 
      * @memberOf IQueryObject
      */
-    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string): IQueryObject<T> { return this; }
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean): IQueryObject<T> { return this; }
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数

@@ -156,10 +156,13 @@ describe("ToList", () => {
         }
 
         // 左外连接查询
-        let r = await ctx.Table.Join<TableParty>(x => x.tableId, ctx.TableParty).ToList<{ desktable: Table; tableparty: TableParty; }>();
+        let r = await ctx.Table
+            .Join<TableParty>(x => x.tableId, ctx.TableParty)
+            .Where(x => x.id == tableId, ["tableId"], [tableId])
+            .ToList<{ desktable: Table; tableparty: TableParty; }>();
         assert.equal(r.length >= 1, true);
-        assert.notEqual(r[0].desktable, null);
-        assert.equal(r[0].tableparty, null);
+        assert.notEqual(r[0].desktable, null, "r[0].desktable == null");
+        assert.equal(r[0].tableparty, null, "r[0].tableparty!=null");
     });
 
     it("左外连接查询,主表多个数据", async () => {
@@ -189,9 +192,16 @@ describe("ToList", () => {
         assert.notEqual(r, null);
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
-
     })
 });
+
+describe("左外连接都是链接主表", () => {
+    before(async () => { 
+        
+    })
+    it("左外连接都是链接主表", async () => { })
+    after(async () => { })
+})
 
 describe("join + contains + where", () => {
     let table = new Table();

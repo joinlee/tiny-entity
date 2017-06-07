@@ -22,21 +22,23 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
-    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string) {
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean) {
         let joinTableName = entity.toString().toLocaleLowerCase();
         let feild = this.formateCode(qFn);
         let mainTableName = this.toString();
-        if (this.joinParms && this.joinParms.length > 0) {
+        if (this.joinParms.length > 0 && !isMainTable) {
             mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
         }
         if (mainFeild == null || mainFeild == undefined) mainFeild = "id";
         let sql = "LEFT JOIN `" + joinTableName + "` ON " + mainTableName + "." + mainFeild + " = " + joinTableName + "." + feild;
+
 
         this.joinParms.push({
             joinSql: sql,
             joinSelectFeild: this.GetSelectFieldList(entity).join(","),
             joinTableName: joinTableName
         });
+
 
         return this;
     }

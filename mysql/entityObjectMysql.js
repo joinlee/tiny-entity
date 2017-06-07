@@ -22,11 +22,11 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
-    Join(qFn, entity, mainFeild) {
+    Join(qFn, entity, mainFeild, isMainTable) {
         let joinTableName = entity.toString().toLocaleLowerCase();
         let feild = this.formateCode(qFn);
         let mainTableName = this.toString();
-        if (this.joinParms && this.joinParms.length > 0) {
+        if (this.joinParms.length > 0 && !isMainTable) {
             mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
         }
         if (mainFeild == null || mainFeild == undefined)

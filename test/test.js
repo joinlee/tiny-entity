@@ -123,10 +123,13 @@ describe("ToList", () => {
         for (let item of tablePartyList) {
             yield ctx.Delete(item);
         }
-        let r = yield ctx.Table.Join(x => x.tableId, ctx.TableParty).ToList();
+        let r = yield ctx.Table
+            .Join(x => x.tableId, ctx.TableParty)
+            .Where(x => x.id == tableId, ["tableId"], [tableId])
+            .ToList();
         assert.equal(r.length >= 1, true);
-        assert.notEqual(r[0].desktable, null);
-        assert.equal(r[0].tableparty, null);
+        assert.notEqual(r[0].desktable, null, "r[0].desktable == null");
+        assert.equal(r[0].tableparty, null, "r[0].tableparty!=null");
     }));
     it("左外连接查询,主表多个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
@@ -154,6 +157,12 @@ describe("ToList", () => {
         assert.equal(r.length == 1, true);
         assert.equal(r[0].id, tableId);
     }));
+});
+describe("左外连接都是链接主表", () => {
+    before(() => __awaiter(this, void 0, void 0, function* () {
+    }));
+    it("左外连接都是链接主表", () => __awaiter(this, void 0, void 0, function* () { }));
+    after(() => __awaiter(this, void 0, void 0, function* () { }));
 });
 describe("join + contains + where", () => {
     let table = new model_1.Table();
