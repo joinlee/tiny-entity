@@ -274,11 +274,6 @@ describe("Create", () => {
         }
     })
     it("通过循环批量添加数据", async () => {
-        // let ctx = DataContextFactory.GetDataContext();
-        // for (let item of orderList) {
-        //     await ctx.Create(item);
-        // }
-
         let t = new ttt();
         await t.insertInto();
         assert.ok(true,"error");
