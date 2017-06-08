@@ -18,7 +18,8 @@ function Transaction(ctx) {
                 let result;
                 try {
                     result = yield method.apply(this, arguments);
-                    ctx.Commit();
+                    yield ctx.Commit();
+                    console.log("Transcation successful!");
                     return result;
                 }
                 catch (error) {

@@ -17,7 +17,8 @@ export function Transaction(ctx: IDataContext) {
             let result;
             try {
                 result = await method.apply(this, arguments);
-                ctx.Commit();
+                await ctx.Commit();
+                console.log("Transcation successful!");
                 return result;
             } catch (error) {
                 console.log("RollBack propertyName:", propertyName);
