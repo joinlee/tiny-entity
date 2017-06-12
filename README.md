@@ -1,4 +1,8 @@
 # tiny-entity 
+v0.8.9
+1.修复mysql contains 方法参数引用的bug；
+2.修复了mysql toList 方法异常后清空sqltemp等内部参数的bug；
+
 v0.8.8
 1. 新增了一些单元测试
 2. 修复了mysql 事务处理的bug
