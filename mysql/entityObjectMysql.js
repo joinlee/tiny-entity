@@ -86,14 +86,15 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     Contains(feild, values) {
         let filed = this.formateCode(feild);
         filed = this.toString() + "." + filed;
-        if (values && values.length > 0) {
+        let arr = values.slice();
+        if (arr && arr.length > 0) {
             let sql = "";
-            if (isNaN(values[0])) {
-                for (let i = 0; i < values.length; i++) {
-                    values[i] = "'" + values[i] + "'";
+            if (isNaN(arr[0])) {
+                for (let i = 0; i < arr.length; i++) {
+                    arr[i] = "'" + arr[i] + "'";
                 }
             }
-            sql = filed + " IN (" + values.join(",") + ")";
+            sql = filed + " IN (" + arr.join(",") + ")";
             this.sqlTemp.push("(" + sql + ")");
             return this;
         }
@@ -162,63 +163,72 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let row;
             let queryFields = this.GetFinalQueryFields();
-            if (this.sqlTemp.length > 0) {
-                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                if (this.joinParms && this.joinParms.length > 0) {
-                    for (let joinItem of this.joinParms) {
-                        sql += joinItem.joinSql + " ";
-                    }
-                }
-                sql += "WHERE " + this.sqlTemp.join(' AND ');
-                0;
-                sql = this.addQueryStence(sql) + ";";
-                row = yield this.ctx.Query(sql);
-            }
-            else {
-                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                if (this.joinParms && this.joinParms.length > 0) {
-                    for (let joinItem of this.joinParms) {
-                        sql += joinItem.joinSql + " ";
-                    }
-                }
-                sql = this.addQueryStence(sql) + ";";
-                row = yield this.ctx.Query(sql);
-            }
-            this.sqlTemp = [];
-            if (row[0]) {
-                if (this.joinParms && this.joinParms.length > 0) {
-                    let newRows = [];
-                    for (let rowItem of row) {
-                        let newRow = {};
-                        for (let feild in rowItem) {
-                            let s = feild.split("_");
-                            newRow[s[0]] || (newRow[s[0]] = {
-                                toString: function () { return s[0]; }
-                            });
-                            if (rowItem[s[0] + "_id"] == null) {
-                                newRow[s[0]] = null;
-                                break;
-                            }
-                            else {
-                                newRow[s[0]][s[1]] = rowItem[feild];
-                            }
+            try {
+                if (this.sqlTemp.length > 0) {
+                    let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+                    if (this.joinParms && this.joinParms.length > 0) {
+                        for (let joinItem of this.joinParms) {
+                            sql += joinItem.joinSql + " ";
                         }
-                        for (let objItem in newRow) {
-                            if (newRow[objItem] != null)
-                                newRow[objItem] = entityCopier_1.EntityCopier.Decode(newRow[objItem]);
-                        }
-                        newRows.push(newRow);
                     }
-                    this.joinParms = [];
-                    return newRows;
+                    sql += "WHERE " + this.sqlTemp.join(' AND ');
+                    0;
+                    sql = this.addQueryStence(sql) + ";";
+                    row = yield this.ctx.Query(sql);
                 }
                 else {
-                    return this.cloneList(row);
+                    let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+                    if (this.joinParms && this.joinParms.length > 0) {
+                        for (let joinItem of this.joinParms) {
+                            sql += joinItem.joinSql + " ";
+                        }
+                    }
+                    sql = this.addQueryStence(sql) + ";";
+                    row = yield this.ctx.Query(sql);
+                }
+                this.sqlTemp = [];
+                if (row[0]) {
+                    if (this.joinParms && this.joinParms.length > 0) {
+                        let newRows = [];
+                        for (let rowItem of row) {
+                            let newRow = {};
+                            for (let feild in rowItem) {
+                                let s = feild.split("_");
+                                newRow[s[0]] || (newRow[s[0]] = {
+                                    toString: function () { return s[0]; }
+                                });
+                                if (rowItem[s[0] + "_id"] == null) {
+                                    newRow[s[0]] = null;
+                                    break;
+                                }
+                                else {
+                                    newRow[s[0]][s[1]] = rowItem[feild];
+                                }
+                            }
+                            for (let objItem in newRow) {
+                                if (newRow[objItem] != null)
+                                    newRow[objItem] = entityCopier_1.EntityCopier.Decode(newRow[objItem]);
+                            }
+                            newRows.push(newRow);
+                        }
+                        this.joinParms = [];
+                        return newRows;
+                    }
+                    else {
+                        return this.cloneList(row);
+                    }
+                }
+                else {
+                    this.joinParms = [];
+                    return [];
                 }
             }
-            else {
+            catch (error) {
+                throw error;
+            }
+            finally {
                 this.joinParms = [];
-                return [];
+                this.sqlTemp = [];
             }
         });
     }
