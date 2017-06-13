@@ -165,7 +165,7 @@ class MysqlDataContext {
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
                 }
-                else if (isNaN(obj[key])) {
+                else if (isNaN(obj[key]) || typeof (obj[key]) == "string") {
                     propertyValueList.push("'" + obj[key] + "'");
                 }
                 else if (obj[key] instanceof Date) {

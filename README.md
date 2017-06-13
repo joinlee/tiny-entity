@@ -1,4 +1,7 @@
 # tiny-entity 
+v0.8.10
+1. 修复mysql create方法传入字符串数字被转化成number类型的bug。
+
 v0.8.9
 1.修复mysql contains 方法参数引用的bug；
 2.修复了mysql toList 方法异常后清空sqltemp等内部参数的bug；
