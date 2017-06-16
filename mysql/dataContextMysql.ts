@@ -81,6 +81,15 @@ export class MysqlDataContext implements IDataContext {
             return this.onSubmit(sqlStr);
         }
     }
+    DeleteAll(obj: IEntityObject) {
+        let sqlStr = "DELETE FROM " + obj.toString() + ";";
+        if (this.transactionOn) {
+            this.querySentence.push(sqlStr);
+        }
+        else {
+            return this.onSubmit(sqlStr);
+        }
+    }
     /**
      * 开启一个事务
      */

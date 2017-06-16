@@ -77,7 +77,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
     }
     OrderBy(qFn, entity) {
         this.queryParam.OrderByFeildName = this.getFeild(qFn);
-        this.queryParam.OrderByTableName = entity.toString();
+        this.queryParam.OrderByTableName = entity ? entity.toString() : this.toString();
         return this;
     }
     OrderByDesc(qFn, entity) {
@@ -173,7 +173,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                     result = result.splice(0, this.queryParam.TakeCount);
                     this.queryParam.TakeCount = null;
                 }
-                this.queryParam = null;
+                this.queryParam = new Object();
             }
             this.joinParams = null;
             return result;
@@ -193,7 +193,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
                     mrItem_e = mrItem[joinParamsItem.mainFeild];
                 else {
                     mainTableName = null;
-                    mrItem_e = mrItem[this.joinParams[joinParsamsIndex - 1].joinTableName.toLocaleLowerCase()][joinParamsItem.mainFeild];
+                    mrItem_e = mrItem[this.joinParams[joinParsamsIndex].mainTableName.toLocaleLowerCase()][joinParamsItem.mainFeild];
                 }
                 let leftResultResult = yield this.ctx.Query([(x) => {
                         return x[joinParamsItem.joinSelectFeild] == mrItem_e;
@@ -222,16 +222,14 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         }
         else {
             let currentTableName = mainTableName.toLocaleLowerCase();
-            newRowItem[currentTableName] || (newRowItem[currentTableName] = {
-                toString: function () { return currentTableName; }
-            });
             newRowItem[currentTableName] = mainItem;
+            if (newRowItem[currentTableName])
+                newRowItem[currentTableName].toString = function () { return currentTableName; };
         }
         joinTableName = joinTableName.toLocaleLowerCase();
-        newRowItem[joinTableName] || (newRowItem[joinTableName] = {
-            toString: function () { return joinTableName; }
-        });
         newRowItem[joinTableName] = joinItem;
+        if (newRowItem[joinTableName])
+            newRowItem[joinTableName].toString = function () { return joinTableName; };
         return newRowItem;
     }
     HasJoin() {
@@ -324,7 +322,7 @@ class EntityObjectNeDB extends entityObject_1.EntityObject {
         let qList = qFns.split(".");
         if (qList.length > 2)
             throw "解析出错： getFeild(qFn): string";
-        return qList[1];
+        return qList[qList.length - 1];
     }
 }
 exports.EntityObjectNeDB = EntityObjectNeDB;

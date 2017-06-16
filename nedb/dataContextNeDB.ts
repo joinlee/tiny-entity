@@ -122,7 +122,7 @@ export class NeDBDataContext implements IDataContext {
         });
     }
 
-    async Delete(obj: IEntityObject, stillOpen?: boolean): Promise<boolean> {
+    async Delete(obj: IEntityObject, stillOpen?: boolean, isAll?: boolean): Promise<boolean> {
         if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         let entity;
         if (this.transOn) {
@@ -131,7 +131,7 @@ export class NeDBDataContext implements IDataContext {
         }
 
         let promise = new Promise<boolean>((resolve, reject) => {
-            this.deleteInner(obj, stillOpen).then(() => {
+            this.deleteInner(obj, stillOpen, isAll).then(() => {
                 this.pushQuery("delete", entity);
                 resolve(true);
             }).catch(err => {
@@ -141,11 +141,19 @@ export class NeDBDataContext implements IDataContext {
 
         return promise;
     }
-    private async deleteInner(obj: IEntityObject, stillOpen?) {
-        // let db = await this.Open(obj.toString(), stillOpen);
+    DeleteAll(obj: IEntityObject): Promise<boolean> {
+        return this.Delete(obj, null, true);
+    }
+    private async deleteInner(obj: IEntityObject, stillOpen?, isAll?: boolean) {
         let db = await NeDBPool.Current.GetDBConnection(obj.toString(), this.config);
         let promise = new Promise<boolean>((resolve, reject) => {
-            db.remove({ id: obj.id }, {}, (err, numRemoved) => {
+            let queryParam: any = { id: obj.id };
+            let removeOpt = {}
+            if (isAll) {
+                queryParam = {};
+                removeOpt = { multi: true };
+            }
+            db.remove(queryParam, removeOpt, (err, numRemoved) => {
                 if (err) reject(err);
                 else {
                     resolve(true);
@@ -155,7 +163,6 @@ export class NeDBDataContext implements IDataContext {
 
         return promise;
     }
-
 
     BeginTranscation() {
         this.transOn = true;

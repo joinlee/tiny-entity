@@ -73,6 +73,15 @@ class MysqlDataContext {
             return this.onSubmit(sqlStr);
         }
     }
+    DeleteAll(obj) {
+        let sqlStr = "DELETE FROM " + obj.toString() + ";";
+        if (this.transactionOn) {
+            this.querySentence.push(sqlStr);
+        }
+        else {
+            return this.onSubmit(sqlStr);
+        }
+    }
     BeginTranscation() {
         this.transactionOn = true;
     }

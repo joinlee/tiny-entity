@@ -131,7 +131,7 @@ class NeDBDataContext {
             });
         });
     }
-    Delete(obj, stillOpen) {
+    Delete(obj, stillOpen, isAll) {
         return __awaiter(this, void 0, void 0, function* () {
             if (stillOpen == undefined || stillOpen == null)
                 stillOpen = true;
@@ -141,7 +141,7 @@ class NeDBDataContext {
                 entity.toString = obj.toString;
             }
             let promise = new Promise((resolve, reject) => {
-                this.deleteInner(obj, stillOpen).then(() => {
+                this.deleteInner(obj, stillOpen, isAll).then(() => {
                     this.pushQuery("delete", entity);
                     resolve(true);
                 }).catch(err => {
@@ -151,11 +151,20 @@ class NeDBDataContext {
             return promise;
         });
     }
-    deleteInner(obj, stillOpen) {
+    DeleteAll(obj) {
+        return this.Delete(obj, null, true);
+    }
+    deleteInner(obj, stillOpen, isAll) {
         return __awaiter(this, void 0, void 0, function* () {
             let db = yield nedbPool_1.NeDBPool.Current.GetDBConnection(obj.toString(), this.config);
             let promise = new Promise((resolve, reject) => {
-                db.remove({ id: obj.id }, {}, (err, numRemoved) => {
+                let queryParam = { id: obj.id };
+                let removeOpt = {};
+                if (isAll) {
+                    queryParam = {};
+                    removeOpt = { multi: true };
+                }
+                db.remove(queryParam, removeOpt, (err, numRemoved) => {
                     if (err)
                         reject(err);
                     else {

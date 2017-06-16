@@ -1,4 +1,8 @@
 # tiny-entity 
+v0.9.0
+1. 修复了nedb查询的部分bug
+2. ctx 中增加了DeleteAll 方法
+
 v0.8.10
 1. 修复mysql create方法传入字符串数字被转化成number类型的bug。
 
