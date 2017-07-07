@@ -152,7 +152,9 @@ export class MysqlDataContext implements IDataContext {
         });
     }
 
-    RollBack() { }
+    RollBack() {
+        this.querySentence = [];
+     }
     /**
      * @param  {string} sqlStr
      */
