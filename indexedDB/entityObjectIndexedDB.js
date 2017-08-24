@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const dataContextIndexedDB_1 = require("./dataContextIndexedDB");
 const entityObject_1 = require("../entityObject");
 class EntityObjectIndexedDB extends entityObject_1.EntityObject {

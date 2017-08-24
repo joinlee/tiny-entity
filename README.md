@@ -1,4 +1,7 @@
 # tiny-entity 
+v0.9.1
+1. 修复了mysql中的where null 的查询bug
+
 v0.9.0
 1. 修复了nedb查询的部分bug
 2. ctx 中增加了DeleteAll 方法

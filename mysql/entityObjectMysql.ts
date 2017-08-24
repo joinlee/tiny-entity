@@ -290,6 +290,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         qFnS = qFnS.replace(/\=\=/g, "=");
 
         if (paramsKey && paramsValue) {
+            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
             if (paramsKey.length != paramsValue.length) throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];

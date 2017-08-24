@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const entityCopier_1 = require("./../entityCopier");
 const sqlite = require("sqlite-sync");
 class SqliteDataContext {

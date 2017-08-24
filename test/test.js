@@ -1,17 +1,28 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("./config");
 const dataContextMysql_1 = require("./../mysql/dataContextMysql");
 const dataContextNeDB_1 = require("./../nedb/dataContextNeDB");
 const model_1 = require("./model");
 const model_2 = require("./model");
+const index_1 = require("../index");
 const assert = require("assert");
 class FBSDataContextNeDB extends dataContextNeDB_1.NeDBDataContext {
     constructor() {
@@ -279,6 +290,79 @@ describe("join + contains + where", () => {
         yield ctx.Delete(table);
         yield ctx.Delete(tbp_demo1);
         yield ctx.Delete(tbp_demo2);
+    }));
+});
+describe("transcation", () => {
+    class TestService {
+        Action1() {
+            return __awaiter(this, void 0, void 0, function* () {
+                let emp = new model_2.Employee();
+                emp.id = Guid.GetGuid();
+                emp.storeId = "testStore";
+                emp.employeeNumber = "likecheng";
+                let e = yield this.ctx.Create(emp);
+                this.Action2();
+            });
+        }
+        Action2() {
+            return __awaiter(this, void 0, void 0, function* () {
+                let emp = new model_2.Employee();
+                emp.id = Guid.GetGuid();
+                emp.storeId = "testStore";
+                emp.employeeNumber = "likecheng2";
+                yield this.ctx.Create(emp);
+            });
+        }
+    }
+    __decorate([
+        index_1.Transaction(DataContextFactory.GetDataContext()),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", []),
+        __metadata("design:returntype", Promise)
+    ], TestService.prototype, "Action1", null);
+    __decorate([
+        index_1.Transaction(DataContextFactory.GetDataContext()),
+        __metadata("design:type", Function),
+        __metadata("design:paramtypes", []),
+        __metadata("design:returntype", Promise)
+    ], TestService.prototype, "Action2", null);
+    it("transcation on", () => __awaiter(this, void 0, void 0, function* () {
+        let svr = new TestService();
+        try {
+            yield svr.Action1();
+            let ctx = DataContextFactory.GetDataContext();
+            let list = yield ctx.Employee.Where(x => x.storeId == "testStore").ToList();
+            assert.equal(list.length == 0, "transaction error！");
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }));
+    after(() => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        let list = yield ctx.Employee.Where(x => x.storeId == "testStore").ToList();
+        for (let item of list) {
+            yield ctx.Delete(item);
+        }
+    }));
+});
+describe("查询字段是NUll的情况", () => {
+    let table;
+    before(() => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        table = new model_1.Table();
+        table.id = Guid.GetGuid();
+        table.name = "测试台桌";
+        yield ctx.Create(table);
+    }));
+    it("查询字段是NUll 情况", () => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        let tableResult = yield ctx.Table.Where(x => x.status == null && x.name == table.name, ["table.name"], [table.name]).ToList();
+        assert.equal(tableResult.length, 1, "ableResult.length must be 1");
+    }));
+    after(() => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        yield ctx.Delete(table);
     }));
 });
 //# sourceMappingURL=test.js.map

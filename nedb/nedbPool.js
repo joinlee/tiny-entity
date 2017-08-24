@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const dbOpenWorker_1 = require("./dbOpenWorker");
 const Datastore = require("nedb");
 class NeDBPool {

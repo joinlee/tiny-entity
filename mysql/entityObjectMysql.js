@@ -4,9 +4,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments)).next());
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 const entityCopier_1 = require("../entityCopier");
 const entityObject_1 = require("../entityObject");
 class EntityObjectMysql extends entityObject_1.EntityObject {
@@ -277,6 +278,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");
         if (paramsKey && paramsValue) {
+            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
             if (paramsKey.length != paramsValue.length)
                 throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
