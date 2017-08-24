@@ -1,5 +1,5 @@
 # tiny-entity 
-v0.9.1
+v0.9.2
 1. 修复了mysql中的where null 的查询bug
 
 v0.9.0
