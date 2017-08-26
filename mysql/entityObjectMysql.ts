@@ -303,7 +303,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
                     if (isNaN(v)) v = opchar + " '" + paramsValue[i] + "'";
                     else v = opchar + " " + paramsValue[i];
 
-                    if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
+                    if (paramsValue[i] === "" || paramsValue[i] === null || paramsValue[i] === undefined) {
                         v = "IS NULL";
                     }
                     qFnS = qFnS.replace(new RegExp(opchar + " " + paramsKey[i], "gm"), v);
