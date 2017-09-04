@@ -1,4 +1,9 @@
 # tiny-entity 
+v0.9.3
+
+v0.9.2
+1. 修复了mysql中的where null 的查询bug
+
 v0.9.0
 1. 修复了nedb查询的部分bug
 2. ctx 中增加了DeleteAll 方法
@@ -28,3 +33,6 @@ v0.6.8
 v 0.6.4
 
 1. nedb 实现select方法
+
+https://open.weixin.qq.com/connect/qrconnect?appid=wx58dd3d6735c7c590&redirect_uri=http://wz.cdjump.com&response_type=code&scope=snsapi_login
+https://open.weixin.qq.com/connect/qrconnect?appid=wx58dd3d6735c7c590&redirect_uri=https%3A%2F%2Fwz.cdjump.com%2F&response_type=code&scope=snsapi_login&state=3d6be0a4035d839573b04816624a415e#wechat_redirect

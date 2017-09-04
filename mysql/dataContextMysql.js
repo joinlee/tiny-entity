@@ -141,7 +141,9 @@ class MysqlDataContext {
             });
         });
     }
-    RollBack() { }
+    RollBack() {
+        this.querySentence = [];
+    }
     Query(sqlStr) {
         return this.onSubmit(sqlStr);
     }

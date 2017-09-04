@@ -278,6 +278,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         qFnS = qFnS.replace(/\|\|/g, "OR");
         qFnS = qFnS.replace(/\=\=/g, "=");
         if (paramsKey && paramsValue) {
+            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
             if (paramsKey.length != paramsValue.length)
                 throw 'paramsKey,paramsValue 参数异常';
             for (let i = 0; i < paramsKey.length; i++) {
@@ -292,7 +293,7 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                         v = opchar + " '" + paramsValue[i] + "'";
                     else
                         v = opchar + " " + paramsValue[i];
-                    if (paramsValue[i] == "" || paramsValue[i] == null || paramsValue[i] == undefined) {
+                    if (paramsValue[i] === "" || paramsValue[i] === null || paramsValue[i] === undefined) {
                         v = "IS NULL";
                     }
                     qFnS = qFnS.replace(new RegExp(opchar + " " + paramsKey[i], "gm"), v);
