@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const Datastore = require("nedb");
 class DBOpenWorker {
     constructor(option, callback) {

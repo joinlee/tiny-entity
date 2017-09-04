@@ -1,8 +1,7 @@
 import mysql = require("mysql");
 import { EntityCopier } from "../entityCopier";
 import { IDataContext, IEntityObject } from '../tinyDB';
-
-var mysqlPool;
+var mysqlPool: mysql.Pool;
 
 export class MysqlDataContext implements IDataContext {
     private transactionOn: boolean = false;
@@ -165,6 +164,7 @@ export class MysqlDataContext implements IDataContext {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
                 // console.log("mysql onSubmits error:", err);
+                sqlStr = conn.escape(sqlStr);
                 if (err) {
                     conn.release();
                     reject(err);

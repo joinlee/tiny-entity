@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 class EntityCopier {
     static Copy(s, d) {
         delete d.sqlTemp;

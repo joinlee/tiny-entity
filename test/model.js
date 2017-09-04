@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = require("./config");
 let EntityObject = config_1.EntityObjectFactory.GetEntityObjectType();
 class Employee extends EntityObject {
