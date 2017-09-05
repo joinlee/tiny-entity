@@ -13,25 +13,24 @@ function Transaction(ctx) {
         let method = descriptor.value;
         descriptor.value = function () {
             return __awaiter(this, arguments, void 0, function* () {
-                if (this.ctx)
-                    return;
-                this.ctx = ctx;
-                console.log("BeginTranscation propertyName:", propertyName);
-                ctx.BeginTranscation();
+                if (!this.ctx) {
+                    this.ctx = ctx;
+                }
+                this.ctx.BeginTranscation();
                 let result;
                 try {
                     result = yield method.apply(this, arguments);
-                    yield ctx.Commit();
-                    console.log("Transcation successful!");
+                    let r = yield this.ctx.Commit();
+                    if (r === true) {
+                        this.ctx = null;
+                    }
                     return result;
                 }
                 catch (error) {
                     console.log("RollBack propertyName:", propertyName);
-                    yield ctx.RollBack();
-                    throw error;
-                }
-                finally {
+                    yield this.ctx.RollBack();
                     this.ctx = null;
+                    throw error;
                 }
             });
         };

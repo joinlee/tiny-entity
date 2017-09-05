@@ -18,6 +18,9 @@ class IndexedDBDataContext {
         this.tableDefines = tableDefines;
         this.db = new indexedDB_1.LocalIndexedDB(this.dbName, this.dbVersion, this.tableDefines);
     }
+    DeleteAll(obj) {
+        throw new Error("Method not implemented.");
+    }
     Create(obj) {
         return new Promise((resolve, reject) => {
             this.ExcuteQuery([{

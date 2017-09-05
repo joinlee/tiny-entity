@@ -4,7 +4,7 @@ import { IDataContext, IEntityObject } from '../tinyDB';
 var mysqlPool: mysql.Pool;
 
 export class MysqlDataContext implements IDataContext {
-    private transactionOn: boolean = false;
+    private transactionOn: string;
     private querySentence: string[] = [];
     private mysqlPool;
 
@@ -93,14 +93,24 @@ export class MysqlDataContext implements IDataContext {
      * 开启一个事务
      */
     BeginTranscation() {
-        this.transactionOn = true;
+        if (this.transactionOn === "on") {
+            this.transactionOn = "pedding";
+        }
+        if (this.transactionOn === "" || this.transactionOn == null) {
+            this.transactionOn = "on";
+        }
+        
+        console.log("BeginTranscation", this.transactionOn);
     }
 
     /**
      * 提交一个事务
      */
     Commit() {
-        if (!this.transactionOn) return;
+        if (this.transactionOn === "pedding") {
+            console.warn("transaction is pedding!");
+            return;
+        }
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection(async (err, conn) => {
                 if (err) {
@@ -123,13 +133,14 @@ export class MysqlDataContext implements IDataContext {
                             reject(err);
                         });
                         this.querySentence = [];
-                        this.transactionOn = false;
+                        this.transactionOn = null;
                         conn.release();
                         resolve(true);
+                        console.log("Transcation successful!");
                     });
                 } catch (error) {
                     this.querySentence = [];
-                    this.transactionOn = false;
+                    this.transactionOn = null;
                     conn.release();
                     reject(error);
                 }
@@ -153,6 +164,7 @@ export class MysqlDataContext implements IDataContext {
 
     RollBack() {
         this.querySentence = [];
+        this.transactionOn = null;
     }
     /**
      * @param  {string} sqlStr

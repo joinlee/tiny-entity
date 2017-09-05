@@ -2,6 +2,9 @@ import { LocalIndexedDB, DBTranscationModel } from "./indexedDB";
 import { IDataContext, ITableDefine, IEntityObject } from '../tinyDB';
 
 export class IndexedDBDataContext implements IDataContext {
+    DeleteAll(obj: IEntityObject) {
+        throw new Error("Method not implemented.");
+    }
     private db: LocalIndexedDB;
     private tableDefines;
     private dbName: string;

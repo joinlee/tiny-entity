@@ -1,4 +1,6 @@
 # tiny-entity 
+## 0.9.5
+
 v0.9.4 
 1. 防止sql注入
 2. 解决事务嵌套的问题
@@ -37,6 +39,3 @@ v0.6.8
 v 0.6.4
 
 1. nedb 实现select方法
-
-https://open.weixin.qq.com/connect/qrconnect?appid=wx58dd3d6735c7c590&redirect_uri=http://wz.cdjump.com&response_type=code&scope=snsapi_login
-https://open.weixin.qq.com/connect/qrconnect?appid=wx58dd3d6735c7c590&redirect_uri=https%3A%2F%2Fwz.cdjump.com%2F&response_type=code&scope=snsapi_login&state=3d6be0a4035d839573b04816624a415e#wechat_redirect

@@ -141,14 +141,14 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy<K extends IEntityObject>(qFn: (x: K) => void, entity?: K) {
+    OrderBy(qFn: (x) => void, entity?) {
         let tableName = this.toString();
         if (entity) tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
         this.queryParam.OrderByFeildName = sql;
         return this;
     }
-    OrderByDesc<K extends IEntityObject>(qFn: (x: K) => void, entity?: K) {
+    OrderByDesc(qFn: (x) => void, entity?) {
         this.queryParam.IsDesc = true;
         return this.OrderBy(qFn, entity);
     }

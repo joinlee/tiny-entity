@@ -11,23 +11,23 @@ export function Transaction(ctx: IDataContext) {
     return (target: any, propertyName: string, descriptor: TypedPropertyDescriptor<Function>) => {
         let method = descriptor.value;
         descriptor.value = async function () {
-            if (this.ctx) return; // 判断方法中套事务，是否已经在事务中。
-            this.ctx = ctx;
-            console.log("BeginTranscation propertyName:", propertyName);
-            ctx.BeginTranscation();
+            if (!this.ctx) {
+                this.ctx = ctx;
+            }
+            this.ctx.BeginTranscation();
             let result;
             try {
                 result = await method.apply(this, arguments);
-                await ctx.Commit();
-                console.log("Transcation successful!");
+                let r = await this.ctx.Commit();
+                if (r === true) {
+                    this.ctx = null;
+                }
                 return result;
             } catch (error) {
                 console.log("RollBack propertyName:", propertyName);
-                await ctx.RollBack();
-                throw error;
-            }
-            finally {
+                await this.ctx.RollBack();
                 this.ctx = null;
+                throw error;
             }
         }
     }

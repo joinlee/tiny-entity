@@ -1,7 +1,7 @@
 {
   "name": "tiny-entity",
-  "version": "0.9.4",
-  "description": "一款简单易用的ORM框架，支持NEDB IndexedDB msql 以及Sqlite等常用的数据库",
+  "version": "0.9.5",
+  "description": "A simple and easy to use ORM framework, support NEDB, IndexedDB, MySQL and Sqlite and other commonly used database ",
   "main": "index.js",
   "scripts": {
     "test": "npm run test:nedb&&npm run test:mysql&&npm run test:indexedDB",
@@ -17,7 +17,8 @@
     "tiny",
     "nedb",
     "sqlite",
-    "indexedDB"
+    "indexedDB",
+    "mysql"
   ],
   "author": "likecheng",
   "license": "ISC",

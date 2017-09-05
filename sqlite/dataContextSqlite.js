@@ -10,6 +10,9 @@ class SqliteDataContext {
         this.dbName = dbName;
         var r = sqlite.connect(this.dbName);
     }
+    DeleteAll(obj) {
+        throw new Error("Method not implemented.");
+    }
     Create(obj) {
         let sqlStr = "INSERT INTO " + obj.toString();
         let pt = this.propertyFormat(obj);

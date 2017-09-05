@@ -3,6 +3,9 @@ import { IEntityObject, IDataContext } from '../tinyDB';
 import sqlite = require("sqlite-sync");
 
 export class SqliteDataContext implements IDataContext {
+    DeleteAll(obj: IEntityObject) {
+        throw new Error("Method not implemented.");
+    }
     private dbName: string = "js/Test.db3";
     private transactionOn: boolean = false;
     private querySentence: string[] = [];

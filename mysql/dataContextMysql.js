@@ -13,7 +13,6 @@ const entityCopier_1 = require("../entityCopier");
 var mysqlPool;
 class MysqlDataContext {
     constructor(option) {
-        this.transactionOn = false;
         this.querySentence = [];
         if (!mysqlPool)
             mysqlPool = mysql.createPool(option);
@@ -84,11 +83,19 @@ class MysqlDataContext {
         }
     }
     BeginTranscation() {
-        this.transactionOn = true;
+        if (this.transactionOn === "on") {
+            this.transactionOn = "pedding";
+        }
+        if (this.transactionOn === "" || this.transactionOn == null) {
+            this.transactionOn = "on";
+        }
+        console.log("BeginTranscation", this.transactionOn);
     }
     Commit() {
-        if (!this.transactionOn)
+        if (this.transactionOn === "pedding") {
+            console.warn("transaction is pedding!");
             return;
+        }
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
                 if (err) {
@@ -112,14 +119,15 @@ class MysqlDataContext {
                                 reject(err);
                             });
                         this.querySentence = [];
-                        this.transactionOn = false;
+                        this.transactionOn = null;
                         conn.release();
                         resolve(true);
+                        console.log("Transcation successful!");
                     });
                 }
                 catch (error) {
                     this.querySentence = [];
-                    this.transactionOn = false;
+                    this.transactionOn = null;
                     conn.release();
                     reject(error);
                 }
@@ -143,6 +151,7 @@ class MysqlDataContext {
     }
     RollBack() {
         this.querySentence = [];
+        this.transactionOn = null;
     }
     Query(sqlStr) {
         return this.onSubmit(sqlStr);

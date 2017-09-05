@@ -337,9 +337,10 @@ describe("transcation", () => {
             console.error(error);
         }
         finally {
+            yield svr.Action2();
             let ctx = DataContextFactory.GetDataContext();
             let list = yield ctx.Employee.Where(x => x.storeId == "testStore").ToList();
-            assert.equal(list.length == 0, true, "事务操作失败，已有数据写入到数据库！");
+            assert.equal(list.length == 2, true, "事务操作失败，已有数据写入到数据库！" + list.length);
         }
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
