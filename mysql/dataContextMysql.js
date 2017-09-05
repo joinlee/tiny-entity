@@ -150,7 +150,9 @@ class MysqlDataContext {
     onSubmit(sqlStr) {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
-                sqlStr = conn.escape(sqlStr);
+                if (process.env.tinyLog == "on") {
+                    console.log(sqlStr);
+                }
                 if (err) {
                     conn.release();
                     reject(err);
@@ -176,16 +178,16 @@ class MysqlDataContext {
                     continue;
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
-                    propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
+                    propertyValueList.push(mysql.escape(JSON.stringify(obj[key])));
                 }
                 else if (isNaN(obj[key]) || typeof (obj[key]) == "string") {
-                    propertyValueList.push("'" + obj[key] + "'");
+                    propertyValueList.push(mysql.escape(obj[key]));
                 }
                 else if (obj[key] instanceof Date) {
-                    propertyValueList.push("'" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
+                    propertyValueList.push(mysql.escape(this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss")));
                 }
                 else {
-                    propertyValueList.push(obj[key]);
+                    propertyValueList.push(mysql.escape(obj[key]));
                 }
             }
         }

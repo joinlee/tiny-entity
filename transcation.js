@@ -13,6 +13,8 @@ function Transaction(ctx) {
         let method = descriptor.value;
         descriptor.value = function () {
             return __awaiter(this, arguments, void 0, function* () {
+                if (this.ctx)
+                    return;
                 this.ctx = ctx;
                 console.log("BeginTranscation propertyName:", propertyName);
                 ctx.BeginTranscation();
@@ -27,6 +29,9 @@ function Transaction(ctx) {
                     console.log("RollBack propertyName:", propertyName);
                     yield ctx.RollBack();
                     throw error;
+                }
+                finally {
+                    this.ctx = null;
                 }
             });
         };

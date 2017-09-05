@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const entityCopier_1 = require("../entityCopier");
 const entityObject_1 = require("../entityObject");
+const mysql = require("mysql");
 class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
@@ -284,15 +285,15 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
                 if (indexOfFlag) {
-                    v = "LIKE '%" + paramsValue[i] + "%'";
+                    v = "LIKE '%" + mysql.escape(paramsValue[i]) + "%'";
                     qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
                 }
                 else {
                     let opchar = qFnS[qFnS.lastIndexOf(paramsKey[i]) - 2];
                     if (isNaN(v))
-                        v = opchar + " '" + paramsValue[i] + "'";
+                        v = opchar + " " + mysql.escape(paramsValue[i]) + "";
                     else
-                        v = opchar + " " + paramsValue[i];
+                        v = opchar + " " + mysql.escape(paramsValue[i]);
                     if (paramsValue[i] === "" || paramsValue[i] === null || paramsValue[i] === undefined) {
                         v = "IS NULL";
                     }

@@ -96,6 +96,10 @@ describe("ToList", () => {
             table.id = tableId;
             table.name = "测试台桌1";
             table.status = "opening";
+            table.zone = {
+                id: Guid.GetGuid(),
+                name: "testName"
+            };
             yield ctx.Create(table);
         }
         if (!hasTableParty) {
@@ -107,6 +111,7 @@ describe("ToList", () => {
             tableParty.openedTime = new Date().getTime();
             tableParty.status = "opening";
             tableParty.orderId = order.id;
+            tableParty.openedTime = new Date().getTime();
             yield ctx.Create(tableParty);
             yield ctx.Create(order);
         }
@@ -201,7 +206,7 @@ describe("Join", () => {
             mockDatas.tableParties.push(tableParty);
         }
     }));
-    it("JOIN Three Table", () => __awaiter(this, void 0, void 0, function* () {
+    it("左外连接3张表", () => __awaiter(this, void 0, void 0, function* () {
         let r = yield ctx.TableParty
             .Join(x => x.id, ctx.Table, "tableId", true)
             .Join(x => x.id, ctx.Order, "orderId", true)
@@ -211,7 +216,7 @@ describe("Join", () => {
         assert.notEqual(mockDatas.tableParties.find(x => x.id == r[1].tableparty.id), null, "");
         assert.notEqual(mockDatas.tableList.find(x => x.name == r[2].desktable.name), null, "");
     }));
-    it("use Join and Take", () => __awaiter(this, void 0, void 0, function* () {
+    it("左外连接获取第一条数据", () => __awaiter(this, void 0, void 0, function* () {
         let r = yield ctx.TableParty
             .Join(x => x.id, ctx.Table, "tableId", true)
             .Join(x => x.id, ctx.Order, "orderId", true)
@@ -237,7 +242,7 @@ describe("Contains", () => {
             yield ctx.Create(table);
         }
     }));
-    it("only use contains function", () => __awaiter(this, void 0, void 0, function* () {
+    it("Contains查询，等同于In", () => __awaiter(this, void 0, void 0, function* () {
         let r = yield ctx.Table.Contains(x => x.id, tableIds).ToList();
         assert.equal(r.length, 2, "r.length must be 2");
         assert.notEqual(r.find(x => x.id == tableIds[0]), null, "");
@@ -246,12 +251,6 @@ describe("Contains", () => {
     after(() => __awaiter(this, void 0, void 0, function* () {
         yield ctx.DeleteAll(new model_1.Table());
     }));
-});
-describe("左外连接都是链接主表", () => {
-    before(() => __awaiter(this, void 0, void 0, function* () {
-    }));
-    it("左外连接都是链接主表");
-    after(() => __awaiter(this, void 0, void 0, function* () { }));
 });
 describe("join + contains + where", () => {
     let table = new model_1.Table();
@@ -293,15 +292,17 @@ describe("join + contains + where", () => {
     }));
 });
 describe("transcation", () => {
+    let guid = Guid.GetGuid();
     class TestService {
         Action1() {
             return __awaiter(this, void 0, void 0, function* () {
                 let emp = new model_2.Employee();
-                emp.id = Guid.GetGuid();
+                emp.id = guid;
                 emp.storeId = "testStore";
                 emp.employeeNumber = "likecheng";
                 let e = yield this.ctx.Create(emp);
-                this.Action2();
+                yield this.Action2();
+                throw "this is a exception!";
             });
         }
         Action2() {
@@ -329,13 +330,16 @@ describe("transcation", () => {
     it("transcation on", () => __awaiter(this, void 0, void 0, function* () {
         let svr = new TestService();
         try {
+            yield svr.Action2();
             yield svr.Action1();
-            let ctx = DataContextFactory.GetDataContext();
-            let list = yield ctx.Employee.Where(x => x.storeId == "testStore").ToList();
-            assert.equal(list.length == 0, "transaction error！");
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
+        }
+        finally {
+            let ctx = DataContextFactory.GetDataContext();
+            let list = yield ctx.Employee.Where(x => x.storeId == "testStore").ToList();
+            assert.equal(list.length == 0, true, "事务操作失败，已有数据写入到数据库！");
         }
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
@@ -359,6 +363,22 @@ describe("查询字段是NUll的情况", () => {
         let ctx = DataContextFactory.GetDataContext();
         let tableResult = yield ctx.Table.Where(x => x.status == null && x.name == table.name, ["table.name"], [table.name]).ToList();
         assert.equal(tableResult.length, 1, "ableResult.length must be 1");
+    }));
+    after(() => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        yield ctx.Delete(table);
+    }));
+});
+describe("sql注入攻击", () => {
+    let table;
+    before(() => {
+        table = new model_1.Table();
+        table.id = Guid.GetGuid();
+        table.name = "likecheng.xx, name != 1 ' % \\";
+    });
+    it("执行包含sql注入的语句", () => __awaiter(this, void 0, void 0, function* () {
+        let ctx = DataContextFactory.GetDataContext();
+        yield ctx.Create(table);
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();

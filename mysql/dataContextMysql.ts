@@ -153,20 +153,20 @@ export class MysqlDataContext implements IDataContext {
 
     RollBack() {
         this.querySentence = [];
-     }
+    }
     /**
      * @param  {string} sqlStr
      */
     Query(sqlStr: string) {
-        //console.log(sqlStr);
         return this.onSubmit(sqlStr);
     }
 
     private onSubmit(sqlStr: string) {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
-                // console.log("mysql onSubmits error:", err);
-                sqlStr = conn.escape(sqlStr);
+                if (process.env.tinyLog == "on") {
+                    console.log(sqlStr);
+                }
                 if (err) {
                     conn.release();
                     reject(err);
@@ -189,15 +189,15 @@ export class MysqlDataContext implements IDataContext {
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "") continue;
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
-                    propertyValueList.push("'" + JSON.stringify(obj[key]) + "'");
+                    propertyValueList.push(mysql.escape(JSON.stringify(obj[key])));
                 } else if (isNaN(obj[key]) || typeof (obj[key]) == "string") {
-                    propertyValueList.push("'" + obj[key] + "'");
+                    propertyValueList.push(mysql.escape(obj[key]));
                 }
                 else if (obj[key] instanceof Date) {
-                    propertyValueList.push("'" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
+                    propertyValueList.push(mysql.escape(this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss")));
                 }
                 else {
-                    propertyValueList.push(obj[key]);
+                    propertyValueList.push(mysql.escape(obj[key]));
                 }
 
             }

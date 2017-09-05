@@ -110,6 +110,10 @@ describe("ToList", () => {
             table.id = tableId;
             table.name = "测试台桌1";
             table.status = "opening";
+            table.zone = {
+                id: Guid.GetGuid(),
+                name: "testName"
+            };
 
             await ctx.Create(table);
         }
@@ -124,6 +128,7 @@ describe("ToList", () => {
             tableParty.openedTime = new Date().getTime();
             tableParty.status = "opening";
             tableParty.orderId = order.id;
+            tableParty.openedTime = new Date().getTime();
 
             await ctx.Create(tableParty);
             await ctx.Create(order);
@@ -232,7 +237,7 @@ describe("Join", () => {
         }
     })
 
-    it("JOIN Three Table", async () => {
+    it("左外连接3张表", async () => {
         let r = await ctx.TableParty
             .Join<Table>(x => x.id, ctx.Table, "tableId", true)
             .Join<Order>(x => x.id, ctx.Order, "orderId", true)
@@ -242,7 +247,7 @@ describe("Join", () => {
         assert.notEqual(mockDatas.tableParties.find(x => x.id == r[1].tableparty.id), null, "");
         assert.notEqual(mockDatas.tableList.find(x => x.name == r[2].desktable.name), null, "");
     })
-    it("use Join and Take", async () => {
+    it("左外连接获取第一条数据", async () => {
         let r = await ctx.TableParty
             .Join<Table>(x => x.id, ctx.Table, "tableId", true)
             .Join<Order>(x => x.id, ctx.Order, "orderId", true)
@@ -272,7 +277,7 @@ describe("Contains", () => {
             await ctx.Create(table);
         }
     })
-    it("only use contains function", async () => {
+    it("Contains查询，等同于In", async () => {
         let r = await ctx.Table.Contains(x => x.id, tableIds).ToList();
         assert.equal(r.length, 2, "r.length must be 2");
         assert.notEqual(r.find(x => x.id == tableIds[0]), null, "");
@@ -283,14 +288,6 @@ describe("Contains", () => {
         await ctx.DeleteAll(new Table());
     })
 });
-
-describe("左外连接都是链接主表", () => {
-    before(async () => {
-
-    })
-    it("左外连接都是链接主表")
-    after(async () => { })
-})
 
 describe("join + contains + where", () => {
     let table = new Table();
@@ -341,29 +338,32 @@ describe("join + contains + where", () => {
 })
 
 describe("transcation", () => {
+    let guid = Guid.GetGuid();
     class TestService {
         ctx: FBSDataContextBase;
 
         @Transaction(DataContextFactory.GetDataContext())
         async Action1() {
             let emp = new Employee();
-            emp.id = Guid.GetGuid();
+            emp.id = guid;
             emp.storeId = "testStore";
             emp.employeeNumber = "likecheng";
 
             let e = await this.ctx.Create(emp);
-            this.Action2();
+            await this.Action2();
+            throw "this is a exception!";
         }
 
         @Transaction(DataContextFactory.GetDataContext())
         async Action2() {
             let emp = new Employee();
+            // emp.id = guid;
             emp.id = Guid.GetGuid();
             emp.storeId = "testStore";
             emp.employeeNumber = "likecheng2";
 
             await this.ctx.Create(emp);
-            // throw "this is a exception!";
+            //throw "this is a exception!";
         }
 
     }
@@ -371,13 +371,17 @@ describe("transcation", () => {
     it("transcation on", async () => {
         let svr = new TestService();
         try {
+            await svr.Action2();
+
             await svr.Action1();
-            let ctx = DataContextFactory.GetDataContext();
-            let list = await ctx.Employee.Where(x => x.storeId == "testStore").ToList();
-            assert.equal(list.length == 0, "transaction error！");
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
+        }
+        finally {
+            let ctx = DataContextFactory.GetDataContext();
+            let list = await ctx.Employee.Where(x => x.storeId == "testStore").ToList();
+            assert.equal(list.length == 0, true, "事务操作失败，已有数据写入到数据库！");
         }
     });
     after(async () => {
@@ -409,7 +413,24 @@ describe("查询字段是NUll的情况", () => {
 
     after(async () => {
         let ctx = DataContextFactory.GetDataContext();
-        // clean data;
+        await ctx.Delete(table);
+    })
+})
+
+describe("sql注入攻击", () => {
+    let table: Table;
+    before(() => {
+        table = new Table();
+        table.id = Guid.GetGuid();
+        table.name = "likecheng.xx, name != 1 ' % \\";
+    })
+    it("执行包含sql注入的语句", async () => {
+        let ctx = DataContextFactory.GetDataContext();
+        await ctx.Create(table);
+    })
+
+    after(async () => {
+        let ctx = DataContextFactory.GetDataContext();
         await ctx.Delete(table);
     })
 })
