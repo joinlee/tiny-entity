@@ -279,7 +279,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         qFnS = qFnS.substring(p.length, qFnS.length);
         qFnS = qFnS.trim();
         if (tableName)
-            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), tableName + ".");
+            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "`" + tableName + "`.");
         else
             qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
 
@@ -296,12 +296,14 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             for (let i = 0; i < paramsKey.length; i++) {
                 let v = paramsValue[i];
                 if (indexOfFlag) {
-                    v = "LIKE '%" + mysql.escape(paramsValue[i]) + "%'";
+                    let xx = mysql.escape(paramsValue[i]);
+                    xx = xx.substring(1, xx.length - 1);
+                    v = "LIKE '%" + xx + "%'";
                     qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
                 }
                 else {
                     let opchar = qFnS[qFnS.lastIndexOf(paramsKey[i]) - 2];
-                    if (isNaN(v)) v = opchar + " " + mysql.escape(paramsValue[i]) + "";
+                    if (isNaN(v)) v = opchar + " " + mysql.escape(paramsValue[i]);
                     else v = opchar + " " + mysql.escape(paramsValue[i]);
 
                     if (paramsValue[i] === "" || paramsValue[i] === null || paramsValue[i] === undefined) {
@@ -313,6 +315,18 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         }
         else {
             qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
+            if (indexOfFlag) {
+                let s = qFnS.split(" ");
+                let sIndex = s.findIndex(x => x === "LIKE");
+                if (sIndex) {
+                    let sStr = s[sIndex + 1];
+                    sStr = sStr.substring(1, sStr.length - 1);
+                    sStr = mysql.escape(sStr);
+                    sStr = sStr.substring(1, sStr.length - 1);
+                    s[sIndex + 1] = "'%" + sStr + "%'";
+                    qFnS = s.join(' ');
+                }
+            }
         }
         return qFnS;
     }

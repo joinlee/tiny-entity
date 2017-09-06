@@ -1,5 +1,5 @@
 import { EntityObject } from "../index";
-process.env.tinyLog = "off";
+process.env.tinyLog = "on";
 export let webconfig = {
     dbType: "mysql",
     mysqlConnOption: {

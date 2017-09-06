@@ -26,8 +26,8 @@ export class MysqlDataContext implements IDataContext {
         }
         else {
             let r = await this.onSubmit(sqlStr);
-            return EntityCopier.Decode(obj);
         }
+        return EntityCopier.Decode(obj);
     }
     /**
      * @param  {IEntityObject} obj
@@ -36,21 +36,22 @@ export class MysqlDataContext implements IDataContext {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
+            if(key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms") continue;
             if (this.isAvailableValue(obj[key]) && key != "id") {
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                     qList.push("`" + key + "`=NULL");
                 }
                 else if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
-                    qList.push("`" + key + "`='" + JSON.stringify(obj[key]) + "'");
+                    qList.push("`" + key + "`=" + mysql.escape(JSON.stringify(obj[key])));
                 }
                 else if (isNaN(obj[key]) || typeof (obj[key]) == "string") {
-                    qList.push("`" + key + "`='" + obj[key] + "'");
+                    qList.push("`" + key + "`=" + mysql.escape(obj[key]));
                 }
                 else if (obj[key] instanceof Date) {
-                    qList.push("`" + key + "`='" + this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss") + "'");
+                    qList.push("`" + key + "`=" + mysql.escape(this.dateFormat(obj[key], "yyyy-MM-dd HH:mm:ss")));
                 }
                 else {
-                    qList.push("`" + key + "`=" + obj[key]);
+                    qList.push("`" + key + "`=" + mysql.escape(obj[key]));
                 }
             }
         }
@@ -63,8 +64,8 @@ export class MysqlDataContext implements IDataContext {
         }
         else {
             let r = await this.onSubmit(sqlStr);
-            return EntityCopier.Decode(obj);
         }
+        return EntityCopier.Decode(obj);
 
     }
     /**
@@ -99,7 +100,7 @@ export class MysqlDataContext implements IDataContext {
         if (this.transactionOn === "" || this.transactionOn == null) {
             this.transactionOn = "on";
         }
-        
+
         console.log("BeginTranscation", this.transactionOn);
     }
 

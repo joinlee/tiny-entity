@@ -386,4 +386,24 @@ describe("sql注入攻击", () => {
         yield ctx.Delete(table);
     }));
 });
+describe("IndexOf", () => {
+    let table = new model_1.Table();
+    table.id = Guid.GetGuid();
+    table.name = "测试模糊查询台桌, '' xx && %%";
+    table.status = "opening";
+    let ctx = DataContextFactory.GetDataContext();
+    before(() => __awaiter(this, void 0, void 0, function* () {
+        yield ctx.Create(table);
+    }));
+    it("模糊查询", () => __awaiter(this, void 0, void 0, function* () {
+        let tableName = "模糊查";
+        let r = yield ctx.Table.Where(x => x.name.IndexOf("模糊") && x.status == "opening").ToList();
+        let r2 = yield ctx.Table.Where(x => x.name.IndexOf(tableName), ["tableName"], [tableName]).ToList();
+        assert.equal(r.length, 1, "当前结果应该是1 ");
+        assert.equal(r2.length, 1, "r2 的结果应该是1");
+    }));
+    after(() => __awaiter(this, void 0, void 0, function* () {
+        yield ctx.Delete(table);
+    }));
+});
 //# sourceMappingURL=test.js.map

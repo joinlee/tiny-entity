@@ -434,3 +434,27 @@ describe("sql注入攻击", () => {
         await ctx.Delete(table);
     })
 })
+
+describe("IndexOf", () => {
+    let table = new Table();
+    table.id = Guid.GetGuid();
+    table.name = "测试模糊查询台桌, '' xx && %%";
+    table.status = "opening";
+    let ctx = DataContextFactory.GetDataContext();
+    before(async () => {
+
+        await ctx.Create(table);
+    })
+
+    it("模糊查询", async () => {
+        let tableName = "模糊查";
+        let r = await ctx.Table.Where(x => x.name.IndexOf("模糊") && x.status == "opening").ToList();
+        let r2 = await ctx.Table.Where(x => x.name.IndexOf(tableName), ["tableName"], [tableName]).ToList();
+        assert.equal(r.length, 1, "当前结果应该是1 ");
+        assert.equal(r2.length, 1, "r2 的结果应该是1");
+    })
+
+    after(async () => {
+        await ctx.Delete(table);
+    })
+});
