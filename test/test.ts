@@ -350,38 +350,36 @@ describe("transcation", () => {
             emp.employeeNumber = "likecheng";
 
             let e = await this.ctx.Create(emp);
-            await this.Action2();
-            throw "this is a exception!";
+            for (let index = 0; index < 3; index++) {
+                await this.Action2();
+            }
         }
 
         @Transaction(DataContextFactory.GetDataContext())
         async Action2() {
             let emp = new Employee();
-            // emp.id = guid;
-            emp.id = Guid.GetGuid();
+            emp.id = guid;
+            //emp.id = Guid.GetGuid();
             emp.storeId = "testStore";
             emp.employeeNumber = "likecheng2";
 
             await this.ctx.Create(emp);
             //throw "this is a exception!";
         }
-
     }
 
     it("transcation on", async () => {
         let svr = new TestService();
         try {
-            await svr.Action2();
             await svr.Action1();
         }
         catch (error) {
             console.error(error);
         }
         finally {
-            await svr.Action2();
             let ctx = DataContextFactory.GetDataContext();
             let list = await ctx.Employee.Where(x => x.storeId == "testStore").ToList();
-            assert.equal(list.length == 2, true, "事务操作失败，已有数据写入到数据库！" + list.length);
+            assert.equal(list.length == 0, true, "事务操作失败，已有数据写入到数据库！" + list.length);
         }
     });
     after(async () => {

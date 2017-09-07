@@ -301,14 +301,15 @@ describe("transcation", () => {
                 emp.storeId = "testStore";
                 emp.employeeNumber = "likecheng";
                 let e = yield this.ctx.Create(emp);
-                yield this.Action2();
-                throw "this is a exception!";
+                for (let index = 0; index < 3; index++) {
+                    yield this.Action2();
+                }
             });
         }
         Action2() {
             return __awaiter(this, void 0, void 0, function* () {
                 let emp = new model_2.Employee();
-                emp.id = Guid.GetGuid();
+                emp.id = guid;
                 emp.storeId = "testStore";
                 emp.employeeNumber = "likecheng2";
                 yield this.ctx.Create(emp);
@@ -330,17 +331,15 @@ describe("transcation", () => {
     it("transcation on", () => __awaiter(this, void 0, void 0, function* () {
         let svr = new TestService();
         try {
-            yield svr.Action2();
             yield svr.Action1();
         }
         catch (error) {
             console.error(error);
         }
         finally {
-            yield svr.Action2();
             let ctx = DataContextFactory.GetDataContext();
             let list = yield ctx.Employee.Where(x => x.storeId == "testStore").ToList();
-            assert.equal(list.length == 2, true, "事务操作失败，已有数据写入到数据库！" + list.length);
+            assert.equal(list.length == 0, true, "事务操作失败，已有数据写入到数据库！" + list.length);
         }
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {

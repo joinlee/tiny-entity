@@ -14,6 +14,7 @@ var mysqlPool;
 class MysqlDataContext {
     constructor(option) {
         this.querySentence = [];
+        this.transStatus = [];
         if (!mysqlPool)
             mysqlPool = mysql.createPool(option);
     }
@@ -85,18 +86,15 @@ class MysqlDataContext {
         }
     }
     BeginTranscation() {
-        if (this.transactionOn === "on") {
-            this.transactionOn = "pedding";
-        }
-        if (this.transactionOn === "" || this.transactionOn == null) {
-            this.transactionOn = "on";
-        }
-        console.log("BeginTranscation", this.transactionOn);
+        this.transactionOn = "on";
+        this.transStatus.push({ key: new Date().getTime() });
+        console.log("BeginTranscation", this.transStatus.length);
     }
     Commit() {
-        if (this.transactionOn === "pedding") {
+        if (this.transStatus.length > 1) {
             console.warn("transaction is pedding!");
-            return;
+            this.transStatus.splice(0, 1);
+            return false;
         }
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => __awaiter(this, void 0, void 0, function* () {
@@ -112,6 +110,9 @@ class MysqlDataContext {
                 });
                 try {
                     for (let sql of this.querySentence) {
+                        if (process.env.tinyLog == "on") {
+                            console.log(sql);
+                        }
                         let r = yield this.TrasnQuery(conn, sql);
                     }
                     conn.commit(err => {
@@ -120,21 +121,24 @@ class MysqlDataContext {
                                 conn.release();
                                 reject(err);
                             });
-                        this.querySentence = [];
-                        this.transactionOn = null;
+                        this.CleanTransactionStatus();
                         conn.release();
                         resolve(true);
                         console.log("Transcation successful!");
                     });
                 }
                 catch (error) {
-                    this.querySentence = [];
-                    this.transactionOn = null;
+                    this.CleanTransactionStatus();
                     conn.release();
                     reject(error);
                 }
             }));
         });
+    }
+    CleanTransactionStatus() {
+        this.querySentence = [];
+        this.transactionOn = null;
+        this.transStatus = [];
     }
     TrasnQuery(conn, sql) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -152,8 +156,7 @@ class MysqlDataContext {
         });
     }
     RollBack() {
-        this.querySentence = [];
-        this.transactionOn = null;
+        this.CleanTransactionStatus();
     }
     Query(sqlStr) {
         return this.onSubmit(sqlStr);

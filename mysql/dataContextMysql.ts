@@ -36,7 +36,7 @@ export class MysqlDataContext implements IDataContext {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
-            if(key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms") continue;
+            if (key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms") continue;
             if (this.isAvailableValue(obj[key]) && key != "id") {
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                     qList.push("`" + key + "`=NULL");
@@ -90,27 +90,25 @@ export class MysqlDataContext implements IDataContext {
             return this.onSubmit(sqlStr);
         }
     }
+
+    private transStatus = [];
     /**
      * 开启一个事务
      */
     BeginTranscation() {
-        if (this.transactionOn === "on") {
-            this.transactionOn = "pedding";
-        }
-        if (this.transactionOn === "" || this.transactionOn == null) {
-            this.transactionOn = "on";
-        }
-
-        console.log("BeginTranscation", this.transactionOn);
+        this.transactionOn = "on";
+        this.transStatus.push({ key: new Date().getTime() });
+        console.log("BeginTranscation", this.transStatus.length);
     }
 
     /**
      * 提交一个事务
      */
     Commit() {
-        if (this.transactionOn === "pedding") {
+        if (this.transStatus.length > 1) {
             console.warn("transaction is pedding!");
-            return;
+            this.transStatus.splice(0, 1);
+            return false;
         }
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection(async (err, conn) => {
@@ -126,6 +124,9 @@ export class MysqlDataContext implements IDataContext {
                 });
                 try {
                     for (let sql of this.querySentence) {
+                        if (process.env.tinyLog == "on") {
+                            console.log(sql);
+                        }
                         let r = await this.TrasnQuery(conn, sql);
                     }
                     conn.commit(err => {
@@ -133,20 +134,24 @@ export class MysqlDataContext implements IDataContext {
                             conn.release();
                             reject(err);
                         });
-                        this.querySentence = [];
-                        this.transactionOn = null;
+                        this.CleanTransactionStatus();
                         conn.release();
                         resolve(true);
                         console.log("Transcation successful!");
                     });
                 } catch (error) {
-                    this.querySentence = [];
-                    this.transactionOn = null;
+                    this.CleanTransactionStatus();
                     conn.release();
                     reject(error);
                 }
             });
         });
+    }
+
+    private CleanTransactionStatus() {
+        this.querySentence = [];
+        this.transactionOn = null;
+        this.transStatus = [];
     }
 
     private async TrasnQuery(conn: mysql.Connection, sql: string) {
@@ -164,8 +169,7 @@ export class MysqlDataContext implements IDataContext {
     }
 
     RollBack() {
-        this.querySentence = [];
-        this.transactionOn = null;
+        this.CleanTransactionStatus();
     }
     /**
      * @param  {string} sqlStr
