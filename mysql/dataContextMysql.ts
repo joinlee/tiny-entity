@@ -3,6 +3,13 @@ import { EntityCopier } from "../entityCopier";
 import { IDataContext, IEntityObject } from '../tinyDB';
 var mysqlPool: mysql.Pool;
 
+function log() {
+    if (process.env.tinyLog == "on") {
+        console.log(arguments);
+    }
+}
+const logger: (...args) => void = log;
+
 export class MysqlDataContext implements IDataContext {
     private transactionOn: string;
     private querySentence: string[] = [];
@@ -20,7 +27,6 @@ export class MysqlDataContext implements IDataContext {
 
         sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
 
-        // console.log(sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -58,7 +64,6 @@ export class MysqlDataContext implements IDataContext {
 
         //todo:判断id的类型
         sqlStr += qList.join(',') + " WHERE id='" + obj.id + "';";
-        // console.log("Update:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -73,7 +78,6 @@ export class MysqlDataContext implements IDataContext {
      */
     Delete(obj: IEntityObject) {
         let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
-        // console.log("DELETE:", sqlStr);
         if (this.transactionOn) {
             this.querySentence.push(sqlStr);
         }
@@ -98,7 +102,7 @@ export class MysqlDataContext implements IDataContext {
     BeginTranscation() {
         this.transactionOn = "on";
         this.transStatus.push({ key: new Date().getTime() });
-        console.log("BeginTranscation", this.transStatus.length);
+        logger("BeginTranscation", this.transStatus.length);
     }
 
     /**
@@ -106,7 +110,7 @@ export class MysqlDataContext implements IDataContext {
      */
     Commit() {
         if (this.transStatus.length > 1) {
-            console.warn("transaction is pedding!");
+            logger("transaction is pedding!");
             this.transStatus.splice(0, 1);
             return false;
         }
@@ -124,9 +128,7 @@ export class MysqlDataContext implements IDataContext {
                 });
                 try {
                     for (let sql of this.querySentence) {
-                        if (process.env.tinyLog == "on") {
-                            console.log(sql);
-                        }
+                        logger(sql);
                         let r = await this.TrasnQuery(conn, sql);
                     }
                     conn.commit(err => {
@@ -137,7 +139,7 @@ export class MysqlDataContext implements IDataContext {
                         this.CleanTransactionStatus();
                         conn.release();
                         resolve(true);
-                        console.log("Transcation successful!");
+                        logger("Transcation successful!");
                     });
                 } catch (error) {
                     this.CleanTransactionStatus();
@@ -158,7 +160,7 @@ export class MysqlDataContext implements IDataContext {
         return new Promise((resolve, reject) => {
             conn.query(sql, (err, result) => {
                 if (err) {
-                    console.log("TrasnQuery , hhhhhhhhhhhhhhhhh", err, sql);
+                    logger("TrasnQuery , hhhhhhhhhhhhhhhhh", err, sql);
                     conn.rollback(() => { reject(err) });
                 }
                 else {
@@ -181,9 +183,7 @@ export class MysqlDataContext implements IDataContext {
     private onSubmit(sqlStr: string) {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
-                if (process.env.tinyLog == "on") {
-                    console.log(sqlStr);
-                }
+                logger(sqlStr);
                 if (err) {
                     conn.release();
                     reject(err);

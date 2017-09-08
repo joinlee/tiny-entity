@@ -11,6 +11,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mysql = require("mysql");
 const entityCopier_1 = require("../entityCopier");
 var mysqlPool;
+function log() {
+    if (process.env.tinyLog == "on") {
+        console.log(arguments);
+    }
+}
+const logger = log;
 class MysqlDataContext {
     constructor(option) {
         this.querySentence = [];
@@ -88,11 +94,11 @@ class MysqlDataContext {
     BeginTranscation() {
         this.transactionOn = "on";
         this.transStatus.push({ key: new Date().getTime() });
-        console.log("BeginTranscation", this.transStatus.length);
+        logger("BeginTranscation", this.transStatus.length);
     }
     Commit() {
         if (this.transStatus.length > 1) {
-            console.warn("transaction is pedding!");
+            logger("transaction is pedding!");
             this.transStatus.splice(0, 1);
             return false;
         }
@@ -110,9 +116,7 @@ class MysqlDataContext {
                 });
                 try {
                     for (let sql of this.querySentence) {
-                        if (process.env.tinyLog == "on") {
-                            console.log(sql);
-                        }
+                        logger(sql);
                         let r = yield this.TrasnQuery(conn, sql);
                     }
                     conn.commit(err => {
@@ -124,7 +128,7 @@ class MysqlDataContext {
                         this.CleanTransactionStatus();
                         conn.release();
                         resolve(true);
-                        console.log("Transcation successful!");
+                        logger("Transcation successful!");
                     });
                 }
                 catch (error) {
@@ -145,7 +149,7 @@ class MysqlDataContext {
             return new Promise((resolve, reject) => {
                 conn.query(sql, (err, result) => {
                     if (err) {
-                        console.log("TrasnQuery , hhhhhhhhhhhhhhhhh", err, sql);
+                        logger("TrasnQuery , hhhhhhhhhhhhhhhhh", err, sql);
                         conn.rollback(() => { reject(err); });
                     }
                     else {
@@ -164,9 +168,7 @@ class MysqlDataContext {
     onSubmit(sqlStr) {
         return new Promise((resolve, reject) => {
             mysqlPool.getConnection((err, conn) => {
-                if (process.env.tinyLog == "on") {
-                    console.log(sqlStr);
-                }
+                logger(sqlStr);
                 if (err) {
                     conn.release();
                     reject(err);
