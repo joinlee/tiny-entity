@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const entityCopier_1 = require("../entityCopier");
 const entityObject_1 = require("../entityObject");
 const mysql = require("mysql");
+const interpreter_1 = require("../interpreter");
 class EntityObjectMysql extends entityObject_1.EntityObject {
     constructor(ctx) {
         super(ctx);
@@ -21,19 +22,21 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+        let interpreter = new interpreter_1.Interpreter(mysql.escape);
+        this.sqlTemp.push("(" + interpreter.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
     Join(qFn, entity, mainFeild, isMainTable) {
+        let interpreter = new interpreter_1.Interpreter(mysql.escape);
         let joinTableName = entity.toString().toLocaleLowerCase();
-        let feild = this.formateCode(qFn);
+        let feild = interpreter.formateCode(qFn);
         let mainTableName = this.toString();
         if (this.joinParms.length > 0 && !isMainTable) {
             mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
         }
         if (mainFeild == null || mainFeild == undefined)
             mainFeild = "id";
-        let sql = "LEFT JOIN `" + joinTableName + "` ON " + mainTableName + "." + mainFeild + " = " + joinTableName + "." + feild;
+        let sql = "LEFT JOIN `" + joinTableName + "` ON `" + mainTableName + "`." + mainFeild + " = `" + joinTableName + "`.`" + feild + "`";
         this.joinParms.push({
             joinSql: sql,
             joinSelectFeild: this.GetSelectFieldList(entity).join(","),
@@ -56,7 +59,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return feildList;
     }
     Select(qFn) {
-        let fileds = this.formateCode(qFn);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape);
+        let fileds = interpreter.formateCode(qFn);
         this.queryParam.SelectFileds = fileds.split("AND");
         return this;
     }
@@ -72,7 +76,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = "";
             if (qFn) {
-                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
+                let interpreter = new interpreter_1.Interpreter(mysql.escape);
+                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + interpreter.formateCode(qFn, null, paramsKey, paramsValue);
             }
             else {
                 sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
@@ -86,7 +91,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         });
     }
     Contains(feild, values) {
-        let filed = this.formateCode(feild);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape);
+        let filed = interpreter.formateCode(feild);
         filed = this.toString() + "." + filed;
         let arr = values.slice();
         if (arr && arr.length > 0) {
@@ -106,7 +112,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             let sql;
             let queryFields = this.GetFinalQueryFields();
             if (qFn) {
-                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + this.formateCode(qFn, null, paramsKey, paramsValue);
+                let interpreter = new interpreter_1.Interpreter(mysql.escape);
+                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + interpreter.formateCode(qFn, null, paramsKey, paramsValue);
             }
             else {
                 sql = "SELECT * FROM `" + this.toString() + "`";
@@ -137,7 +144,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         let tableName = this.toString();
         if (entity)
             tableName = entity.toString();
-        var sql = this.formateCode(qFn, tableName);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape);
+        var sql = interpreter.formateCode(qFn, tableName);
         this.queryParam.OrderByFeildName = sql;
         return this;
     }
@@ -146,7 +154,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return this.OrderBy(qFn, entity);
     }
     GroupBy(qFn) {
-        let fileds = this.formateCode(qFn, this.toString());
+        let interpreter = new interpreter_1.Interpreter(mysql.escape);
+        let fileds = interpreter.formateCode(qFn);
         this.queryParam.GroupByFeildName = fileds;
         return this;
     }
@@ -239,86 +248,6 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     }
     Min(qFn) {
         return null;
-    }
-    getParameterNames(fn) {
-        const COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
-        const DEFAULT_PARAMS = /=[^,]+/mg;
-        const FAT_ARROWS = /=>.*$/mg;
-        const code = fn.toString()
-            .replace(COMMENTS, '')
-            .replace(FAT_ARROWS, '')
-            .replace(DEFAULT_PARAMS, '');
-        const result = code.slice(code.indexOf('(') + 1, code.indexOf(')') == -1 ? code.length : code.indexOf(')')).match(/([^\s,]+)/g);
-        return result === null ? [] : result;
-    }
-    formateCode(qFn, tableName, paramsKey, paramsValue) {
-        let qFnS = qFn.toString();
-        qFnS = qFnS.replace(/function/g, "");
-        qFnS = qFnS.replace(/return/g, "");
-        qFnS = qFnS.replace(/if/g, "");
-        qFnS = qFnS.replace(/else/g, "");
-        qFnS = qFnS.replace(/true/g, "");
-        qFnS = qFnS.replace(/false/g, "");
-        qFnS = qFnS.replace(/\{/g, "");
-        qFnS = qFnS.replace(/\}/g, "");
-        qFnS = qFnS.replace(/\(/g, "");
-        qFnS = qFnS.replace(/\)/g, "");
-        qFnS = qFnS.replace(/\;/g, "");
-        qFnS = qFnS.replace(/=>/g, "");
-        qFnS = qFnS.trim();
-        let p = this.getParameterNames(qFn)[0];
-        qFnS = qFnS.substring(p.length, qFnS.length);
-        qFnS = qFnS.trim();
-        if (tableName)
-            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "`" + tableName + "`.");
-        else
-            qFnS = qFnS.replace(new RegExp(p + "\\.", "gm"), "");
-        let indexOfFlag = qFnS.indexOf(".IndexOf") > -1;
-        qFnS = qFnS.replace(new RegExp("\\.IndexOf", "gm"), " LIKE ");
-        qFnS = qFnS.replace(/\&\&/g, "AND");
-        qFnS = qFnS.replace(/\|\|/g, "OR");
-        qFnS = qFnS.replace(/\=\=/g, "=");
-        if (paramsKey && paramsValue) {
-            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
-            if (paramsKey.length != paramsValue.length)
-                throw 'paramsKey,paramsValue 参数异常';
-            for (let i = 0; i < paramsKey.length; i++) {
-                let v = paramsValue[i];
-                if (indexOfFlag) {
-                    let xx = mysql.escape(paramsValue[i]);
-                    xx = xx.substring(1, xx.length - 1);
-                    v = "LIKE '%" + xx + "%'";
-                    qFnS = qFnS.replace(new RegExp("LIKE " + paramsKey[i], "gm"), v);
-                }
-                else {
-                    let opchar = qFnS[qFnS.lastIndexOf(paramsKey[i]) - 2];
-                    if (isNaN(v))
-                        v = opchar + " " + mysql.escape(paramsValue[i]);
-                    else
-                        v = opchar + " " + mysql.escape(paramsValue[i]);
-                    if (paramsValue[i] === "" || paramsValue[i] === null || paramsValue[i] === undefined) {
-                        v = "IS NULL";
-                    }
-                    qFnS = qFnS.replace(new RegExp(opchar + " " + paramsKey[i], "gm"), v);
-                }
-            }
-        }
-        else {
-            qFnS = qFnS.replace(new RegExp("= null", "gm"), "IS NULL");
-            if (indexOfFlag) {
-                let s = qFnS.split(" ");
-                let sIndex = s.findIndex(x => x === "LIKE");
-                if (sIndex) {
-                    let sStr = s[sIndex + 1];
-                    sStr = sStr.substring(1, sStr.length - 1);
-                    sStr = mysql.escape(sStr);
-                    sStr = sStr.substring(1, sStr.length - 1);
-                    s[sIndex + 1] = "'%" + sStr + "%'";
-                    qFnS = s.join(' ');
-                }
-            }
-        }
-        return qFnS;
     }
     clone(source, destination, isDeep) {
         if (!source)
