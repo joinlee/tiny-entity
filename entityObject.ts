@@ -23,14 +23,17 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @returns IQueryObject 查询对象
      */
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
+   
     /**
      * 左外连接查询
      * 
      * @template K 
-     * @param {(x: K) => void} qFn 
-     * @param {K} entity 
-     * 
-     * @memberOf IQueryObject
+     * @param {(x: K) => void} qFn  外表查询条件
+     * @param {K} entity 外表集合
+     * @param {string} [mainFeild] 主表关联的字段  
+     * @param {boolean} [isMainTable] 是否是主表
+     * @returns {IQueryObject<T>} 
+     * @memberof EntityObject
      */
     Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean): IQueryObject<T> { return this; }
     /**
