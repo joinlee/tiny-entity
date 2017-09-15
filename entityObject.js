@@ -6,6 +6,12 @@ class EntityObject {
     clone(source, destination, isDeep) { return null; }
     Where(qFn, paramsKey, paramsValue) { return this; }
     Join(qFn, entity, mainFeild, isMainTable) { return this; }
+    LeftJoin(fTable) {
+        return this;
+    }
+    On(func) {
+        return this;
+    }
     Any(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     ToList(queryCallback) { return null; }

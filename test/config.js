@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-process.env.tinyLog = "on";
 exports.webconfig = {
     dbType: "mysql",
     mysqlConnOption: {

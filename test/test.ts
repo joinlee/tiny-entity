@@ -97,7 +97,7 @@ class Guid {
 }
 
 console.log("当前数据库配置：", webconfig.dbType);
-describe("ToList", () => {
+describe("ToList()", () => {
     let ctx = DataContextFactory.GetDataContext();
     let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
     before(async () => {
@@ -456,3 +456,25 @@ describe("IndexOf", () => {
         await ctx.Delete(table);
     })
 });
+
+describe("Select()", () => {
+    let ctx = DataContextFactory.GetDataContext();
+    let table = new Table();
+    table.id = Guid.GetGuid();
+    table.name = "测试模糊查询台桌, '' xx && %%";
+    table.status = "opening";
+    before(async () => {
+        await ctx.Create(table);
+    })
+
+    it("should be right feild", async () => {
+        let r = await ctx.Table.Where(x => x.id == table.id, ["table.id"], [table.id]).Select(x => x.id && x.status).ToList();
+
+        ctx.TableParty
+        .LeftJoin(ctx.Table).On<Table>((m, f) => m.tableId == f.id)
+        .LeftJoin(ctx.Order).On<Order>((m, f) => m.orderId == f.id)
+
+        assert.equal(r[0].id, table.id);
+        assert.equal(r[0].status, table.status);
+    })
+})
