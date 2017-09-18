@@ -25,8 +25,10 @@ export function Transaction(ctx: IDataContext) {
                 return result;
             } catch (error) {
                 console.log("RollBack propertyName:", propertyName);
-                await this.ctx.RollBack();
-                this.ctx = null;
+                if (this.ctx) {
+                    await this.ctx.RollBack();
+                    this.ctx = null;
+                }
                 throw error;
             }
         }

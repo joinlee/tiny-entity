@@ -28,8 +28,10 @@ function Transaction(ctx) {
                 }
                 catch (error) {
                     console.log("RollBack propertyName:", propertyName);
-                    yield this.ctx.RollBack();
-                    this.ctx = null;
+                    if (this.ctx) {
+                        yield this.ctx.RollBack();
+                        this.ctx = null;
+                    }
                     throw error;
                 }
             });
