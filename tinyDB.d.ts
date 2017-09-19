@@ -149,6 +149,8 @@ export interface IQueryObject<T> {
      * @memberOf IQueryObject
      */
     Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean): IQueryObject<T>;
+
+    LeftJoin<F extends IEntityObject>(fEntity: F): IJoinQueryObject<T, F>;
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数
@@ -229,6 +231,10 @@ export interface IQueryObject<T> {
     Max(qFn: (x: T) => void): Promise<number>;
     Min(qFn: (x: T) => void): Promise<number>;
     Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
+}
+
+export interface IJoinQueryObject<T> {
+    On<F extends IEntityObject>(func: (m: T, f: F) => void): IQueryObject<T>;
 }
 
 interface DBTranscationModel { }

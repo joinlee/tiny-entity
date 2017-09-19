@@ -12,7 +12,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     private ctx: IDataContext;
     private sqlTemp = [];
     private joinParms: {
-        joinSql: string; joinSelectFeild: string; joinTableName: string;
+        joinSql?: string; joinSelectFeild?: string; joinTableName: string;
     }[] = [];
     private queryParam: QueryParams = new Object() as QueryParams;
     constructor(ctx?: IDataContext) {
@@ -40,6 +40,26 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             joinTableName: joinTableName
         });
 
+        return this;
+    }
+    LeftJoin(entity: IEntityObject) {
+        let joinTableName = entity.toString().toLocaleLowerCase();
+        this.joinParms.push({
+            joinSql: null,
+            joinSelectFeild: null,
+            joinTableName: joinTableName
+        });
+        return this;
+    }
+    On(func: Function) {
+        //let feild = this.formateCode(func);
+        let funcStr = func.toString();
+        let funcCharList = funcStr.split("");
+        
+
+        let joinParmsItem = this.joinParms.find(x => x.joinSql == null && x.joinSelectFeild == null);
+        let joinTableName = joinParmsItem.joinTableName;
+        let mainTableName = this.toString();
 
         return this;
     }

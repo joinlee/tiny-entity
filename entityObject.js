@@ -2,6 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class EntityObject {
     constructor(ctx) { }
+    On(func) {
+        return this;
+    }
+    LeftJoin(fEntity) {
+        return this;
+    }
     toString() { return ""; }
     clone(source, destination, isDeep) { return null; }
     Where(qFn, paramsKey, paramsValue) { return this; }

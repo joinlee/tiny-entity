@@ -41,6 +41,23 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         });
         return this;
     }
+    LeftJoin(entity) {
+        let joinTableName = entity.toString().toLocaleLowerCase();
+        this.joinParms.push({
+            joinSql: null,
+            joinSelectFeild: null,
+            joinTableName: joinTableName
+        });
+        return this;
+    }
+    On(func) {
+        let funcStr = func.toString();
+        let funcCharList = funcStr.split("");
+        let joinParmsItem = this.joinParms.find(x => x.joinSql == null && x.joinSelectFeild == null);
+        let joinTableName = joinParmsItem.joinTableName;
+        let mainTableName = this.toString();
+        return this;
+    }
     GetSelectFieldList(entity) {
         let tableName = entity.toString().toLocaleLowerCase();
         let feildList = [];

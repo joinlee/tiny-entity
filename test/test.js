@@ -405,4 +405,12 @@ describe("IndexOf", () => {
         yield ctx.Delete(table);
     }));
 });
+describe("LeftJoin()", () => {
+    let ctx = DataContextFactory.GetDataContext();
+    it("多表查询", () => __awaiter(this, void 0, void 0, function* () {
+        ctx.TableParty
+            .LeftJoin(ctx.Table)
+            .On((m, f) => m.tableId == f.id).ToList();
+    }));
+});
 //# sourceMappingURL=test.js.map

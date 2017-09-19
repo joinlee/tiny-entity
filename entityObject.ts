@@ -1,5 +1,12 @@
+import { IJoinQueryObject } from './tinyDB.d';
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
-export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
+export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>, IJoinQueryObject<T>{
+    On<F extends IEntityObject>(func: (m: T, f: F) => void): IQueryObject<T> {
+        return this;
+    }
+    LeftJoin<F extends IEntityObject>(fEntity: F): IJoinQueryObject<T> {
+        return this;
+    }
     constructor(ctx?: IDataContext) { }
     id: string;
     toString(): string { return ""; }
