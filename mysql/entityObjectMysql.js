@@ -53,6 +53,13 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     On(func) {
         let funcStr = func.toString();
         let funcCharList = funcStr.split("");
+        let fe = funcCharList[0];
+        fe = fe.replace(/\(/g, "");
+        fe = fe.replace(/\)/g, "");
+        let felist = fe.split(",");
+        let m = felist[0];
+        let f = felist[1];
+        funcCharList[1] = "";
         let joinParmsItem = this.joinParms.find(x => x.joinSql == null && x.joinSelectFeild == null);
         let joinTableName = joinParmsItem.joinTableName;
         let mainTableName = this.toString();

@@ -55,6 +55,14 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         //let feild = this.formateCode(func);
         let funcStr = func.toString();
         let funcCharList = funcStr.split("");
+        let fe = funcCharList[0];
+        fe = fe.replace(/\(/g, "");
+        fe = fe.replace(/\)/g, "");
+        let felist = fe.split(",");
+        let m = felist[0];
+        let f = felist[1];
+
+        funcCharList[1] = "";
         
 
         let joinParmsItem = this.joinParms.find(x => x.joinSql == null && x.joinSelectFeild == null);
