@@ -22,14 +22,14 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     }
     toString() { return ""; }
     Where(qFn, paramsKey, paramsValue) {
-        let interpreter = new interpreter_1.Interpreter(mysql.escape);
-        this.sqlTemp.push("(" + interpreter.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+        let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+        this.sqlTemp.push("(" + interpreter.TransToSQLOfWhere(qFn, this.toString(), paramsKey, paramsValue) + ")");
         return this;
     }
     Join(qFn, entity, mainFeild, isMainTable) {
-        let interpreter = new interpreter_1.Interpreter(mysql.escape);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
         let joinTableName = entity.toString().toLocaleLowerCase();
-        let feild = interpreter.formateCode(qFn);
+        let feild = interpreter.TransToSQLOfWhere(qFn);
         let mainTableName = this.toString();
         if (this.joinParms.length > 0 && !isMainTable) {
             mainTableName = this.joinParms[this.joinParms.length - 1].joinTableName;
@@ -43,6 +43,10 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             joinTableName: joinTableName
         });
         return this;
+    }
+    LeftJoin(func) {
+    }
+    On() {
     }
     GetSelectFieldList(entity) {
         let tableName = entity.toString().toLocaleLowerCase();
@@ -59,14 +63,14 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return feildList;
     }
     Select(qFn) {
-        let interpreter = new interpreter_1.Interpreter(mysql.escape);
-        let fileds = interpreter.formateCode(qFn);
-        this.queryParam.SelectFileds = fileds.split("AND");
+        let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+        let fileds = interpreter.TransToSQLOfSelect(qFn);
+        this.queryParam.SelectFileds = fileds.split(",");
         return this;
     }
-    Any(qFn, paramsKey, paramsValue, queryCallback) {
+    Any(qFn, paramsKey, paramsValue) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.Count(qFn, paramsKey, paramsValue, queryCallback);
+            let result = yield this.Count(qFn, paramsKey, paramsValue);
             return new Promise((resolve, reject) => {
                 resolve(result > 0);
             });
@@ -76,8 +80,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = "";
             if (qFn) {
-                let interpreter = new interpreter_1.Interpreter(mysql.escape);
-                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + interpreter.formateCode(qFn, null, paramsKey, paramsValue);
+                let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+                sql = "SELECT COUNT(id) FROM `" + this.toString() + "` WHERE " + interpreter.TransToSQLOfWhere(qFn, null, paramsKey, paramsValue);
             }
             else {
                 sql = "SELECT COUNT(id) FROM `" + this.toString() + "`";
@@ -91,8 +95,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         });
     }
     Contains(feild, values) {
-        let interpreter = new interpreter_1.Interpreter(mysql.escape);
-        let filed = interpreter.formateCode(feild);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+        let filed = interpreter.TransToSQLOfWhere(feild);
         filed = this.toString() + "." + filed;
         let arr = values.slice();
         if (arr && arr.length > 0) {
@@ -112,8 +116,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             let sql;
             let queryFields = this.GetFinalQueryFields();
             if (qFn) {
-                let interpreter = new interpreter_1.Interpreter(mysql.escape);
-                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + interpreter.formateCode(qFn, null, paramsKey, paramsValue);
+                let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+                sql = "SELECT * FROM `" + this.toString() + "` WHERE " + interpreter.TransToSQLOfWhere(qFn, null, paramsKey, paramsValue);
             }
             else {
                 sql = "SELECT * FROM `" + this.toString() + "`";
@@ -144,8 +148,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         let tableName = this.toString();
         if (entity)
             tableName = entity.toString();
-        let interpreter = new interpreter_1.Interpreter(mysql.escape);
-        var sql = interpreter.formateCode(qFn, tableName);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+        var sql = interpreter.TransToSQLOfWhere(qFn, tableName);
         this.queryParam.OrderByFeildName = sql;
         return this;
     }
@@ -154,8 +158,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return this.OrderBy(qFn, entity);
     }
     GroupBy(qFn) {
-        let interpreter = new interpreter_1.Interpreter(mysql.escape);
-        let fileds = interpreter.formateCode(qFn);
+        let interpreter = new interpreter_1.Interpreter(mysql.escape, this.toString());
+        let fileds = interpreter.TransToSQLOfWhere(qFn);
         this.queryParam.GroupByFeildName = fileds;
         return this;
     }

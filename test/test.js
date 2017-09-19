@@ -85,7 +85,7 @@ class Guid {
     }
 }
 console.log("当前数据库配置：", config_1.webconfig.dbType);
-describe("ToList", () => {
+describe("ToList()", () => {
     let ctx = DataContextFactory.GetDataContext();
     let tableId = "a66fcbd29d2b4ac683c57520bfca5728";
     before(() => __awaiter(this, void 0, void 0, function* () {
@@ -403,6 +403,24 @@ describe("IndexOf", () => {
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
         yield ctx.Delete(table);
+    }));
+});
+describe("Select()", () => {
+    let ctx = DataContextFactory.GetDataContext();
+    let table = new model_1.Table();
+    table.id = Guid.GetGuid();
+    table.name = "测试模糊查询台桌, '' xx && %%";
+    table.status = "opening";
+    before(() => __awaiter(this, void 0, void 0, function* () {
+        yield ctx.Create(table);
+    }));
+    it("should be right feild", () => __awaiter(this, void 0, void 0, function* () {
+        let r = yield ctx.Table.Where(x => x.id == table.id, ["table.id"], [table.id]).Select(x => x.id && x.status).ToList();
+        ctx.TableParty
+            .LeftJoin(ctx.Table).On((m, f) => m.tableId == f.id)
+            .LeftJoin(ctx.Order).On((m, f) => m.orderId == f.id);
+        assert.equal(r[0].id, table.id);
+        assert.equal(r[0].status, table.status);
     }));
 });
 //# sourceMappingURL=test.js.map

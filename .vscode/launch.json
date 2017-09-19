@@ -17,6 +17,9 @@
                 "--colors",
                 "${workspaceRoot}/test"
             ],
+            "env": {
+                "tinyLog": "off"
+            },
             "internalConsoleOptions": "openOnSessionStart"
         },
         {

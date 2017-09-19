@@ -1,5 +1,5 @@
-import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
-export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>{
+import { IEntityObject, IDataContext, IQueryObject, IJoinQueryObject } from './tinyDB';
+export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>, IJoinQueryObject<T>{
     constructor(ctx?: IDataContext) { }
     id: string;
     toString(): string { return ""; }
@@ -23,7 +23,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @returns IQueryObject 查询对象
      */
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
-   
+
     /**
      * 左外连接查询
      * 
@@ -36,6 +36,13 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @memberof EntityObject
      */
     Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean): IQueryObject<T> { return this; }
+
+    LeftJoin(fTable: IEntityObject): IJoinQueryObject<T> {
+        return this;
+    }
+    On<F extends IEntityObject>(func: (m: T, f: F) => boolean): IQueryObject<T> {
+        return this;
+    }
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数
