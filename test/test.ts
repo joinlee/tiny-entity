@@ -165,10 +165,10 @@ describe("ToList", () => {
 
         // 左外连接查询
         let r = await ctx.Table
-            .Join<TableParty>(x => x.tableId, ctx.TableParty)
+            .LeftJoin(ctx.TableParty)
+            .On<TableParty>((m, f) => m.id == f.tableId)
             .Where(x => x.id == tableId, ["tableId"], [tableId])
             .ToList<{ desktable: Table; tableparty: TableParty; }>();
-
 
         assert.equal(r.length >= 1, true);
         assert.notEqual(r[0].desktable, null, "r[0].desktable == null");
@@ -177,11 +177,10 @@ describe("ToList", () => {
 
     it("左外连接查询,主表多个数据", async () => {
         let ctx = DataContextFactory.GetDataContext();
-        let r = await ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
-            .OrderByDesc(x => x.openedTime, ctx.TableParty)
+        let r = await ctx.Table.LeftJoin(ctx.TableParty).On<TableParty>((m, f) => m.id == f.tableId).OrderByDesc(x => x.openedTime, ctx.TableParty)
             .GroupBy(x => x.name)
             .ToList<{ desktable: Table; tableparty: TableParty }>();
+
         assert.notEqual(r, null);
         assert.equal(r.length >= 1, true);
         let table = new Table();
@@ -244,19 +243,19 @@ describe("Join", () => {
 
     it("左外连接3张表", async () => {
         let r = await ctx.TableParty
-            .Join<Table>(x => x.id, ctx.Table, "tableId", true)
-            .Join<Order>(x => x.id, ctx.Order, "orderId", true)
+            .LeftJoin(ctx.Table)
+            .On<Table>((m, y) => m.tableId == y.id)
+            .LeftJoin(ctx.Order)
+            .On<Order>((x, y) => x.orderId == y.id)
             .ToList<{ tableparty: TableParty; desktable: Table; orders: Order; }>();
+
         assert.equal(r.length, 3, "");
         assert.notEqual(mockDatas.orders.find(x => x.id == r[0].orders.id), null, "");
         assert.notEqual(mockDatas.tableParties.find(x => x.id == r[1].tableparty.id), null, "");
         assert.notEqual(mockDatas.tableList.find(x => x.name == r[2].desktable.name), null, "");
     })
     it("左外连接获取第一条数据", async () => {
-        let r = await ctx.TableParty
-            .Join<Table>(x => x.id, ctx.Table, "tableId", true)
-            .Join<Order>(x => x.id, ctx.Order, "orderId", true)
-            .Take(1)
+        let r = await ctx.TableParty.LeftJoin(ctx.Table).On<Table>((m, f) => m.tableId == f.id).LeftJoin(ctx.Order).On<Order>((m, f) => m.orderId == f.id).Take(1)
             .ToList<{ tableparty: TableParty; desktable: Table; orders: Order; }>();
         assert.equal(r.length, 1, "");
     })
@@ -322,7 +321,8 @@ describe("join + contains + where", () => {
 
         let r = await ctx.TableParty
             .Contains(x => x.id, tbpIds)
-            .Join<Table>(x => x.id, ctx.Table, "tableId")
+            .LeftJoin(ctx.Table)
+            .On<Table>((m, f) => m.tableId == f.id)
             .Where(x => x.status == "closed")
             .ToList<{ tableparty: TableParty; desktable: Table; }>();
 
@@ -460,48 +460,3 @@ describe("IndexOf", () => {
         await ctx.Delete(table);
     })
 });
-
-describe("LeftJoin()", () => {
-    let table: Table = new Table();
-    let tableParty: TableParty = new TableParty();
-    let tableParty1: TableParty = new TableParty();
-    let ctx = DataContextFactory.GetDataContext();
-    before(async () => {
-        table.id = Guid.GetGuid();
-        table.name = "测试台桌";
-        table.status = "opending";
-        await ctx.Create(table);
-
-        tableParty1.id = Guid.GetGuid();
-        tableParty1.tableId = table.id;
-        tableParty1.openedTime = new Date().getTime();
-        tableParty1.closedTime = new Date().getTime();
-        tableParty1.tableName = table.name;
-        tableParty1.status = "closed";
-        await ctx.Create(tableParty1);
-
-        tableParty.id = Guid.GetGuid();
-        tableParty.tableId = table.id;
-        tableParty.openedTime = new Date().getTime();
-        tableParty.closedTime = null;
-        tableParty.tableName = table.name;
-        tableParty.status = table.status;
-        await ctx.Create(tableParty);
-    })
-    it("多表查询", async () => {
-        let r = await ctx.TableParty
-            .LeftJoin(ctx.Table)
-            .On((m, f) => m.tableId == f.id)
-            .Where(x => x.id == table.id, ["table.id"], [table.id])
-            .ToList();
-
-
-        console.log(r);
-    })
-
-    after(async () => {
-        ctx.Delete(tableParty1);
-        ctx.Delete(tableParty);
-        ctx.Delete(table);
-    })
-})

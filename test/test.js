@@ -141,7 +141,8 @@ describe("ToList", () => {
             yield ctx.Delete(item);
         }
         let r = yield ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
+            .LeftJoin(ctx.TableParty)
+            .On((m, f) => m.id == f.tableId)
             .Where(x => x.id == tableId, ["tableId"], [tableId])
             .ToList();
         assert.equal(r.length >= 1, true);
@@ -150,9 +151,7 @@ describe("ToList", () => {
     }));
     it("左外连接查询,主表多个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
-        let r = yield ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
-            .OrderByDesc(x => x.openedTime, ctx.TableParty)
+        let r = yield ctx.Table.LeftJoin(ctx.TableParty).On((m, f) => m.id == f.tableId).OrderByDesc(x => x.openedTime, ctx.TableParty)
             .GroupBy(x => x.name)
             .ToList();
         assert.notEqual(r, null);
@@ -209,8 +208,10 @@ describe("Join", () => {
     }));
     it("左外连接3张表", () => __awaiter(this, void 0, void 0, function* () {
         let r = yield ctx.TableParty
-            .Join(x => x.id, ctx.Table, "tableId", true)
-            .Join(x => x.id, ctx.Order, "orderId", true)
+            .LeftJoin(ctx.Table)
+            .On((m, y) => m.tableId == y.id)
+            .LeftJoin(ctx.Order)
+            .On((x, y) => x.orderId == y.id)
             .ToList();
         assert.equal(r.length, 3, "");
         assert.notEqual(mockDatas.orders.find(x => x.id == r[0].orders.id), null, "");
@@ -218,10 +219,7 @@ describe("Join", () => {
         assert.notEqual(mockDatas.tableList.find(x => x.name == r[2].desktable.name), null, "");
     }));
     it("左外连接获取第一条数据", () => __awaiter(this, void 0, void 0, function* () {
-        let r = yield ctx.TableParty
-            .Join(x => x.id, ctx.Table, "tableId", true)
-            .Join(x => x.id, ctx.Order, "orderId", true)
-            .Take(1)
+        let r = yield ctx.TableParty.LeftJoin(ctx.Table).On((m, f) => m.tableId == f.id).LeftJoin(ctx.Order).On((m, f) => m.orderId == f.id).Take(1)
             .ToList();
         assert.equal(r.length, 1, "");
     }));
@@ -276,7 +274,8 @@ describe("join + contains + where", () => {
         let tbpIds = ["0dec72a0cd11439fb04c4f4385bb1c2a", "0faafe3cd8254c9a91e2f936c9743dda"];
         let r = yield ctx.TableParty
             .Contains(x => x.id, tbpIds)
-            .Join(x => x.id, ctx.Table, "tableId")
+            .LeftJoin(ctx.Table)
+            .On((m, f) => m.tableId == f.id)
             .Where(x => x.status == "closed")
             .ToList();
         assert.equal(r.length, 2, "r.length must be 2");
@@ -404,45 +403,6 @@ describe("IndexOf", () => {
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
         yield ctx.Delete(table);
-    }));
-});
-describe("LeftJoin()", () => {
-    let table = new model_1.Table();
-    let tableParty = new model_1.TableParty();
-    let tableParty1 = new model_1.TableParty();
-    let ctx = DataContextFactory.GetDataContext();
-    before(() => __awaiter(this, void 0, void 0, function* () {
-        table.id = Guid.GetGuid();
-        table.name = "测试台桌";
-        table.status = "opending";
-        yield ctx.Create(table);
-        tableParty1.id = Guid.GetGuid();
-        tableParty1.tableId = table.id;
-        tableParty1.openedTime = new Date().getTime();
-        tableParty1.closedTime = new Date().getTime();
-        tableParty1.tableName = table.name;
-        tableParty1.status = "closed";
-        yield ctx.Create(tableParty1);
-        tableParty.id = Guid.GetGuid();
-        tableParty.tableId = table.id;
-        tableParty.openedTime = new Date().getTime();
-        tableParty.closedTime = null;
-        tableParty.tableName = table.name;
-        tableParty.status = table.status;
-        yield ctx.Create(tableParty);
-    }));
-    it("多表查询", () => __awaiter(this, void 0, void 0, function* () {
-        let r = yield ctx.TableParty
-            .LeftJoin(ctx.Table)
-            .On((m, f) => m.tableId == f.id)
-            .Where(x => x.id == table.id, ["table.id"], [table.id])
-            .ToList();
-        console.log(r);
-    }));
-    after(() => __awaiter(this, void 0, void 0, function* () {
-        ctx.Delete(tableParty1);
-        ctx.Delete(tableParty);
-        ctx.Delete(table);
     }));
 });
 //# sourceMappingURL=test.js.map
