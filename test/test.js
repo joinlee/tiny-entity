@@ -174,9 +174,9 @@ describe("ToList", () => {
         assert.equal(r[0].id, tableId);
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
-        yield ctx.DeleteAll(new model_1.Table());
-        yield ctx.DeleteAll(new model_2.Order());
-        yield ctx.DeleteAll(new model_1.TableParty());
+        yield ctx.Delete(ctx.Table, x => x.id == tableId, ["tableId"], [tableId]);
+        yield ctx.Delete(ctx.TableParty, x => x.id != null);
+        yield ctx.Delete(ctx.Order, x => x.id != null);
     }));
 });
 describe("Join", () => {
@@ -224,9 +224,9 @@ describe("Join", () => {
         assert.equal(r.length, 1, "");
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
-        yield ctx.DeleteAll(new model_1.Table());
-        yield ctx.DeleteAll(new model_2.Order());
-        yield ctx.DeleteAll(new model_1.TableParty());
+        yield ctx.Delete(ctx.Table, x => x.id != null);
+        yield ctx.Delete(ctx.TableParty, x => x.id != null);
+        yield ctx.Delete(ctx.Order, x => x.id != null);
     }));
 });
 describe("Contains", () => {
@@ -248,7 +248,7 @@ describe("Contains", () => {
         assert.notEqual(r.find(x => x.id == tableIds[1]), null, "");
     }));
     after(() => __awaiter(this, void 0, void 0, function* () {
-        yield ctx.DeleteAll(new model_1.Table());
+        yield ctx.Delete(ctx.Table, x => x.id != null);
     }));
 });
 describe("join + contains + where", () => {

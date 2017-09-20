@@ -1,6 +1,7 @@
 import mysql = require("mysql");
 import { EntityCopier } from "../entityCopier";
 import { IDataContext, IEntityObject } from '../tinyDB';
+import { Interpreter } from "../interpreter";
 var mysqlPool: mysql.Pool;
 
 function log() {
@@ -11,6 +12,27 @@ function log() {
 const logger: (...args) => void = log;
 
 export class MysqlDataContext implements IDataContext {
+    Delete(obj: IEntityObject);
+    Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean);
+    Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean, paramsKey: string[], paramsValue: any[]);
+    Delete(obj: any, func?: any, paramsKey?: any, paramsValue?: any) {
+        let sqlStr: string;
+        if (func) {
+            let interpreter = new Interpreter(mysql.escape, obj.toString());
+            let s = interpreter.TransToSQLOfWhere(func, obj.toString(), paramsKey, paramsValue);
+            sqlStr = "DELETE FROM " + obj.toString() + " WHERE " + s + ";";
+        }
+        else {
+            sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
+        }
+
+        if (this.transactionOn) {
+            this.querySentence.push(sqlStr);
+        }
+        else {
+            return this.onSubmit(sqlStr);
+        }
+    }
     private transactionOn: string;
     private querySentence: string[] = [];
     private mysqlPool;
@@ -72,27 +94,6 @@ export class MysqlDataContext implements IDataContext {
         }
         return EntityCopier.Decode(obj);
 
-    }
-    /**
-     * @param  {IEntityObject} obj
-     */
-    Delete(obj: IEntityObject) {
-        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
-        if (this.transactionOn) {
-            this.querySentence.push(sqlStr);
-        }
-        else {
-            return this.onSubmit(sqlStr);
-        }
-    }
-    DeleteAll(obj: IEntityObject) {
-        let sqlStr = "DELETE FROM " + obj.toString() + ";";
-        if (this.transactionOn) {
-            this.querySentence.push(sqlStr);
-        }
-        else {
-            return this.onSubmit(sqlStr);
-        }
     }
 
     private transStatus = [];

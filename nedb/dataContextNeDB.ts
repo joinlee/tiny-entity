@@ -9,6 +9,26 @@ String.prototype.IndexOf = function (str: string) {
 }
 
 export class NeDBDataContext implements IDataContext {
+    Delete(obj: IEntityObject);
+    Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean, paramsKey: string[], paramsValue: any[]);
+    async Delete(obj: any, func?: any, paramsKey?: any, paramsValue?: any) {
+        let entity;
+        if (this.transOn) {
+            entity = await this.getEntity(obj.toString(), obj.id, true);
+            entity.toString = obj.toString;
+        }
+
+        let promise = new Promise<boolean>((resolve, reject) => {
+            this.deleteInner(obj, true, false).then(() => {
+                this.pushQuery("delete", entity);
+                resolve(true);
+            }).catch(err => {
+                reject(err);
+            });
+        });
+
+        return promise;
+    }
     private nedb: Datastore;
     private config: ContextConfig;
     private transOn: boolean;
@@ -122,28 +142,6 @@ export class NeDBDataContext implements IDataContext {
         });
     }
 
-    async Delete(obj: IEntityObject, stillOpen?: boolean, isAll?: boolean): Promise<boolean> {
-        if (stillOpen == undefined || stillOpen == null) stillOpen = true;
-        let entity;
-        if (this.transOn) {
-            entity = await this.getEntity(obj.toString(), obj.id, stillOpen);
-            entity.toString = obj.toString;
-        }
-
-        let promise = new Promise<boolean>((resolve, reject) => {
-            this.deleteInner(obj, stillOpen, isAll).then(() => {
-                this.pushQuery("delete", entity);
-                resolve(true);
-            }).catch(err => {
-                reject(err);
-            });
-        });
-
-        return promise;
-    }
-    DeleteAll(obj: IEntityObject): Promise<boolean> {
-        return this.Delete(obj, null, true);
-    }
     private async deleteInner(obj: IEntityObject, stillOpen?, isAll?: boolean) {
         let db = await NeDBPool.Current.GetDBConnection(obj.toString(), this.config);
         let promise = new Promise<boolean>((resolve, reject) => {

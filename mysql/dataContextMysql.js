@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mysql = require("mysql");
 const entityCopier_1 = require("../entityCopier");
+const interpreter_1 = require("../interpreter");
 var mysqlPool;
 function log() {
     if (process.env.tinyLog == "on") {
@@ -23,6 +24,23 @@ class MysqlDataContext {
         this.transStatus = [];
         if (!mysqlPool)
             mysqlPool = mysql.createPool(option);
+    }
+    Delete(obj, func, paramsKey, paramsValue) {
+        let sqlStr;
+        if (func) {
+            let interpreter = new interpreter_1.Interpreter(mysql.escape, obj.toString());
+            let s = interpreter.TransToSQLOfWhere(func, obj.toString(), paramsKey, paramsValue);
+            sqlStr = "DELETE FROM " + obj.toString() + " WHERE " + s + ";";
+        }
+        else {
+            sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
+        }
+        if (this.transactionOn) {
+            this.querySentence.push(sqlStr);
+        }
+        else {
+            return this.onSubmit(sqlStr);
+        }
     }
     Create(obj) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -72,24 +90,6 @@ class MysqlDataContext {
             }
             return entityCopier_1.EntityCopier.Decode(obj);
         });
-    }
-    Delete(obj) {
-        let sqlStr = "DELETE FROM " + obj.toString() + " WHERE id='" + obj.id + "';";
-        if (this.transactionOn) {
-            this.querySentence.push(sqlStr);
-        }
-        else {
-            return this.onSubmit(sqlStr);
-        }
-    }
-    DeleteAll(obj) {
-        let sqlStr = "DELETE FROM " + obj.toString() + ";";
-        if (this.transactionOn) {
-            this.querySentence.push(sqlStr);
-        }
-        else {
-            return this.onSubmit(sqlStr);
-        }
     }
     BeginTranscation() {
         this.transactionOn = "on";

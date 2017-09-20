@@ -203,9 +203,9 @@ describe("ToList", () => {
         assert.equal(r[0].id, tableId);
     })
     after(async () => {
-        await ctx.DeleteAll(new Table());
-        await ctx.DeleteAll(new Order());
-        await ctx.DeleteAll(new TableParty());
+        await ctx.Delete<Table>(ctx.Table, x => x.id == tableId, ["tableId"], [tableId]);
+        await ctx.Delete<TableParty>(ctx.TableParty, x => x.id != null);
+        await ctx.Delete<Order>(ctx.Order, x => x.id != null);
     })
 });
 
@@ -260,9 +260,13 @@ describe("Join", () => {
         assert.equal(r.length, 1, "");
     })
     after(async () => {
-        await ctx.DeleteAll(new Table());
-        await ctx.DeleteAll(new Order());
-        await ctx.DeleteAll(new TableParty());
+        // await ctx.DeleteAll(new Table());
+        // await ctx.DeleteAll(new Order());
+        // await ctx.DeleteAll(new TableParty());
+
+        await ctx.Delete<Table>(ctx.Table, x => x.id != null);
+        await ctx.Delete<TableParty>(ctx.TableParty, x => x.id != null);
+        await ctx.Delete<Order>(ctx.Order, x => x.id != null);
     })
 });
 
@@ -289,7 +293,7 @@ describe("Contains", () => {
     })
     after(async () => {
         // 清空台桌表
-        await ctx.DeleteAll(new Table());
+        await ctx.Delete<Table>(ctx.Table, x => x.id != null);
     })
 });
 

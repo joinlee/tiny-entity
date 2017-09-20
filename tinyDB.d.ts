@@ -244,7 +244,8 @@ export interface IDataContext {
     Create(obj: IEntityObject);
     Update(obj: IEntityObject);
     Delete(obj: IEntityObject);
-    DeleteAll(obj: IEntityObject);
+    Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean);
+    Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean, paramsKey: string[], paramsValue: any[]);
     BeginTranscation();
     Commit();
     Query(...args);
