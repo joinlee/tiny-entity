@@ -150,7 +150,7 @@ export interface IQueryObject<T> {
      */
     Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean): IQueryObject<T>;
 
-    LeftJoin<F extends IEntityObject>(fEntity: F): IJoinQueryObject<T, F>;
+    LeftJoin<F extends IEntityObject>(fEntity: F): IJoinQueryObject<T>;
     /**
      * 从集合中查找是否有符合匹配的项，存在任何一项返回true，不存在返回false
      * @param  {(entityObject:T)=>boolean} qFn 查询条件函数
@@ -235,6 +235,7 @@ export interface IQueryObject<T> {
 
 export interface IJoinQueryObject<T> {
     On<F extends IEntityObject>(func: (m: T, f: F) => void): IQueryObject<T>;
+    On<M extends IEntityObject, F extends IEntityObject>(func: (m: M, f: F) => void, mEntity: M): IQueryObject<T>;
 }
 
 interface DBTranscationModel { }

@@ -136,13 +136,16 @@ describe("ToList", () => {
     })
     it("左外连接查询,主表单个数据", async () => {
         let ctx = DataContextFactory.GetDataContext();
+
         let jr = await ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
-            .Join<Order>(x => x.id, ctx.Order, "orderId")
+            .LeftJoin(ctx.TableParty)
+            .On<TableParty>((m, f) => m.id == f.tableId)
+            .LeftJoin(ctx.Order)
+            .On<TableParty, Order>((m, f) => m.orderId == f.id, ctx.TableParty)
             .Where(x => x.id == tableId, ["tableId"], [tableId])
-            .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .Take(1)
             .ToList<{ desktable: Table; tableparty: TableParty; orders: Order }>();
+
         assert.notEqual(jr, null, "查询结果为空");
         assert.equal(jr.length, 1, "查询条数不为1");
         assert.equal(jr[0].desktable.id, tableId, "desktable.id != tableId");
@@ -165,6 +168,8 @@ describe("ToList", () => {
             .Join<TableParty>(x => x.tableId, ctx.TableParty)
             .Where(x => x.id == tableId, ["tableId"], [tableId])
             .ToList<{ desktable: Table; tableparty: TableParty; }>();
+
+
         assert.equal(r.length >= 1, true);
         assert.notEqual(r[0].desktable, null, "r[0].desktable == null");
         assert.equal(r[0].tableparty, null, "r[0].tableparty!=null");
@@ -457,10 +462,46 @@ describe("IndexOf", () => {
 });
 
 describe("LeftJoin()", () => {
+    let table: Table = new Table();
+    let tableParty: TableParty = new TableParty();
+    let tableParty1: TableParty = new TableParty();
     let ctx = DataContextFactory.GetDataContext();
+    before(async () => {
+        table.id = Guid.GetGuid();
+        table.name = "测试台桌";
+        table.status = "opending";
+        await ctx.Create(table);
+
+        tableParty1.id = Guid.GetGuid();
+        tableParty1.tableId = table.id;
+        tableParty1.openedTime = new Date().getTime();
+        tableParty1.closedTime = new Date().getTime();
+        tableParty1.tableName = table.name;
+        tableParty1.status = "closed";
+        await ctx.Create(tableParty1);
+
+        tableParty.id = Guid.GetGuid();
+        tableParty.tableId = table.id;
+        tableParty.openedTime = new Date().getTime();
+        tableParty.closedTime = null;
+        tableParty.tableName = table.name;
+        tableParty.status = table.status;
+        await ctx.Create(tableParty);
+    })
     it("多表查询", async () => {
-        ctx.TableParty
-        .LeftJoin(ctx.Table)
-        .On((m, f) => m.tableId == f.id).ToList();
+        let r = await ctx.TableParty
+            .LeftJoin(ctx.Table)
+            .On((m, f) => m.tableId == f.id)
+            .Where(x => x.id == table.id, ["table.id"], [table.id])
+            .ToList();
+
+
+        console.log(r);
+    })
+
+    after(async () => {
+        ctx.Delete(tableParty1);
+        ctx.Delete(tableParty);
+        ctx.Delete(table);
     })
 })

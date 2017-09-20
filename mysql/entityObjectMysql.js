@@ -45,24 +45,40 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         let joinTableName = entity.toString().toLocaleLowerCase();
         this.joinParms.push({
             joinSql: null,
-            joinSelectFeild: null,
+            joinSelectFeild: this.GetSelectFieldList(entity).join(","),
             joinTableName: joinTableName
         });
         return this;
     }
-    On(func) {
+    On(func, mEntity) {
+        let joinParmsItem = this.joinParms.find(x => x.joinSql == null);
+        let joinTableName = joinParmsItem.joinTableName;
+        let mainTableName = this.toString();
+        if (mEntity)
+            mainTableName = mEntity.toString().toLocaleLowerCase();
         let funcStr = func.toString();
-        let funcCharList = funcStr.split("");
-        let fe = funcCharList[0];
+        let fe = funcStr.substr(0, funcStr.indexOf("=>")).trim();
+        funcStr = funcStr.replace(new RegExp(fe, "gm"), "");
         fe = fe.replace(/\(/g, "");
         fe = fe.replace(/\)/g, "");
         let felist = fe.split(",");
-        let m = felist[0];
-        let f = felist[1];
+        let m = felist[0].trim();
+        let f = felist[1].trim();
+        let funcCharList = funcStr.split(" ");
+        funcCharList[0] = "";
         funcCharList[1] = "";
-        let joinParmsItem = this.joinParms.find(x => x.joinSql == null && x.joinSelectFeild == null);
-        let joinTableName = joinParmsItem.joinTableName;
-        let mainTableName = this.toString();
+        for (let i = 2; i < funcCharList.length; i++) {
+            if (funcCharList[i].indexOf(m + ".") > -1) {
+                funcCharList[i] = funcCharList[i].replace(new RegExp(m + "\\.", "gm"), "`" + mainTableName.toLocaleLowerCase() + "`.");
+            }
+            if (funcCharList[i].indexOf(f + ".") > -1) {
+                funcCharList[i] = funcCharList[i].replace(new RegExp(f + "\\.", "gm"), "`" + joinTableName.toLocaleLowerCase() + "`.");
+            }
+            if (funcCharList[i] === "==")
+                funcCharList[i] = " = ";
+        }
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + funcCharList.join("");
+        joinParmsItem.joinSql = sql;
         return this;
     }
     GetSelectFieldList(entity) {

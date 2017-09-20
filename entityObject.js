@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class EntityObject {
     constructor(ctx) { }
-    On(func) {
+    On(func, mEntity) {
         return this;
     }
     LeftJoin(fEntity) {
