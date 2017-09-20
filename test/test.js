@@ -119,10 +119,11 @@ describe("ToList", () => {
     it("左外连接查询,主表单个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
         let jr = yield ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
-            .Join(x => x.id, ctx.Order, "orderId")
+            .LeftJoin(ctx.TableParty)
+            .On((m, f) => m.id == f.tableId)
+            .LeftJoin(ctx.Order)
+            .On((m, f) => m.orderId == f.id, ctx.TableParty)
             .Where(x => x.id == tableId, ["tableId"], [tableId])
-            .OrderByDesc(x => x.openedTime, ctx.TableParty)
             .Take(1)
             .ToList();
         assert.notEqual(jr, null, "查询结果为空");
@@ -140,7 +141,8 @@ describe("ToList", () => {
             yield ctx.Delete(item);
         }
         let r = yield ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
+            .LeftJoin(ctx.TableParty)
+            .On((m, f) => m.id == f.tableId)
             .Where(x => x.id == tableId, ["tableId"], [tableId])
             .ToList();
         assert.equal(r.length >= 1, true);
@@ -149,9 +151,7 @@ describe("ToList", () => {
     }));
     it("左外连接查询,主表多个数据", () => __awaiter(this, void 0, void 0, function* () {
         let ctx = DataContextFactory.GetDataContext();
-        let r = yield ctx.Table
-            .Join(x => x.tableId, ctx.TableParty)
-            .OrderByDesc(x => x.openedTime, ctx.TableParty)
+        let r = yield ctx.Table.LeftJoin(ctx.TableParty).On((m, f) => m.id == f.tableId).OrderByDesc(x => x.openedTime, ctx.TableParty)
             .GroupBy(x => x.name)
             .ToList();
         assert.notEqual(r, null);
@@ -208,8 +208,10 @@ describe("Join", () => {
     }));
     it("左外连接3张表", () => __awaiter(this, void 0, void 0, function* () {
         let r = yield ctx.TableParty
-            .Join(x => x.id, ctx.Table, "tableId", true)
-            .Join(x => x.id, ctx.Order, "orderId", true)
+            .LeftJoin(ctx.Table)
+            .On((m, y) => m.tableId == y.id)
+            .LeftJoin(ctx.Order)
+            .On((x, y) => x.orderId == y.id)
             .ToList();
         assert.equal(r.length, 3, "");
         assert.notEqual(mockDatas.orders.find(x => x.id == r[0].orders.id), null, "");
@@ -217,10 +219,7 @@ describe("Join", () => {
         assert.notEqual(mockDatas.tableList.find(x => x.name == r[2].desktable.name), null, "");
     }));
     it("左外连接获取第一条数据", () => __awaiter(this, void 0, void 0, function* () {
-        let r = yield ctx.TableParty
-            .Join(x => x.id, ctx.Table, "tableId", true)
-            .Join(x => x.id, ctx.Order, "orderId", true)
-            .Take(1)
+        let r = yield ctx.TableParty.LeftJoin(ctx.Table).On((m, f) => m.tableId == f.id).LeftJoin(ctx.Order).On((m, f) => m.orderId == f.id).Take(1)
             .ToList();
         assert.equal(r.length, 1, "");
     }));
@@ -275,7 +274,8 @@ describe("join + contains + where", () => {
         let tbpIds = ["0dec72a0cd11439fb04c4f4385bb1c2a", "0faafe3cd8254c9a91e2f936c9743dda"];
         let r = yield ctx.TableParty
             .Contains(x => x.id, tbpIds)
-            .Join(x => x.id, ctx.Table, "tableId")
+            .LeftJoin(ctx.Table)
+            .On((m, f) => m.tableId == f.id)
             .Where(x => x.status == "closed")
             .ToList();
         assert.equal(r.length, 2, "r.length must be 2");

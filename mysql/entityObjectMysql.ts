@@ -12,7 +12,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     private ctx: IDataContext;
     private sqlTemp = [];
     private joinParms: {
-        joinSql: string; joinSelectFeild: string; joinTableName: string;
+        joinSql?: string; joinSelectFeild?: string; joinTableName: string;
     }[] = [];
     private queryParam: QueryParams = new Object() as QueryParams;
     constructor(ctx?: IDataContext) {
@@ -40,6 +40,49 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             joinTableName: joinTableName
         });
 
+        return this;
+    }
+    LeftJoin(entity: IEntityObject) {
+        let joinTableName = entity.toString().toLocaleLowerCase();
+        this.joinParms.push({
+            joinSql: null,
+            joinSelectFeild: this.GetSelectFieldList(entity).join(","),
+            joinTableName: joinTableName
+        });
+        return this;
+    }
+    On(func: Function, mEntity?: IEntityObject) {
+        let joinParmsItem = this.joinParms.find(x => x.joinSql == null);
+        let joinTableName = joinParmsItem.joinTableName;
+        let mainTableName = this.toString();
+        if(mEntity) mainTableName = mEntity.toString().toLocaleLowerCase();
+
+        let funcStr = func.toString();
+
+        let fe = funcStr.substr(0, funcStr.indexOf("=>")).trim();
+        funcStr = funcStr.replace(new RegExp(fe, "gm"), "");
+        fe = fe.replace(/\(/g, "");
+        fe = fe.replace(/\)/g, "");
+        let felist = fe.split(",");
+        let m = felist[0].trim();
+        let f = felist[1].trim();
+
+        let funcCharList = funcStr.split(" ");
+        funcCharList[0] = "";
+        funcCharList[1] = "";
+        for (let i = 2; i < funcCharList.length; i++) {
+            if (funcCharList[i].indexOf(m + ".") > -1) {
+                funcCharList[i] = funcCharList[i].replace(new RegExp(m + "\\.", "gm"), "`" + mainTableName.toLocaleLowerCase() + "`.");
+            }
+            if (funcCharList[i].indexOf(f + ".") > -1) {
+                funcCharList[i] = funcCharList[i].replace(new RegExp(f + "\\.", "gm"), "`" + joinTableName.toLocaleLowerCase() + "`.");
+            }
+
+            if (funcCharList[i] === "==") funcCharList[i] = " = ";
+        }
+
+        let sql = "LEFT JOIN `" + joinTableName + "` ON " + funcCharList.join("");
+        joinParmsItem.joinSql = sql;
 
         return this;
     }
