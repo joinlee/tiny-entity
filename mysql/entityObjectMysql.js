@@ -20,8 +20,13 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         this.ctx = ctx;
     }
     toString() { return ""; }
-    Where(qFn, paramsKey, paramsValue) {
-        this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+    Where(qFn, paramsKey, paramsValue, entity) {
+        let tableName = "";
+        if (entity)
+            tableName = entity.toString();
+        else
+            tableName = this.toString();
+        this.sqlTemp.push("(" + this.formateCode(qFn, tableName, paramsKey, paramsValue) + ")");
         return this;
     }
     Join(qFn, entity, mainFeild, isMainTable) {
@@ -124,6 +129,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                 resolve(result);
             });
         });
+    }
+    Sum(qFn) {
     }
     Contains(feild, values) {
         let filed = this.formateCode(feild);

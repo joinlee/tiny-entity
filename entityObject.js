@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class EntityObject {
     constructor(ctx) { }
+    Where(qFn, paramsKey, paramsValue, entity) {
+        return this;
+    }
     On(func, mEntity) {
         return this;
     }
@@ -10,7 +13,6 @@ class EntityObject {
     }
     toString() { return ""; }
     clone(source, destination, isDeep) { return null; }
-    Where(qFn, paramsKey, paramsValue) { return this; }
     Join(qFn, entity, mainFeild, isMainTable) { return this; }
     Any(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) { return null; }

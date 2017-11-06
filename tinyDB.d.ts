@@ -139,6 +139,7 @@ export interface IQueryObject<T> {
      * @returns IQueryObject 查询对象
      */
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T>;
+    Where<K extends IEntityObject>(qFn: (x: K) => boolean, paramsKey?: string[], paramsValue?: any[], entity?: K): IQueryObject<T>;
     /**
      * 左外连接查询
      * 

@@ -10,7 +10,7 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
         }
     }
     toString() { return ""; }
-    Where(qFn, paramsKey, paramsValue) {
+    Where(qFn, paramsKey, paramsValue, entity) {
         this.ctx.AddQueryScratchpad(this.toString(), dataContextIndexedDB_1.QueryActionType.Select, qFn);
         return this;
     }

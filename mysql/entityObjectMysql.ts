@@ -19,8 +19,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         super(ctx);
         this.ctx = ctx;
     }
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
-        this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[], entity?) {
+        let tableName = "";
+        if (entity) tableName = entity.toString();
+        else tableName = this.toString();
+        this.sqlTemp.push("(" + this.formateCode(qFn, tableName, paramsKey, paramsValue) + ")");
         return this;
     }
     Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean) {
@@ -55,7 +58,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         let joinParmsItem = this.joinParms.find(x => x.joinSql == null);
         let joinTableName = joinParmsItem.joinTableName;
         let mainTableName = this.toString();
-        if(mEntity) mainTableName = mEntity.toString().toLocaleLowerCase();
+        if (mEntity) mainTableName = mEntity.toString().toLocaleLowerCase();
 
         let funcStr = func.toString();
 
@@ -133,6 +136,9 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         return new Promise<number>((resolve, reject) => {
             resolve(result);
         });
+    }
+    Sum(qFn: (x: T) => void) {
+
     }
     Contains(feild: (x: T) => void, values: any[]) {
         let filed = this.formateCode(feild);
