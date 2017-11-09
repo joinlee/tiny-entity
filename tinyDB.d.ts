@@ -242,8 +242,8 @@ export interface IJoinQueryObject<T> {
 interface DBTranscationModel { }
 
 export interface IDataContext {
-    Create(obj: IEntityObject);
-    Update(obj: IEntityObject);
+    Create(obj: IEntityObject, exclude?: string[]);
+    Update(obj: IEntityObject, exclude?: string[]);
     Delete(obj: IEntityObject);
     Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean);
     Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean, paramsKey: string[], paramsValue: any[]);

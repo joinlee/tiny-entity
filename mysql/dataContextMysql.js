@@ -42,10 +42,10 @@ class MysqlDataContext {
             return this.onSubmit(sqlStr);
         }
     }
-    Create(obj) {
+    Create(obj, exclude) {
         return __awaiter(this, void 0, void 0, function* () {
             let sqlStr = "INSERT INTO " + obj.toString();
-            let pt = this.propertyFormat(obj);
+            let pt = this.propertyFormat(obj, exclude);
             sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
             if (this.transactionOn) {
                 this.querySentence.push(sqlStr);
@@ -56,13 +56,18 @@ class MysqlDataContext {
             return entityCopier_1.EntityCopier.Decode(obj);
         });
     }
-    Update(obj) {
+    Update(obj, exclude) {
         return __awaiter(this, void 0, void 0, function* () {
             let sqlStr = "UPDATE " + obj.toString() + " SET ";
             let qList = [];
             for (var key in obj) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms")
                     continue;
+                if (exclude && exclude.length > 0) {
+                    let has = exclude.find(x => x == key);
+                    if (has)
+                        continue;
+                }
                 if (this.isAvailableValue(obj[key]) && key != "id") {
                     if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                         qList.push("`" + key + "`=NULL");
@@ -183,7 +188,7 @@ class MysqlDataContext {
             });
         });
     }
-    propertyFormat(obj) {
+    propertyFormat(obj, exclude) {
         const propertyNameList = [];
         const propertyValueList = [];
         for (var key in obj) {
@@ -192,6 +197,11 @@ class MysqlDataContext {
                     continue;
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "")
                     continue;
+                if (exclude && exclude.length > 0) {
+                    let has = exclude.find(x => x == key);
+                    if (has)
+                        continue;
+                }
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push(mysql.escape(JSON.stringify(obj[key])));

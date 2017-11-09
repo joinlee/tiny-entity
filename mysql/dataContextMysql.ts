@@ -43,9 +43,9 @@ export class MysqlDataContext implements IDataContext {
     /**
      * @param  {IEntityObject} obj
      */
-    async Create(obj: IEntityObject) {
+    async Create(obj: IEntityObject, exclude?: string[]) {
         let sqlStr = "INSERT INTO " + obj.toString();
-        let pt = this.propertyFormat(obj);
+        let pt = this.propertyFormat(obj, exclude);
 
         sqlStr += " (" + pt.PropertyNameList.join(',') + ") VALUES (" + pt.PropertyValueList.join(',') + ");";
 
@@ -60,11 +60,15 @@ export class MysqlDataContext implements IDataContext {
     /**
      * @param  {IEntityObject} obj
      */
-    async Update(obj: IEntityObject) {
+    async Update(obj: IEntityObject, exclude?: string[]) {
         let sqlStr = "UPDATE " + obj.toString() + " SET ";
         let qList = [];
         for (var key in obj) {
             if (key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms") continue;
+            if (exclude && exclude.length > 0) {
+                let has = exclude.find(x => x == key);
+                if(has) continue;
+            }
             if (this.isAvailableValue(obj[key]) && key != "id") {
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "") {
                     qList.push("`" + key + "`=NULL");
@@ -197,7 +201,7 @@ export class MysqlDataContext implements IDataContext {
             });
         });
     }
-    private propertyFormat(obj: IEntityObject): PropertyFormatResult {
+    private propertyFormat(obj: IEntityObject, exclude?: string[]): PropertyFormatResult {
         const propertyNameList: string[] = [];
         const propertyValueList = [];
         for (var key in obj) {
@@ -205,6 +209,10 @@ export class MysqlDataContext implements IDataContext {
             if (this.isAvailableValue(obj[key])) {
                 if (key == "sqlTemp" || key == "queryParam" || key == "ctx" || key == "joinParms") continue;
                 if (obj[key] == undefined || obj[key] == null || obj[key] === "") continue;
+                if (exclude && exclude.length > 0) {
+                    let has = exclude.find(x => x == key);
+                    if(has) continue;
+                }
                 propertyNameList.push("`" + key + "`");
                 if (Array.isArray(obj[key]) || Object.prototype.toString.call(obj[key]) === '[object Object]') {
                     propertyValueList.push(mysql.escape(JSON.stringify(obj[key])));
