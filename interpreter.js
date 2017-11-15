@@ -31,9 +31,17 @@ class Interpreter {
     ReplaceParam(funcCharList, param) {
         if (param) {
             for (let key in param) {
-                let index = funcCharList.findIndex(x => x.indexOf(key) > -1 && x.indexOf("." + key) <= -1);
-                if (index) {
-                    funcCharList[index] = funcCharList[index].replace(new RegExp(key, "gm"), this.escape(param[key]));
+                let indexs = [];
+                for (let i = 0; i < funcCharList.length; i++) {
+                    let x = funcCharList[i];
+                    if (x.indexOf(key) > -1 && x.indexOf("." + key) <= -1) {
+                        indexs.push(i);
+                    }
+                }
+                if (indexs && indexs.length) {
+                    for (let index of indexs) {
+                        funcCharList[index] = funcCharList[index].replace(new RegExp(key, "gm"), this.escape(param[key]));
+                    }
                 }
             }
         }

@@ -41,9 +41,17 @@ export class Interpreter {
     private ReplaceParam(funcCharList: string[], param): string[] {
         if (param) {
             for (let key in param) {
-                let index = funcCharList.findIndex(x => x.indexOf(key) > -1 && x.indexOf("." + key) <= -1);
-                if (index) {
-                    funcCharList[index] = funcCharList[index].replace(new RegExp(key, "gm"), this.escape(param[key]));
+                let indexs = [];
+                for (let i = 0; i < funcCharList.length; i++) {
+                    let x = funcCharList[i];
+                    if (x.indexOf(key) > -1 && x.indexOf("." + key) <= -1) {
+                        indexs.push(i);
+                    }
+                }
+                if (indexs && indexs.length) {
+                    for(let index of indexs){
+                        funcCharList[index] = funcCharList[index].replace(new RegExp(key, "gm"), this.escape(param[key]));
+                    }
                 }
             }
         }
@@ -69,8 +77,8 @@ export class Interpreter {
             if (item === "&&") funcCharList[index] = "AND";
             if (item === "||") funcCharList[index] = "OR";
             if (item.toLocaleLowerCase() == "null") {
-                if(funcCharList[index - 1] === "==") funcCharList[index - 1] = "IS";
-                else if(funcCharList[index - 1] === "!=") funcCharList[index - 1] = "IS NOT";
+                if (funcCharList[index - 1] === "==") funcCharList[index - 1] = "IS";
+                else if (funcCharList[index - 1] === "!=") funcCharList[index - 1] = "IS NOT";
                 funcCharList[index] = "NULL";
             }
             if (item.indexOf(".IndexOf") > -1) {
