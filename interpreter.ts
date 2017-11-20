@@ -19,7 +19,6 @@ export class Interpreter {
         let r = this.TransToSQL(func, this.tableName);
         // add to sql part of select
         this.partOfSelect = r.split('AND').join(',');
-        console.log("rrrrrrrrrrrrrrrr", this.partOfSelect, this.partOfWhere);
 
         return this.partOfSelect;
     }
@@ -77,7 +76,7 @@ export class Interpreter {
             if (item === "&&") funcCharList[index] = "AND";
             if (item === "||") funcCharList[index] = "OR";
             if (item.toLocaleLowerCase() == "null") {
-                if (funcCharList[index - 1] === "==") funcCharList[index - 1] = "IS";
+                if (funcCharList[index - 1] === "=") funcCharList[index - 1] = "IS";
                 else if (funcCharList[index - 1] === "!=") funcCharList[index - 1] = "IS NOT";
                 funcCharList[index] = "NULL";
             }

@@ -15,7 +15,6 @@ class Interpreter {
     TransToSQLOfSelect(func) {
         let r = this.TransToSQL(func, this.tableName);
         this.partOfSelect = r.split('AND').join(',');
-        console.log("rrrrrrrrrrrrrrrr", this.partOfSelect, this.partOfWhere);
         return this.partOfSelect;
     }
     TransToSQLOfJoin(func, foreignTable) {
@@ -66,7 +65,7 @@ class Interpreter {
             if (item === "||")
                 funcCharList[index] = "OR";
             if (item.toLocaleLowerCase() == "null") {
-                if (funcCharList[index - 1] === "==")
+                if (funcCharList[index - 1] === "=")
                     funcCharList[index - 1] = "IS";
                 else if (funcCharList[index - 1] === "!=")
                     funcCharList[index - 1] = "IS NOT";
