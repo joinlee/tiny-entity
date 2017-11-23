@@ -271,4 +271,8 @@ declare global {
     interface String {
         IndexOf(str: string): boolean;
     }
+
+    interface Array<T> {
+        IndexOf(str: string): boolean;
+    }
 }
