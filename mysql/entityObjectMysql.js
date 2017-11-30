@@ -132,9 +132,13 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
     }
     Sum(qFn) {
     }
-    Contains(feild, values) {
+    Contains(feild, values, entity) {
+        let tableName = this.toString().toLocaleLowerCase();
+        if (entity) {
+            tableName = entity.toString().toLocaleLowerCase();
+        }
         let filed = this.formateCode(feild);
-        filed = this.toString() + "." + filed;
+        filed = tableName + "." + filed;
         let arr = values.slice();
         if (arr && arr.length > 0) {
             let sql = "";
@@ -145,8 +149,8 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             }
             sql = filed + " IN (" + arr.join(",") + ")";
             this.sqlTemp.push("(" + sql + ")");
-            return this;
         }
+        return this;
     }
     First(qFn, paramsKey, paramsValue, queryCallback) {
         return __awaiter(this, void 0, void 0, function* () {

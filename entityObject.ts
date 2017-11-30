@@ -1,6 +1,12 @@
 import { IJoinQueryObject } from './tinyDB.d';
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>, IJoinQueryObject<T>{
+    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
+    Contains<K extends IEntityObject>(feild: (x: K) => void, values: any[], entity: K): IQueryObject<T>;
+    Contains(feild: any, values: any, entity?: any) {
+        return this;
+    }
+
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T>;
     Where<K extends IEntityObject>(qFn: (x: K) => boolean, paramsKey?: string[], paramsValue?: any[], entity?: K): IQueryObject<T>;
     Where(qFn: any, paramsKey?: any, paramsValue?: any, entity?: any) {
@@ -29,7 +35,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @memberOf EntityObject
      */
     clone(source: any, destination, isDeep?: boolean): T { return null; }
-    
+
     /**
      * 左外连接查询
      * 
@@ -109,5 +115,4 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
     Skip(count: number): IQueryObject<T> { return this; }
     Max(qFn: (x: T) => void): Promise<number> { return null; }
     Min(qFn: (x: T) => void): Promise<number> { return null; }
-    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T> { return this; }
 }

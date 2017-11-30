@@ -232,6 +232,7 @@ export interface IQueryObject<T> {
     Max(qFn: (x: T) => void): Promise<number>;
     Min(qFn: (x: T) => void): Promise<number>;
     Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
+    Contains<K extends IEntityObject>(feild: (x: K) => void, values: any[], entity: K): IQueryObject<T>;
 }
 
 export interface IJoinQueryObject<T> {

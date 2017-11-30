@@ -140,9 +140,13 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     Sum(qFn: (x: T) => void) {
 
     }
-    Contains(feild: (x: T) => void, values: any[]) {
+    Contains(feild: (x: T) => void, values: any[], entity?: IEntityObject) {
+        let tableName = this.toString().toLocaleLowerCase();
+        if (entity) {
+            tableName = entity.toString().toLocaleLowerCase();
+        }
         let filed = this.formateCode(feild);
-        filed = this.toString() + "." + filed;
+        filed = tableName + "." + filed;
         let arr = values.slice();
         if (arr && arr.length > 0) {
             let sql = "";
@@ -153,8 +157,8 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             }
             sql = filed + " IN (" + arr.join(",") + ")";
             this.sqlTemp.push("(" + sql + ")");
-            return this;
         }
+        return this;
     }
     async First(qFn?: (entityObject: T) => boolean,
         paramsKey?: string[],

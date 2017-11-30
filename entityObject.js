@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class EntityObject {
     constructor(ctx) { }
+    Contains(feild, values, entity) {
+        return this;
+    }
     Where(qFn, paramsKey, paramsValue, entity) {
         return this;
     }
@@ -26,7 +29,6 @@ class EntityObject {
     Skip(count) { return this; }
     Max(qFn) { return null; }
     Min(qFn) { return null; }
-    Contains(feild, values) { return this; }
 }
 exports.EntityObject = EntityObject;
 //# sourceMappingURL=entityObject.js.map
