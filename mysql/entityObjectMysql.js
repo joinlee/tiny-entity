@@ -131,6 +131,15 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         });
     }
     Sum(qFn) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let queryFields = this.formateCode(qFn);
+            let f = "SUM(" + queryFields + ")";
+            let r = yield this.GetQueryResult(f);
+            this.joinParms = [];
+            this.sqlTemp = [];
+            let result = r ? r[0][f] : 0;
+            return result;
+        });
     }
     Contains(feild, values, entity) {
         let tableName = this.toString().toLocaleLowerCase();
@@ -216,29 +225,16 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         return __awaiter(this, void 0, void 0, function* () {
             let row;
             let queryFields = this.GetFinalQueryFields();
+            return this.QueryList(queryFields);
+        });
+    }
+    QueryList(queryFields) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let row;
+            if (!queryFields)
+                queryFields = this.GetFinalQueryFields();
             try {
-                if (this.sqlTemp.length > 0) {
-                    let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                    if (this.joinParms && this.joinParms.length > 0) {
-                        for (let joinItem of this.joinParms) {
-                            sql += joinItem.joinSql + " ";
-                        }
-                    }
-                    sql += "WHERE " + this.sqlTemp.join(' AND ');
-                    0;
-                    sql = this.addQueryStence(sql) + ";";
-                    row = yield this.ctx.Query(sql);
-                }
-                else {
-                    let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                    if (this.joinParms && this.joinParms.length > 0) {
-                        for (let joinItem of this.joinParms) {
-                            sql += joinItem.joinSql + " ";
-                        }
-                    }
-                    sql = this.addQueryStence(sql) + ";";
-                    row = yield this.ctx.Query(sql);
-                }
+                row = yield this.GetQueryResult(queryFields);
                 this.sqlTemp = [];
                 if (row[0]) {
                     if (this.joinParms && this.joinParms.length > 0) {
@@ -283,6 +279,34 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
                 this.joinParms = [];
                 this.sqlTemp = [];
             }
+        });
+    }
+    GetQueryResult(queryFields) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let row;
+            if (this.sqlTemp.length > 0) {
+                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+                if (this.joinParms && this.joinParms.length > 0) {
+                    for (let joinItem of this.joinParms) {
+                        sql += joinItem.joinSql + " ";
+                    }
+                }
+                sql += "WHERE " + this.sqlTemp.join(' AND ');
+                0;
+                sql = this.addQueryStence(sql) + ";";
+                row = yield this.ctx.Query(sql);
+            }
+            else {
+                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+                if (this.joinParms && this.joinParms.length > 0) {
+                    for (let joinItem of this.joinParms) {
+                        sql += joinItem.joinSql + " ";
+                    }
+                }
+                sql = this.addQueryStence(sql) + ";";
+                row = yield this.ctx.Query(sql);
+            }
+            return row;
         });
     }
     Max(qFn) {

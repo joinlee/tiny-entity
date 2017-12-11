@@ -1,6 +1,9 @@
 import { IJoinQueryObject } from './tinyDB.d';
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>, IJoinQueryObject<T>{
+    Sum(qFn?: (entityObject: T) => void): Promise<number> {
+        return null;
+    }
     Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
     Contains<K extends IEntityObject>(feild: (x: K) => void, values: any[], entity: K): IQueryObject<T>;
     Contains(feild: any, values: any, entity?: any) {

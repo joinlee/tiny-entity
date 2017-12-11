@@ -2,6 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class EntityObject {
     constructor(ctx) { }
+    Sum(qFn) {
+        return null;
+    }
     Contains(feild, values, entity) {
         return this;
     }

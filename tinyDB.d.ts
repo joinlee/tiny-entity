@@ -197,6 +197,14 @@ export interface IQueryObject<T> {
      */
     Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number>;
     /**
+     * 
+     * 
+     * @param {(entityObject: T) => void} [qFn] 
+     * @returns {Promise<number>} 
+     * @memberof IQueryObject
+     */
+    Sum(qFn?: (entityObject: T) => void): Promise<number>;
+    /**
      * 查询排序
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象

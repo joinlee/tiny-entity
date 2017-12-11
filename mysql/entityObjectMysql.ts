@@ -137,8 +137,17 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             resolve(result);
         });
     }
-    Sum(qFn: (x: T) => void) {
+    async Sum(qFn?: (entityObject: T) => void) {
+        let queryFields = this.formateCode(qFn);
+        let f = "SUM(" + queryFields + ")";
+        let r = await this.GetQueryResult(f);
 
+        this.joinParms = [];
+        this.sqlTemp = [];
+        
+        let result = r ? r[0][f] : 0;
+
+        return result;
     }
     Contains(feild: (x: T) => void, values: any[], entity?: IEntityObject) {
         let tableName = this.toString().toLocaleLowerCase();
@@ -224,28 +233,15 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async ToList<T>(queryCallback?: (result: T[]) => void) {
         let row;
         let queryFields = this.GetFinalQueryFields();
+        return this.QueryList(queryFields);
+
+    }
+    private async QueryList(queryFields?) {
+        let row;
+        if (!queryFields)
+            queryFields = this.GetFinalQueryFields();
         try {
-            if (this.sqlTemp.length > 0) {
-                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                if (this.joinParms && this.joinParms.length > 0) {
-                    for (let joinItem of this.joinParms) {
-                        sql += joinItem.joinSql + " ";
-                    }
-                }
-                sql += "WHERE " + this.sqlTemp.join(' AND '); 0
-                sql = this.addQueryStence(sql) + ";";
-                row = await this.ctx.Query(sql);
-            }
-            else {
-                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                if (this.joinParms && this.joinParms.length > 0) {
-                    for (let joinItem of this.joinParms) {
-                        sql += joinItem.joinSql + " ";
-                    }
-                }
-                sql = this.addQueryStence(sql) + ";";
-                row = await this.ctx.Query(sql);
-            }
+            row = await this.GetQueryResult(queryFields);
             this.sqlTemp = [];
             if (row[0]) {
                 if (this.joinParms && this.joinParms.length > 0) {
@@ -291,7 +287,32 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             this.joinParms = [];
             this.sqlTemp = [];
         }
+    }
+    private async GetQueryResult(queryFields) {
+        let row;
+        if (this.sqlTemp.length > 0) {
+            let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+            if (this.joinParms && this.joinParms.length > 0) {
+                for (let joinItem of this.joinParms) {
+                    sql += joinItem.joinSql + " ";
+                }
+            }
+            sql += "WHERE " + this.sqlTemp.join(' AND '); 0
+            sql = this.addQueryStence(sql) + ";";
+            row = await this.ctx.Query(sql);
+        }
+        else {
+            let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+            if (this.joinParms && this.joinParms.length > 0) {
+                for (let joinItem of this.joinParms) {
+                    sql += joinItem.joinSql + " ";
+                }
+            }
+            sql = this.addQueryStence(sql) + ";";
+            row = await this.ctx.Query(sql);
+        }
 
+        return row;
     }
     Max(qFn: (x: T) => void): Promise<number> {
         return null;
