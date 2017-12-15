@@ -193,17 +193,28 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn, entity) {
+    OrderBy(qFn, entity, isDesc) {
         let tableName = this.toString();
         if (entity)
             tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
-        this.queryParam.OrderByFeildName = sql;
+        if (this.queryParam.OrderByFeildName) {
+            this.queryParam.OrderByFeildName.push({
+                feild: sql,
+                isDesc: isDesc
+            });
+        }
+        else {
+            this.queryParam.OrderByFeildName = [{
+                    feild: sql,
+                    isDesc: isDesc
+                }];
+        }
+        ;
         return this;
     }
     OrderByDesc(qFn, entity) {
-        this.queryParam.IsDesc = true;
-        return this.OrderBy(qFn, entity);
+        return this.OrderBy(qFn, entity, true);
     }
     GroupBy(qFn) {
         let fileds = this.formateCode(qFn, this.toString());
@@ -423,9 +434,11 @@ class EntityObjectMysql extends entityObject_1.EntityObject {
             sql += " GROUP BY " + this.queryParam.GroupByFeildName;
         }
         if (this.queryParam.OrderByFeildName) {
-            sql += " ORDER BY " + this.queryParam.OrderByFeildName;
-            if (this.queryParam.IsDesc)
-                sql += " DESC";
+            let orderByList = this.queryParam.OrderByFeildName.map(x => {
+                let desc = x.isDesc ? "DESC" : "";
+                return x.feild + " " + desc;
+            });
+            sql += " ORDER BY " + orderByList.join(",");
         }
         if (this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) {
             if (this.queryParam.SkipCount == null && this.queryParam.SkipCount == undefined)

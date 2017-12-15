@@ -144,7 +144,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 
         this.joinParms = [];
         this.sqlTemp = [];
-        
+
         let result = r ? r[0][f] : 0;
 
         return result;
@@ -203,16 +203,26 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn: (x) => void, entity?) {
+    OrderBy(qFn: (x) => void, entity?, isDesc?: boolean) {
         let tableName = this.toString();
         if (entity) tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
-        this.queryParam.OrderByFeildName = sql;
+        if (this.queryParam.OrderByFeildName) {
+            this.queryParam.OrderByFeildName.push({
+                feild: sql,
+                isDesc: isDesc
+            });
+        }
+        else {
+            this.queryParam.OrderByFeildName = [{
+                feild: sql,
+                isDesc: isDesc
+            }];
+        };
         return this;
     }
     OrderByDesc(qFn: (x) => void, entity?) {
-        this.queryParam.IsDesc = true;
-        return this.OrderBy(qFn, entity);
+        return this.OrderBy(qFn, entity, true);
     }
     GroupBy(qFn: (x: T) => void) {
         let fileds = this.formateCode(qFn, this.toString());
@@ -432,8 +442,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             sql += " GROUP BY " + this.queryParam.GroupByFeildName;
         }
         if (this.queryParam.OrderByFeildName) {
-            sql += " ORDER BY " + this.queryParam.OrderByFeildName;
-            if (this.queryParam.IsDesc) sql += " DESC";
+            let orderByList = this.queryParam.OrderByFeildName.map(x => {
+                let desc = x.isDesc ? "DESC" : "";
+                return x.feild + " " + desc;
+            });
+            sql += " ORDER BY " + orderByList.join(",");
         }
         if (this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) {
             if (this.queryParam.SkipCount == null && this.queryParam.SkipCount == undefined) this.queryParam.SkipCount = 0;
@@ -450,7 +463,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 interface QueryParams {
     TakeCount: number;
     SkipCount: number;
-    OrderByFeildName: string;
+    OrderByFeildName: {
+        feild: string;
+        isDesc: boolean;
+    }[];
     IsDesc: boolean;
     SelectFileds: string[];
     GroupByFeildName: string;
