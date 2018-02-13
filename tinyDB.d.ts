@@ -139,6 +139,7 @@ export interface IQueryObject<T> {
      * @returns IQueryObject 查询对象
      */
     Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T>;
+    Where<K extends IEntityObject>(qFn: (x: K) => boolean, paramsKey?: string[], paramsValue?: any[], entity?: K): IQueryObject<T>;
     /**
      * 左外连接查询
      * 
@@ -196,6 +197,14 @@ export interface IQueryObject<T> {
      */
     Count(qFn?: (entityObject: T) => boolean, paramsKey?: string[], paramsValue?: any[], queryCallback?: (result: number) => void): Promise<number>;
     /**
+     * 
+     * 
+     * @param {(entityObject: T) => void} [qFn] 
+     * @returns {Promise<number>} 
+     * @memberof IQueryObject
+     */
+    Sum(qFn?: (entityObject: T) => void): Promise<number>;
+    /**
      * 查询排序
      * @param  {(x:T)=>void} qFn 查询条件函数
      * @returns IQueryObject 查询对象
@@ -231,6 +240,7 @@ export interface IQueryObject<T> {
     Max(qFn: (x: T) => void): Promise<number>;
     Min(qFn: (x: T) => void): Promise<number>;
     Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
+    Contains<K extends IEntityObject>(feild: (x: K) => void, values: any[], entity: K): IQueryObject<T>;
 }
 
 export interface IJoinQueryObject<T> {
@@ -241,8 +251,8 @@ export interface IJoinQueryObject<T> {
 interface DBTranscationModel { }
 
 export interface IDataContext {
-    Create(obj: IEntityObject);
-    Update(obj: IEntityObject);
+    Create(obj: IEntityObject, exclude?: string[]);
+    Update(obj: IEntityObject, exclude?: string[]);
     Delete(obj: IEntityObject);
     Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean);
     Delete<T extends IEntityObject>(obj: IEntityObject, func: (x: T) => boolean, paramsKey: string[], paramsValue: any[]);
@@ -268,6 +278,10 @@ declare global {
      *~ existing declarations in the global namespace
      */
     interface String {
+        IndexOf(str: string): boolean;
+    }
+
+    interface Array<T> {
         IndexOf(str: string): boolean;
     }
 }

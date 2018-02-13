@@ -14,7 +14,7 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
     }
     toString(): string { return ""; }
 
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[], entity?) {
         this.ctx.AddQueryScratchpad(this.toString(), QueryActionType.Select, qFn);
         return this;
     }

@@ -1,10 +1,24 @@
 import { IJoinQueryObject } from './tinyDB.d';
 import { IEntityObject, IDataContext, IQueryObject } from './tinyDB';
 export class EntityObject<T extends IEntityObject> implements IEntityObject, IQueryObject<T>, IJoinQueryObject<T>{
+    Sum(qFn?: (entityObject: T) => void): Promise<number> {
+        return null;
+    }
+    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T>;
+    Contains<K extends IEntityObject>(feild: (x: K) => void, values: any[], entity: K): IQueryObject<T>;
+    Contains(feild: any, values: any, entity?: any) {
+        return this;
+    }
+
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T>;
+    Where<K extends IEntityObject>(qFn: (x: K) => boolean, paramsKey?: string[], paramsValue?: any[], entity?: K): IQueryObject<T>;
+    Where(qFn: any, paramsKey?: any, paramsValue?: any, entity?: any) {
+        return this;
+    }
     On<F extends IEntityObject>(func: (m: T, f: F) => void): IQueryObject<T>;
     On<M extends IEntityObject, F extends IEntityObject>(func: (m: M, f: F) => void, mEntity: M): IQueryObject<T>;
     On(func: any, mEntity?: any) {
-       return this;
+        return this;
     }
     LeftJoin<F extends IEntityObject>(fEntity: F): IJoinQueryObject<T> {
         return this;
@@ -24,14 +38,7 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
      * @memberOf EntityObject
      */
     clone(source: any, destination, isDeep?: boolean): T { return null; }
-    /**
-     * 查询，最后通过toList方法提交查询。
-     * @param  {(x:T)=>boolean} qFn 查询条件函数
-     * @param  {string[]} paramsKey? 参数名称列表
-     * @param  {any[]} paramsValue? 参数值列表
-     * @returns IQueryObject 查询对象
-     */
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]): IQueryObject<T> { return this; }
+
     /**
      * 左外连接查询
      * 
@@ -111,5 +118,4 @@ export class EntityObject<T extends IEntityObject> implements IEntityObject, IQu
     Skip(count: number): IQueryObject<T> { return this; }
     Max(qFn: (x: T) => void): Promise<number> { return null; }
     Min(qFn: (x: T) => void): Promise<number> { return null; }
-    Contains(feild: (x: T) => void, values: any[]): IQueryObject<T> { return this; }
 }

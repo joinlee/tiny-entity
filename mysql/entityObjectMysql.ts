@@ -19,8 +19,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         super(ctx);
         this.ctx = ctx;
     }
-    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[]) {
-        this.sqlTemp.push("(" + this.formateCode(qFn, this.toString(), paramsKey, paramsValue) + ")");
+    Where(qFn: (x: T) => boolean, paramsKey?: string[], paramsValue?: any[], entity?) {
+        let tableName = "";
+        if (entity) tableName = entity.toString();
+        else tableName = this.toString();
+        this.sqlTemp.push("(" + this.formateCode(qFn, tableName, paramsKey, paramsValue) + ")");
         return this;
     }
     Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean) {
@@ -55,7 +58,7 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         let joinParmsItem = this.joinParms.find(x => x.joinSql == null);
         let joinTableName = joinParmsItem.joinTableName;
         let mainTableName = this.toString();
-        if(mEntity) mainTableName = mEntity.toString().toLocaleLowerCase();
+        if (mEntity) mainTableName = mEntity.toString().toLocaleLowerCase();
 
         let funcStr = func.toString();
 
@@ -134,9 +137,25 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             resolve(result);
         });
     }
-    Contains(feild: (x: T) => void, values: any[]) {
+    async Sum(qFn?: (entityObject: T) => void) {
+        let queryFields = this.formateCode(qFn);
+        let f = "SUM(" + queryFields + ")";
+        let r = await this.GetQueryResult(f);
+
+        this.joinParms = [];
+        this.sqlTemp = [];
+
+        let result = r ? r[0][f] : 0;
+
+        return result;
+    }
+    Contains(feild: (x: T) => void, values: any[], entity?: IEntityObject) {
+        let tableName = this.toString().toLocaleLowerCase();
+        if (entity) {
+            tableName = entity.toString().toLocaleLowerCase();
+        }
         let filed = this.formateCode(feild);
-        filed = this.toString() + "." + filed;
+        filed = tableName + "." + filed;
         let arr = values.slice();
         if (arr && arr.length > 0) {
             let sql = "";
@@ -147,8 +166,8 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             }
             sql = filed + " IN (" + arr.join(",") + ")";
             this.sqlTemp.push("(" + sql + ")");
-            return this;
         }
+        return this;
     }
     async First(qFn?: (entityObject: T) => boolean,
         paramsKey?: string[],
@@ -184,16 +203,26 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
         this.queryParam.SkipCount = count;
         return this;
     }
-    OrderBy(qFn: (x) => void, entity?) {
+    OrderBy(qFn: (x) => void, entity?, isDesc?: boolean) {
         let tableName = this.toString();
         if (entity) tableName = entity.toString();
         var sql = this.formateCode(qFn, tableName);
-        this.queryParam.OrderByFeildName = sql;
+        if (this.queryParam.OrderByFeildName) {
+            this.queryParam.OrderByFeildName.push({
+                feild: sql,
+                isDesc: isDesc
+            });
+        }
+        else {
+            this.queryParam.OrderByFeildName = [{
+                feild: sql,
+                isDesc: isDesc
+            }];
+        };
         return this;
     }
     OrderByDesc(qFn: (x) => void, entity?) {
-        this.queryParam.IsDesc = true;
-        return this.OrderBy(qFn, entity);
+        return this.OrderBy(qFn, entity, true);
     }
     GroupBy(qFn: (x: T) => void) {
         let fileds = this.formateCode(qFn, this.toString());
@@ -214,28 +243,15 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
     async ToList<T>(queryCallback?: (result: T[]) => void) {
         let row;
         let queryFields = this.GetFinalQueryFields();
+        return this.QueryList(queryFields);
+
+    }
+    private async QueryList(queryFields?) {
+        let row;
+        if (!queryFields)
+            queryFields = this.GetFinalQueryFields();
         try {
-            if (this.sqlTemp.length > 0) {
-                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                if (this.joinParms && this.joinParms.length > 0) {
-                    for (let joinItem of this.joinParms) {
-                        sql += joinItem.joinSql + " ";
-                    }
-                }
-                sql += "WHERE " + this.sqlTemp.join(' AND '); 0
-                sql = this.addQueryStence(sql) + ";";
-                row = await this.ctx.Query(sql);
-            }
-            else {
-                let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
-                if (this.joinParms && this.joinParms.length > 0) {
-                    for (let joinItem of this.joinParms) {
-                        sql += joinItem.joinSql + " ";
-                    }
-                }
-                sql = this.addQueryStence(sql) + ";";
-                row = await this.ctx.Query(sql);
-            }
+            row = await this.GetQueryResult(queryFields);
             this.sqlTemp = [];
             if (row[0]) {
                 if (this.joinParms && this.joinParms.length > 0) {
@@ -281,7 +297,32 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             this.joinParms = [];
             this.sqlTemp = [];
         }
+    }
+    private async GetQueryResult(queryFields) {
+        let row;
+        if (this.sqlTemp.length > 0) {
+            let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+            if (this.joinParms && this.joinParms.length > 0) {
+                for (let joinItem of this.joinParms) {
+                    sql += joinItem.joinSql + " ";
+                }
+            }
+            sql += "WHERE " + this.sqlTemp.join(' AND '); 0
+            sql = this.addQueryStence(sql) + ";";
+            row = await this.ctx.Query(sql);
+        }
+        else {
+            let sql = "SELECT " + queryFields + " FROM `" + this.toString() + "` ";
+            if (this.joinParms && this.joinParms.length > 0) {
+                for (let joinItem of this.joinParms) {
+                    sql += joinItem.joinSql + " ";
+                }
+            }
+            sql = this.addQueryStence(sql) + ";";
+            row = await this.ctx.Query(sql);
+        }
 
+        return row;
     }
     Max(qFn: (x: T) => void): Promise<number> {
         return null;
@@ -401,8 +442,11 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
             sql += " GROUP BY " + this.queryParam.GroupByFeildName;
         }
         if (this.queryParam.OrderByFeildName) {
-            sql += " ORDER BY " + this.queryParam.OrderByFeildName;
-            if (this.queryParam.IsDesc) sql += " DESC";
+            let orderByList = this.queryParam.OrderByFeildName.map(x => {
+                let desc = x.isDesc ? "DESC" : "";
+                return x.feild + " " + desc;
+            });
+            sql += " ORDER BY " + orderByList.join(",");
         }
         if (this.queryParam.TakeCount != null && this.queryParam.TakeCount != undefined) {
             if (this.queryParam.SkipCount == null && this.queryParam.SkipCount == undefined) this.queryParam.SkipCount = 0;
@@ -419,7 +463,10 @@ export class EntityObjectMysql<T extends IEntityObject> extends EntityObject<T> 
 interface QueryParams {
     TakeCount: number;
     SkipCount: number;
-    OrderByFeildName: string;
+    OrderByFeildName: {
+        feild: string;
+        isDesc: boolean;
+    }[];
     IsDesc: boolean;
     SelectFileds: string[];
     GroupByFeildName: string;

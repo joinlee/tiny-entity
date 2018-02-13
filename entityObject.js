@@ -2,6 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class EntityObject {
     constructor(ctx) { }
+    Sum(qFn) {
+        return null;
+    }
+    Contains(feild, values, entity) {
+        return this;
+    }
+    Where(qFn, paramsKey, paramsValue, entity) {
+        return this;
+    }
     On(func, mEntity) {
         return this;
     }
@@ -10,7 +19,6 @@ class EntityObject {
     }
     toString() { return ""; }
     clone(source, destination, isDeep) { return null; }
-    Where(qFn, paramsKey, paramsValue) { return this; }
     Join(qFn, entity, mainFeild, isMainTable) { return this; }
     Any(qFn, paramsKey, paramsValue, queryCallback) { return null; }
     First(qFn, paramsKey, paramsValue, queryCallback) { return null; }
@@ -24,7 +32,6 @@ class EntityObject {
     Skip(count) { return this; }
     Max(qFn) { return null; }
     Min(qFn) { return null; }
-    Contains(feild, values) { return this; }
 }
 exports.EntityObject = EntityObject;
 //# sourceMappingURL=entityObject.js.map

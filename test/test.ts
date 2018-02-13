@@ -340,6 +340,7 @@ describe("join + contains + where", () => {
     after(async () => {
         let ctx = DataContextFactory.GetDataContext();
         // clean data;
+
         await ctx.Delete(table);
         await ctx.Delete(tbp_demo1);
         await ctx.Delete(tbp_demo2);
