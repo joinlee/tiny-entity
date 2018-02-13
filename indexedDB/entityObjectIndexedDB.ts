@@ -34,9 +34,9 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
             });
         });
     }
-    OrderBy<T>(qFn: (x: T) => void, entity?: T) { return this; }
-    OrderByDesc<T>(qFn: (x: T) => void, entity?: T) { return this; }
-    Select(qFn: (x: T) => void) { return this; }
+    OrderBy(qFn: (x) => void, entity?) { return null; }
+    OrderByDesc(qFn: (x) => void, entity?) { return null; }
+    Select(qFn: (x: T) => void) { return null; }
     Take(count: number) {
         this.ctx.AddTakeCount(count);
         return this;
@@ -94,7 +94,7 @@ export class EntityObjectIndexedDB<T extends IEntityObject> extends EntityObject
 
         return r;
     }
-    Join<K extends IEntityObject>(entity: K, qFn: (x: K) => void) {
+    Join<K extends IEntityObject>(qFn: (x: K) => void, entity: K, mainFeild?: string, isMainTable?: boolean) {
         return this;
     }
     Contains(feild: (x: T) => void, values: any[]) {

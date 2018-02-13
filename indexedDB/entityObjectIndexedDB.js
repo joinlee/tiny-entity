@@ -30,9 +30,9 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
             });
         });
     }
-    OrderBy(qFn, entity) { return this; }
-    OrderByDesc(qFn, entity) { return this; }
-    Select(qFn) { return this; }
+    OrderBy(qFn, entity) { return null; }
+    OrderByDesc(qFn, entity) { return null; }
+    Select(qFn) { return null; }
     Take(count) {
         this.ctx.AddTakeCount(count);
         return this;
@@ -77,7 +77,7 @@ class EntityObjectIndexedDB extends entityObject_1.EntityObject {
         });
         return r;
     }
-    Join(entity, qFn) {
+    Join(qFn, entity, mainFeild, isMainTable) {
         return this;
     }
     Contains(feild, values) {
