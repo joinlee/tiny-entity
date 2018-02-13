@@ -43,7 +43,7 @@ class NeDBDataContext {
             return promise;
         });
     }
-    Create(obj, stillOpen) {
+    Create(obj, exclude, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
             if (stillOpen == undefined || stillOpen == null)
                 stillOpen = true;
@@ -101,7 +101,7 @@ class NeDBDataContext {
             });
         });
     }
-    Update(obj, stillOpen) {
+    Update(obj, exclude, stillOpen) {
         return __awaiter(this, void 0, void 0, function* () {
             if (stillOpen == undefined || stillOpen == null)
                 stillOpen = true;

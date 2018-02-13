@@ -42,7 +42,8 @@ export class NeDBDataContext implements IDataContext {
         }
     }
 
-    async Create(obj: IEntityObject, stillOpen?: boolean): Promise<Object> {
+    Create(obj: IEntityObject, exclude?: string[])
+    async Create(obj: IEntityObject, exclude?: string[], stillOpen?: boolean): Promise<Object> {
         if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
         let promise = new Promise((resolve, reject) => {
@@ -96,7 +97,8 @@ export class NeDBDataContext implements IDataContext {
         });
     }
 
-    async Update(obj: IEntityObject, stillOpen?: boolean) {
+    Update(obj: IEntityObject, exclude?: string[]);
+    async Update(obj: IEntityObject, exclude?: string[], stillOpen?: boolean) {
         if (stillOpen == undefined || stillOpen == null) stillOpen = true;
         delete (obj as any).ctx;
         let entity;
